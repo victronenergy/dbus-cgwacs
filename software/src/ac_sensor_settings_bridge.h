@@ -1,5 +1,5 @@
-#ifndef ENERGY_METER_SETTINGS_BRIDGE_H
-#define ENERGY_METER_SETTINGS_BRIDGE_H
+#ifndef AC_SENSOR_SETTINGS_BRIDGE_H
+#define AC_SENSOR_SETTINGS_BRIDGE_H
 
 #include "dbus_bridge.h"
 
@@ -26,4 +26,4 @@ protected:
 	virtual bool fromDBus(const QString &path, QVariant &v);
 };
 
-#endif // ENERGY_METER_SETTINGS_BRIDGE_H
+#endif // AC_SENSOR_SETTINGS_BRIDGE_H

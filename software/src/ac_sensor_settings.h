@@ -1,5 +1,5 @@
-#ifndef ENERGY_METER_SETTINGS_H
-#define ENERGY_METER_SETTINGS_H
+#ifndef AC_SENSOR_SETTINGS_H
+#define AC_SENSOR_SETTINGS_H
 
 #include <QMetaType>
 #include <QObject>
@@ -110,4 +110,4 @@ private:
 	double mL3Energy;
 };
 
-#endif // ENERGY_METER_SETTINGS_H
+#endif // AC_SENSOR_SETTINGS_H

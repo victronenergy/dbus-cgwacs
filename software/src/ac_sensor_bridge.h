@@ -1,5 +1,5 @@
-#ifndef ENERGY_METER_BRIDGE_H
-#define ENERGY_METER_BRIDGE_H
+#ifndef AC_SENSOR_BRIDGE_H
+#define AC_SENSOR_BRIDGE_H
 
 #include <QPointer>
 #include <QString>
@@ -39,4 +39,4 @@ private:
 	AcSensor *mAcSensor;
 };
 
-#endif // ENERGY_METER_BRIDGE_H
+#endif // AC_SENSOR_BRIDGE_H

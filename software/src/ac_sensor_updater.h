@@ -1,5 +1,5 @@
-#ifndef ENERGY_METER_UPDATER_H
-#define ENERGY_METER_UPDATER_H
+#ifndef AC_SENSOR_UPDATER_H
+#define AC_SENSOR_UPDATER_H
 
 #include <QElapsedTimer>
 #include <QObject>
@@ -163,4 +163,4 @@ private:
 	int mAcquisitionIndex;
 };
 
-#endif // ENERGY_METER_UPDATER_H
+#endif // AC_SENSOR_UPDATER_H

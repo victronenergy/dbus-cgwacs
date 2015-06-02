@@ -1,5 +1,5 @@
-#ifndef ac_sensor_SIM_H
-#define ac_sensor_SIM_H
+#ifndef AC_SENSOR_SIM_H
+#define AC_SENSOR_SIM_H
 
 #include <QObject>
 
@@ -23,4 +23,4 @@ private:
 	int mTimerCount;
 };
 
-#endif // ac_sensor_SIM_H
+#endif // AC_SENSOR_SIM_H

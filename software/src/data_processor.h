@@ -1,5 +1,5 @@
-#ifndef DATAPROCESSOR_H
-#define DATAPROCESSOR_H
+#ifndef DATA_PROCESSOR_H
+#define DATA_PROCESSOR_H
 
 #include <QObject>
 #include "defines.h"
@@ -47,4 +47,4 @@ private:
 	double mNegativePower[4];
 };
 
-#endif // DATAPROCESSOR_H
+#endif // DATA_PROCESSOR_H

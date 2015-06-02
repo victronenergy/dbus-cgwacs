@@ -1,5 +1,5 @@
-#ifndef ENERGY_METER_H
-#define ENERGY_METER_H
+#ifndef AC_SENSOR_H
+#define AC_SENSOR_H
 
 #include <QObject>
 #include "defines.h"
@@ -139,4 +139,4 @@ private:
 	PowerInfo *mL3PowerInfo;
 };
 
-#endif // ENERGY_METER_H
+#endif // AC_SENSOR_H

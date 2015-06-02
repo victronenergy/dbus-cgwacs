@@ -1,5 +1,5 @@
-#ifndef DBUS_ENERGY_METER_H
-#define DBUS_ENERGY_METER_H
+#ifndef DBUS_CGWACS_H
+#define DBUS_CGWACS_H
 
 #include <QObject>
 #include <QList>
@@ -71,4 +71,4 @@ private:
 	QList<ControlLoop *> mControlLoops;
 };
 
-#endif // DBUS_ENERGY_METER_H
+#endif // DBUS_CGWACS_H

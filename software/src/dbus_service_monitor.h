@@ -1,5 +1,5 @@
-#ifndef DBUSSERVICEMONITOR_H
-#define DBUSSERVICEMONITOR_H
+#ifndef DBUS_SERVICE_MONITOR_H
+#define DBUS_SERVICE_MONITOR_H
 
 #include <QObject>
 
@@ -34,4 +34,4 @@ private:
 	QList<QString> mServices;
 };
 
-#endif // DBUSSERVICEMONITOR_H
+#endif // DBUS_SERVICE_MONITOR_H
