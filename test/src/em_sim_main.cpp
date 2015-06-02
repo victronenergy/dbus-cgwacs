@@ -1,10 +1,10 @@
 #include <QCoreApplication>
 #include <velib/qt/v_busitems.h>
 #include "control_loop.h"
-#include "energy_meter.h"
-#include "energy_meter_bridge.h"
-#include "energy_meter_settings.h"
-#include "energy_meter_sim.h"
+#include "ac_sensor.h"
+#include "ac_sensor_bridge.h"
+#include "ac_sensor_settings.h"
+#include "ac_sensor_sim.h"
 #include "multi.h"
 #include "multi_bridge.h"
 #include "settings.h"
@@ -17,17 +17,18 @@ int main(int argc, char *argv[])
 	VBusItems::setConnectionType(QDBusConnection::SystemBus);
 #endif
 
-	EnergyMeter em("/dev/ttyUSB0");
-	EnergyMeterSettings emSettings("B01202");
-	EnergyMeterBridge emBridge(&em, &emSettings);
+	Settings settings;
+
+	AcSensor em("/dev/ttyUSB0", 1);
+	AcSensorSettings emSettings(0, "B01202");
+	AcSensorBridge emBridge(&em, &emSettings, &settings);
 
 	Multi multi;
-	EnergyMeterSim emSim(&em, &multi);
+	AcSensorSim emSim(&em, &multi);
 
 	MultiBridge multiBridge(&multi, "ttyO1");
 
-	Settings settings;
-	ControlLoop cl(&multi, &em, &settings);
+	ControlLoop cl(&multi, PhaseL1, &em, &settings);
 
 	return app.exec();
 }

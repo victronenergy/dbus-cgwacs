@@ -1,14 +1,14 @@
 #include <QtGlobal>
 #include <QTimer>
-#include "energy_meter.h"
-#include "energy_meter_sim.h"
+#include "ac_sensor.h"
+#include "ac_sensor_sim.h"
 #include "multi.h"
 #include "multi_phase_data.h"
 #include "power_info.h"
 
-EnergyMeterSim::EnergyMeterSim(EnergyMeter *m, Multi *multi, QObject *parent):
+AcSensorSim::AcSensorSim(AcSensor *m, Multi *multi, QObject *parent):
 	QObject(parent),
-	mEnergyMeter(m),
+	mAcSensor(m),
 	mMulti(multi),
 	mTimer(new QTimer(this)),
 	mTimerCount(0)
@@ -20,7 +20,7 @@ EnergyMeterSim::EnergyMeterSim(EnergyMeter *m, Multi *multi, QObject *parent):
 	connect(mTimer, SIGNAL(timeout()), this, SLOT(onTimer()));
 }
 
-void EnergyMeterSim::onTimer()
+void AcSensorSim::onTimer()
 {
 	double totalPower = 0;
 	if (mTimerCount < 20) {
@@ -31,5 +31,5 @@ void EnergyMeterSim::onTimer()
 	}
 	totalPower *= 1 + (qrand() % 10000) / (100 * 10000.0);
 	totalPower -= mMulti->l1Data()->acPowerIn();
-	mEnergyMeter->l1PowerInfo()->setPower(totalPower);
+	mAcSensor->l1PowerInfo()->setPower(totalPower);
 }

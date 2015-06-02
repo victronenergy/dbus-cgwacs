@@ -35,8 +35,6 @@ unix {
     target.path = $${DESTDIR}$${bindir}
 }
 
-# Note: we need the script module to parse JSON fragments as part of the
-# fronius solar API.
 QT += core dbus
 QT -= gui
 

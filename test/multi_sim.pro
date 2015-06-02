@@ -59,12 +59,12 @@ SOURCES += \
     ../software/ext/velib/src/qt/v_busitem_private_cons.cpp \
     ../software/ext/velib/src/qt/v_busitem_private_prod.cpp \
     ../software/ext/velib/src/qt/v_busitem_proxy.cpp \
+    ../software/src/ac_sensor.cpp \
+    ../software/src/ac_sensor_bridge.cpp \
+    ../software/src/ac_sensor_settings.cpp \
     ../software/src/control_loop.cpp \
     ../software/src/dbus_bridge.cpp \
-    ../software/src/energy_meter_bridge.cpp \
     ../software/src/multi_bridge.cpp \
-    ../software/src/energy_meter.cpp \
-    ../software/src/energy_meter_settings.cpp \
     ../software/src/multi.cpp \
     ../software/src/multi_phase_data.cpp \
     ../software/src/power_info.cpp \
@@ -82,13 +82,13 @@ HEADERS += \
     ../software/ext/velib/src/qt/v_busitem_proxy.h \
     ../software/ext/velib/inc/velib/qt/v_busitem.h \
     ../software/ext/velib/inc/velib/qt/v_busitems.h \
+    ../software/src/ac_sensor.h \
+    ../software/src/ac_sensor_bridge.h \
+    ../software/src/ac_sensor_settings.h \
     ../software/src/control_loop.h \
     ../software/src/dbus_bridge.h \
-    ../software/src/energy_meter_bridge.h \
     ../software/src/multi_bridge.h \
     ../software/src/v_bus_node.h \
-    ../software/src/energy_meter.h \
-    ../software/src/energy_meter_settings.h \
     ../software/src/multi.h \
     ../software/src/multi_phase_data.h \
     ../software/src/power_info.h \

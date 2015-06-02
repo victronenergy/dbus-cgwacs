@@ -41,17 +41,17 @@ INCLUDEPATH += \
 SOURCES += \
     ../software/src/crc16.cpp \
     ../software/src/modbus_rtu.cpp \
-    ../software/src/variables.cpp \
     ../software/ext/velib/src/plt/serial.c \
     ../software/ext/velib/src/plt/posix_serial.c \
     ../software/ext/velib/src/plt/posix_ctx.c \
     ../software/ext/velib/src/types/ve_variant.c \
     src/main.cpp \
-    src/logger.cpp
+    src/logger.cpp \
+    src/variables.cpp
 
 HEADERS += \
     ../software/src/crc16.h \
     ../software/src/modbus_rtu.h \
-    ../software/src/variables.h \
     ../software/ext/velib/inc/velib/platform/serial.h \
-    src/logger.h
+    src/logger.h \
+    src/variables.h

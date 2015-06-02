@@ -3,12 +3,13 @@
 
 #include <QCoreApplication>
 #include <QElapsedTimer>
-#include <QMetaType>
-#include "modbus_rtu.h"
 
+class ModbusRtu;
 class QTextStream;
-class QTimer;
 
+/*!
+ * Logs all available modbus RTU registers for a EM24 AC sensor.
+ */
 class Logger : public QCoreApplication
 {
 	Q_OBJECT
@@ -22,13 +23,10 @@ private slots:
 
 	void onWriteCompleted(int function, quint16 address, quint16 value);
 
-	void onTimeout();
-
 private:
 	void startNext();
 
 	QTextStream *mCsvOut;
-	QTimer *mTimer;
 	QElapsedTimer mStopwatch;
 	ModbusRtu *mModbus;
 
