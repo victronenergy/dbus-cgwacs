@@ -4,6 +4,9 @@
 #include <QObject>
 #include <QTime>
 
+/*!
+ * Contains power data from a single phase.
+ */
 class MultiPhaseData : public QObject
 {
 	Q_OBJECT

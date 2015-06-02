@@ -5,6 +5,9 @@
 #include <QStringList>
 #include "defines.h"
 
+/*!
+ * Contains the global (sensor independent) settings.
+ */
 class Settings : public QObject
 {
 	Q_OBJECT

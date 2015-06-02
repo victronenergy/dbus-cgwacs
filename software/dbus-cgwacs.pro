@@ -113,9 +113,9 @@ HEADERS += \
     src/ac_sensor.h \
     src/ac_sensor_bridge.h \
     src/ac_sensor_settings.h \
-    src/ac_sensor_bridge_settings_bridge.h \
     src/ac_sensor_updater.h \
-    src/dbus_cgwacs.h
+    src/dbus_cgwacs.h \
+    src/ac_sensor_settings_bridge.h
 
 DISTFILES += \
     src/service/run \

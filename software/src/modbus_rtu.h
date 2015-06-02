@@ -14,6 +14,16 @@ class QTimer;
 
 Q_DECLARE_METATYPE(QList<quint16>)
 
+/*!
+ * Partial implementation of the Modbus RTU protocol.
+ *
+ * Supported functions: `ReadHoldingRegisters`, `ReadInputRegisters`,
+ * and `WriteSingleRegister`.
+ *
+ * Communication is implemented asynchronously. It is allowed to add multiple
+ * request at once. They will be queued and sent to the device whenever it is
+ * ready (ie. all previous requests have been handled).
+ */
 class ModbusRtu : public QObject
 {
 	Q_OBJECT

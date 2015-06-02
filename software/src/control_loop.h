@@ -9,6 +9,9 @@ class Multi;
 class QTimer;
 class Settings;
 
+/*!
+ * Implements the Hub-4 control loop.
+ */
 class ControlLoop : public QObject
 {
 	Q_OBJECT

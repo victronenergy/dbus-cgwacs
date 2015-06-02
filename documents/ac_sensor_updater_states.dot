@@ -1,0 +1,55 @@
+digraph {
+    Start[shape="box", style=rounded];
+    DeviceId[shape="box"];
+    DeviceType[shape="diamond" label="Device\ntype?"];
+    VersionCode[shape="box"];
+    Serial[shape="box"];
+    FirmwareVersion[shape="box"];
+    WaitForStart[shape="box"];
+    StartMeasurements[shape="box", label="startMeasurements called"];
+    DeviceType2[shape="diamond" label="Device\ntype?"];
+    subgraph cluster_EM24Setup {
+        CheckSetup[shape="box"];
+        ChangeSetup1[shape="diamond" label="Change\nsetup?"];
+        CheckFrontSelector[shape="box"];
+        IsLocked[shape="diamond" label="Is\nfront selector\nlocked?"];
+        WaitFrontSelector[shape="box"];
+        SetApplication[shape="box"];
+        SetMeasuringSystem[shape="box"];
+    }
+    subgraph cluster_EM112Setup {
+        CheckMeasurementMode[shape="box"];
+        ChangeSetup2[shape="diamond" label="Change\nsetup?"];
+        SetMeasurementMode[shape="box"];
+    }
+    Acquisition[shape="box"];
+    Wait[shape="box"];
+
+    Start->DeviceId;
+    DeviceId->DeviceType;
+    DeviceType->VersionCode[label="EM24"];
+    VersionCode->Serial;
+    DeviceType->Serial[label="EM112 & EM340"];
+    Serial->FirmwareVersion;
+    FirmwareVersion->WaitForStart;
+    WaitForStart->StartMeasurements;
+    StartMeasurements->DeviceType2;
+    DeviceType2->CheckSetup[label="EM24"];
+    DeviceType2->CheckMeasurementMode[label="EM112"];
+    DeviceType2->Acquisition[label="EM340"];
+    CheckSetup->ChangeSetup1;
+    ChangeSetup1->CheckFrontSelector[label="Yes"];
+    ChangeSetup1->Acquisition[label="No"];
+    CheckFrontSelector->IsLocked;
+    IsLocked->WaitFrontSelector[label="Yes"];
+    WaitFrontSelector->CheckFrontSelector
+    IsLocked->SetApplication[label="No"];
+    SetApplication->SetMeasuringSystem;
+    SetMeasuringSystem->Acquisition;
+    CheckMeasurementMode->ChangeSetup2;
+    ChangeSetup2->SetMeasurementMode[label="Yes"];
+    ChangeSetup2->Acquisition[label="No"];
+    SetMeasurementMode->Acquisition;
+    Acquisition->Wait;
+    Wait->Acquisition;
+}

@@ -6,17 +6,16 @@
 class Multi;
 class MultiPhaseData;
 
+/*!
+ * Retrieves Multi data from the D-Bus (com.victronenergy.vebus.*) and stores
+ * it in a `Multi` object. Changes in the AcPowerSetpoint of the `Multi` object
+ * will be sent back to the D-Bus.
+ */
 class MultiBridge : public DBusBridge
 {
 	Q_OBJECT
 public:
-	/*!
-	 * DBusMultiBridge
-	 * @param deviceName The (last part of) the device name (eg. ttyO1)
-	 * @param parent
-	 */
-	explicit MultiBridge(Multi *multi, const QString &service,
-						 QObject *parent = 0);
+	MultiBridge(Multi *multi, const QString &service, QObject *parent = 0);
 
 protected:
 	virtual bool fromDBus(const QString &path, QVariant &v);

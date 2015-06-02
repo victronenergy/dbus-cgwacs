@@ -17,6 +17,10 @@ struct CompositeCommand;
  * This class will setup a connection (modbus RTU) to an energy meter and
  * retrieve data from the device. The value will be stored in an `AcSensor`
  * object.
+ *
+ * This class is implemented as a state engine. The diagram below shows the
+ * progress through the states.
+ * @dotfile ac_sensor_updater_states.dot
  */
 class AcSensorUpdater : public QObject
 {
@@ -115,7 +119,6 @@ private:
 		FirmwareVersion,
 		WaitForStart,
 		CheckSetup,
-		CheckMeasuringSystem,
 		CheckFrontSelector,
 		WaitFrontSelector,
 		SetApplication,

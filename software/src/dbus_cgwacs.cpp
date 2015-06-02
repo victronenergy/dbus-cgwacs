@@ -2,7 +2,7 @@
 #include "ac_sensor.h"
 #include "ac_sensor_bridge.h"
 #include "ac_sensor_settings.h"
-#include "ac_sensor_bridge_settings_bridge.h"
+#include "ac_sensor_settings_bridge.h"
 #include "ac_sensor_updater.h"
 #include "control_loop.h"
 #include "dbus_cgwacs.h"

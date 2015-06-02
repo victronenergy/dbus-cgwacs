@@ -7,13 +7,16 @@
 
 class MultiPhaseData;
 
+/*!
+ * This class stores data from a Multi (or Quattro) needed for the Hub-4 control
+ * loop (`ControlLoop`).
+ */
 class Multi : public QObject
 {
 	Q_OBJECT
 	Q_PROPERTY(double acPowerSetPoint READ acPowerSetPoint WRITE setAcPowerSetPoint NOTIFY acPowerSetPointChanged)
 	Q_PROPERTY(bool isSetPointAvailable READ isSetPointAvailable WRITE setIsSetPointAvailable NOTIFY isSetPointAvailableChanged)
 public:
-
 	explicit Multi(QObject *parent = 0);
 
 	double acPowerSetPoint() const;

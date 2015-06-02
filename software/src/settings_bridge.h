@@ -7,6 +7,11 @@
 
 class Settings;
 
+/*!
+ * Bridge between the global settings (`Settings`) and the D-Bus.
+ *
+ * The settings are stored in com.victronenergy.settings/Settings/CGwacs
+ */
 class SettingsBridge : public DBusBridge
 {
 public:

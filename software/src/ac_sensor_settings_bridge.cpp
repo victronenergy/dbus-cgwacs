@@ -2,7 +2,7 @@
 #include <QDBusVariant>
 #include <velib/qt/v_busitems.h>
 #include "ac_sensor_settings.h"
-#include "ac_sensor_bridge_settings_bridge.h"
+#include "ac_sensor_settings_bridge.h"
 
 static const QString Service = "com.victronenergy.settings";
 

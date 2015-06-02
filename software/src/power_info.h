@@ -4,6 +4,9 @@
 #include <QObject>
 #include <QTime>
 
+/*!
+ * Contains measurement data from an AC sensor.
+ */
 class PowerInfo : public QObject
 {
 	Q_OBJECT

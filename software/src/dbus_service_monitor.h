@@ -3,6 +3,12 @@
 
 #include <QObject>
 
+/*!
+ * Monitors the presence of services whose name start with a known prefix (eg.
+ * com.victronenergy.vebus).
+ * The list of services is stored in the `services` property. The
+ * `servicesChanged` signal will be raised whenever the service list changed.
+ */
 class DbusServiceMonitor : public QObject
 {
 	Q_OBJECT
