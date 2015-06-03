@@ -25,21 +25,14 @@ QMAKE_CXXFLAGS += -Wno-psabi
 QMAKE_CXXFLAGS += -Wno-unused-local-typedefs
 
 # Add more folders to ship with the application here
-target.path = /opt/color-control/dbus-cgwacs
-starter.files = src/start-cgwacs.sh
-starter.path = /opt/color-control/dbus-cgwacs
-run.files = src/service/run
-run.path = /opt/color-control/dbus-cgwacs/service
-log.files = src/service/log/run
-log.path = /opt/color-control/dbus-cgwacs/service/log
-# Deploy .gitignore to force qmake to create the env directory.
-env.files = src/service/env/.gitignore
-env.path = /opt/color-control/dbus-cgwacs/service/env
-INSTALLS += target starter run log env
-
-machine=$$(MACHINE)
-contains(machine,ccgx) {
-    DEFINES += TARGET_ccgx
+unix {
+    bindir = $$(bindir)
+    DESTDIR = $$(DESTDIR)
+    isEmpty(bindir) {
+        bindir = /usr/local/bin
+    }
+    INSTALLS += target
+    target.path = $${DESTDIR}$${bindir}/dbus-cgwacs
 }
 
 # Note: we need the script module to parse JSON fragments as part of the
