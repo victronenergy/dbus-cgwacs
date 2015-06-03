@@ -32,7 +32,7 @@ unix {
         bindir = /usr/local/bin
     }
     INSTALLS += target
-    target.path = $${DESTDIR}$${bindir}/dbus-cgwacs
+    target.path = $${DESTDIR}$${bindir}
 }
 
 # Note: we need the script module to parse JSON fragments as part of the
