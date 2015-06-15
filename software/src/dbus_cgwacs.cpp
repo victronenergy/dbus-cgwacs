@@ -19,6 +19,7 @@ DBusCGwacs::DBusCGwacs(const QString &portName, QObject *parent):
 {
 	qRegisterMetaType<ConnectionState>();
 	qRegisterMetaType<Position>();
+	qRegisterMetaType<MultiMode>();
 	qRegisterMetaType<QList<quint16> >();
 
 	for (int i=1; i<=2; ++i) {
@@ -164,44 +165,44 @@ void DBusCGwacs::updateControlLoop()
 	foreach (ControlLoop *c, mControlLoops)
 		delete c;
 	mControlLoops.clear();
-	if (mMulti->isSetPointAvailable()) {
-		AcSensor *gridMeter = 0;
-		AcSensorSettings *settings = 0;
-		foreach (AcSensor *em, mAcSensors) {
-			if (em->connectionState() == Connected) {
-				AcSensorSettings *s = em->findChild<AcSensorSettings *>();
-				if (s != 0 && s->serviceType() == "grid") {
-					gridMeter = em;
-					settings = s;
-					break;
-				}
+	if (!mMulti->isSetPointAvailable())
+		return;
+	AcSensor *gridMeter = 0;
+	AcSensorSettings *settings = 0;
+	foreach (AcSensor *em, mAcSensors) {
+		if (em->connectionState() == Connected) {
+			AcSensorSettings *s = em->findChild<AcSensorSettings *>();
+			if (s != 0 && s->serviceType() == "grid") {
+				gridMeter = em;
+				settings = s;
+				break;
 			}
 		}
-		if (settings == 0) {
-			QLOG_INFO() << "Control loop: no energy meter with service type 'grid'";
-		} else {
-			if (settings->isMultiPhase()) {
-				switch (settings->hub4Mode()) {
-				case Hub4PhaseL1:
-					QLOG_INFO() << "Control loop: multi phase, phase L1";
-					mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, this));
-					break;
-				case Hub4PhaseCompensation:
-					QLOG_INFO() << "Control loop: multi phase, phase compensation";
-					mControlLoops.append(new ControlLoop(mMulti, MultiPhase, gridMeter, mSettings, this));
-					break;
-				case Hub4PhaseSplit:
-					QLOG_INFO() << "Control loop: multi phase, each phase has a dedicated control loop";
-					mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, this));
-					mControlLoops.append(new ControlLoop(mMulti, PhaseL2, gridMeter, mSettings, this));
-					mControlLoops.append(new ControlLoop(mMulti, PhaseL3, gridMeter, mSettings, this));
-					break;
-				}
-			} else {
-				QLOG_INFO() << "Control loop: single phase";
-				mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, this));
-			}
+	}
+	if (settings == 0) {
+		QLOG_INFO() << "Control loop: no energy meter with service type 'grid'";
+		return;
+	}
+	if (settings->isMultiPhase()) {
+		switch (settings->hub4Mode()) {
+		case Hub4PhaseL1:
+			QLOG_INFO() << "Control loop: multi phase, phase L1";
+			mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, this));
+			break;
+		case Hub4PhaseCompensation:
+			QLOG_INFO() << "Control loop: multi phase, phase compensation";
+			mControlLoops.append(new ControlLoop(mMulti, MultiPhase, gridMeter, mSettings, this));
+			break;
+		case Hub4PhaseSplit:
+			QLOG_INFO() << "Control loop: multi phase, each phase has a dedicated control loop";
+			mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, this));
+			mControlLoops.append(new ControlLoop(mMulti, PhaseL2, gridMeter, mSettings, this));
+			mControlLoops.append(new ControlLoop(mMulti, PhaseL3, gridMeter, mSettings, this));
+			break;
 		}
+	} else {
+		QLOG_INFO() << "Control loop: single phase";
+		mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, this));
 	}
 }
 

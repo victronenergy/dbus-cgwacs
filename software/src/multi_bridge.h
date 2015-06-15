@@ -18,6 +18,8 @@ public:
 	MultiBridge(Multi *multi, const QString &service, QObject *parent = 0);
 
 protected:
+	virtual bool toDBus(const QString &path, QVariant &v);
+
 	virtual bool fromDBus(const QString &path, QVariant &v);
 
 private:

@@ -88,13 +88,35 @@ void ControlLoop::performStep()
 	const double Alpha = 0.8;
 	double pMultiNew = Alpha * pLoad + (1 - Alpha) * pMulti;
 
+	// pMultiNew > 0: battery is discharging
+	// pMultiNew < 0: battery is charging
+	double maxChargePct = qMax(0.0, qMin(100.0, mSettings->maxChargePercentage()));
+	double maxDischargePct = qMax(0.0, qMin(100.0, mSettings->maxDischargePercentage()));
+	bool feedbackDisabled = maxDischargePct < 50;
+	bool chargeDisabled = maxChargePct <= 0;
+	double minPower =
+			-maxChargePct *
+			mMulti->maxChargeCurrent() *
+			mMulti->dcVoltage() / 100;
+	pMultiNew = qMax(minPower, pMultiNew);
+
 	// Ugly workaround: the value of pMultiNew must always be sent over the
 	// D-Bus, even when it does not change, because the multi will reset its
 	// power setpoint if no value has been set during the last 10 seconds.
 	// So we add a random value to ensure pMultiNew changes. Other solution
 	// would involve changes in velib (VBusItem and friends).
 	pMultiNew += qrand() / (100.0 * RAND_MAX);
-	QLOG_TRACE() << pNet << '\t' << pLoad << '\t' << pMulti << '\t' << pMultiNew;
+	QLOG_TRACE() << pNet << '\t' << pLoad << '\t' << pMulti << '\t'
+				 << pMultiNew << '\t' << chargeDisabled
+				 << '\t' << feedbackDisabled;
+
+	mMulti->setIsChargeDisabled(chargeDisabled);
+	mMulti->setIsFeedbackDisabled(feedbackDisabled);
+	// If feedback is disabled and the multi is 'on', it will start inverting
+	// when the grid drops ways (emergency power). If we set the multi to
+	// 'charge only', it will not start inverting so the system on AC-In and
+	// AC-Out will lose power.
+	// mMulti->setMode(feedbackDisabled ? MultiChargerOnly : MultiOn);
 	if (std::isfinite(pMultiNew))
 		mMulti->setAcPowerSetPoint(-pMultiNew);
 }

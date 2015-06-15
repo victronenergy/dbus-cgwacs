@@ -2,7 +2,9 @@
 
 Settings::Settings(QObject *parent) :
 	QObject(parent),
-	mAcPowerSetPoint(0)
+	mAcPowerSetPoint(0),
+	mMaxChargePercentage(100),
+	mMaxDischargePercentage(100)
 {
 }
 
@@ -30,6 +32,34 @@ void Settings::setAcPowerSetPoint(double p)
 		return;
 	mAcPowerSetPoint = p;
 	emit acPowerSetPointChanged();
+}
+
+double Settings::maxChargePercentage() const
+{
+	return mMaxChargePercentage;
+}
+
+void Settings::setMaxChargePercentage(double p)
+{
+	p = qBound(0.0, p, 100.0);
+	if (mMaxChargePercentage == p)
+		return;
+	mMaxChargePercentage = p;
+	emit maxChargePercentageChanged();
+}
+
+double Settings::maxDischargePercentage() const
+{
+	return mMaxDischargePercentage;
+}
+
+void Settings::setMaxDischargePercentage(double p)
+{
+	p = qBound(0.0, p, 100.0);
+	if (mMaxDischargePercentage == p)
+		return;
+	mMaxDischargePercentage = p;
+	emit maxDischargePercentageChanged();
 }
 
 void Settings::registerDevice(const QString &serial)

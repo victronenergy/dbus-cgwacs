@@ -42,6 +42,8 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor,
 
 	if (settings != 0 && emSettings->serviceType() == "grid") {
 		produce(settings, "acPowerSetPoint", "/Hub4/AcPowerSetpoint");
+		produce(settings, "maxChargePercentage", "/Hub4/MaxChargePercentage");
+		produce(settings, "maxDischargePercentage", "/Hub4/MaxDischargePercentage");
 	}
 
 	QString processName = QCoreApplication::arguments()[0];
@@ -59,8 +61,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor,
 		deviceInstance = getDeviceInstance(portName, "/dev/ttyO", 256);
 	produce("/Mgmt/Connection", portName);
 	produce("/DeviceInstance", deviceInstance);
-	QString serial = acSensor->serial();
-	produce("/Serial", serial);
+	produce("/Serial", acSensor->serial());
 
 	registerService();
 }
