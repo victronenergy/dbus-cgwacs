@@ -166,9 +166,12 @@ void AcSensorUpdater::onErrorReceived(int errorType, quint8 addr, int exception)
 				 << "Acq State:" << mAcquisitionIndex;
 	if (errorType == ModbusRtu::Timeout) {
 		if (mTimeoutCount == MaxTimeoutCount) {
-			QLOG_ERROR() << "Lost connection to energy meter @"
-						 << mAcSensor->portName() << ':'
-						 << mAcSensor->slaveAddress();
+			if (!mAcSensor->serial().isEmpty()) {
+				QLOG_ERROR() << "Lost connection to energy meter"
+							 << mAcSensor->serial() << '@'
+							 << mAcSensor->portName() << ':'
+							 << mAcSensor->slaveAddress();
+			}
 			mAcSensor->setIsConnected(false);
 			emit connectionLost();
 		} else {
