@@ -4,6 +4,7 @@
 #include <QByteArray>
 #include <QList>
 #include <QMetaType>
+#include <QMutex>
 #include <QObject>
 extern "C" {
 	#include <velib/platform/serial.h>
@@ -128,6 +129,7 @@ private:
 	VeSerialPort mSerialPort;
 	QByteArray mPortName;
 	QTimer *mTimer;
+	QMutex mMutex;
 	struct Cmd {
 		ModbusRtu::FunctionCode function;
 		quint8 slaveAddress;
