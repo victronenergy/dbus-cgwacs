@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
 	bool expectVerbosity = false;
 	bool expectDBusAddress = false;
-	QString portName = "/dev/ttyUSB0";
+	QString portName;
 	QString dbusAddress = "system";
 	QStringList args = app.arguments();
 	args.pop_front();
@@ -81,8 +81,10 @@ int main(int argc, char *argv[])
 			QLOG_INFO() << "\t Show the application version.";
 			QLOG_INFO() << "\t-d level, --debug level";
 			QLOG_INFO() << "\t Set log level";
-			qDebug() << "\t-b, --dbus";
-			qDebug() << "\t dbus address or 'session' or 'system'";
+			QLOG_INFO() << "\t-b, --dbus";
+			QLOG_INFO() << "\t dbus address or 'session' or 'system'";
+			QLOG_INFO() << "\t <Port Name>";
+			QLOG_INFO() << "\t Name of communication port (eg. /dev/ttyUSB0)";
 			exit(1);
 		} else if (arg == "-V" || arg == "--version") {
 			QLOG_INFO() << VERSION << "(" REVISION ")";
@@ -97,6 +99,13 @@ int main(int argc, char *argv[])
 		} else if (!arg.startsWith('-')) {
 			portName = arg;
 		}
+	}
+
+	if (portName.isEmpty()) {
+		QLOG_ERROR() << "No communication port specified on command line";
+		exit(2);
+	} else {
+		QLOG_INFO() << "Connecting to" << portName;
 	}
 
 	initDBus(dbusAddress);
