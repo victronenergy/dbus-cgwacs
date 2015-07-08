@@ -20,6 +20,7 @@ static const int NoError = 0;
 static const int ErrorFronSelectorLocked = 1;
 
 static const int FrontSelectorWaitInterval = 5 * 1000; // 5 seconds in ms
+static const int ConnectionLostWaitInterval = 60 * 1000;  // 60 seconds in ms
 static const int UpdateSettingsInterval = 10 * 60 * 1000; // 10 minutes in ms
 
 enum ParameterType {
@@ -122,6 +123,7 @@ AcSensorUpdater::AcSensorUpdater(AcSensor *acSensor, ModbusRtu *modbus, QObject 
 	mAcSensor->setIsConnected(false);
 	mSettingsUpdateTimer->setInterval(UpdateSettingsInterval);
 	mSettingsUpdateTimer->start();
+	mAcquisitionTimer->setSingleShot(true);
 	mStopwatch.start();
 	startNextAction();
 }
@@ -140,6 +142,7 @@ void AcSensorUpdater::startMeasurements()
 {
 	if (mSettings == 0 || mState != WaitForStart) {
 		QLOG_ERROR() << "Cannot start measurements before device has been detected";
+		return;
 	}
 	mAcquisitionIndex = 0;
 	mCommandIndex = 0;
@@ -172,6 +175,7 @@ void AcSensorUpdater::onErrorReceived(int errorType, quint8 addr, int exception)
 							 << mAcSensor->portName() << ':'
 							 << mAcSensor->slaveAddress();
 			}
+			mState = WaitOnConnectionLost;
 			mAcSensor->setIsConnected(false);
 			emit connectionLost();
 		} else {
@@ -323,11 +327,13 @@ void AcSensorUpdater::onWaitFinished()
 	switch (mState) {
 	case Wait:
 		mStopwatch.restart();
-		mAcquisitionTimer->stop();
 		mState = Acquisition;
 		break;
 	case WaitFrontSelector:
 		mState = CheckSetup;
+		break;
+	case WaitOnConnectionLost:
+		mState = DeviceId;
 		break;
 	default:
 		mState = mAcSensor->protocolType() == AcSensor::Em24Protocol ?
@@ -340,7 +346,8 @@ void AcSensorUpdater::onWaitFinished()
 
 void AcSensorUpdater::onUpdateSettings()
 {
-	mDataProcessor->updateEnergySettings();
+	if (mDataProcessor != 0)
+		mDataProcessor->updateEnergySettings();
 }
 
 void AcSensorUpdater::onIsMultiPhaseChanged()
@@ -442,7 +449,11 @@ void AcSensorUpdater::startNextAction()
 		} else {
 			onWaitFinished();
 		}
+		break;
 	}
+	case WaitOnConnectionLost:
+		mAcquisitionTimer->setInterval(ConnectionLostWaitInterval);
+		mAcquisitionTimer->start();
 		break;
 	case SetAddress:
 		writeRegister(0x2000, 2);

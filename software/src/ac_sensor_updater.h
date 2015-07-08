@@ -127,6 +127,7 @@ private:
 		SetMeasurementMode,
 		Acquisition,
 		Wait,
+		WaitOnConnectionLost,
 
 		SetAddress
 	};
