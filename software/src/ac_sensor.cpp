@@ -4,7 +4,7 @@
 
 AcSensor::AcSensor(const QString &portName, int slaveAddress, QObject *parent) :
 	QObject(parent),
-	mIsConnected(0),
+	mConnectionState(Disconnected),
 	mDeviceType(0),
 	mDeviceSubType(0),
 	mErrorCode(0),
@@ -19,17 +19,17 @@ AcSensor::AcSensor(const QString &portName, int slaveAddress, QObject *parent) :
 	resetValues();
 }
 
-bool AcSensor::isConnected() const
+ConnectionState AcSensor::connectionState() const
 {
-	return mIsConnected;
+	return mConnectionState;
 }
 
-void AcSensor::setIsConnected(bool v)
+void AcSensor::setConnectionState(ConnectionState state)
 {
-	if (mIsConnected == v)
+	if (mConnectionState == state)
 		return;
-	mIsConnected = v;
-	emit isConnectedChanged();
+	mConnectionState = state;
+	emit connectionStateChanged();
 }
 
 int AcSensor::deviceType() const

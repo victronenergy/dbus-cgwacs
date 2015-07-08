@@ -97,7 +97,6 @@ AcSensorUpdater::AcSensorUpdater(AcSensor *acSensor, ModbusRtu *modbus, QObject 
 	mAcquisitionTimer(new QTimer(this)),
 	mSettingsUpdateTimer(new QTimer(this)),
 	mTimeoutCount(0),
-	mInitialized(false),
 	mMeasuringSystem(0),
 	mDesiredMeasuringSystem(0),
 	mSetupRequested(false),
@@ -120,7 +119,6 @@ AcSensorUpdater::AcSensorUpdater(AcSensor *acSensor, ModbusRtu *modbus, QObject 
 			this, SLOT(onWaitFinished()));
 	connect(mSettingsUpdateTimer, SIGNAL(timeout()),
 			this, SLOT(onUpdateSettings()));
-	mAcSensor->setIsConnected(false);
 	mSettingsUpdateTimer->setInterval(UpdateSettingsInterval);
 	mSettingsUpdateTimer->start();
 	mAcquisitionTimer->setSingleShot(true);
@@ -166,7 +164,8 @@ void AcSensorUpdater::onErrorReceived(int errorType, quint8 addr, int exception)
 		return;
 	QLOG_DEBUG() << "ModBus Error:" << errorType << exception
 				 << "State:" << mState << "Slave Address" << addr
-				 << "Acq State:" << mAcquisitionIndex;
+				 << "Acq State:" << mAcquisitionIndex
+				 << "Timeout count:" << mTimeoutCount;
 	if (errorType == ModbusRtu::Timeout) {
 		if (mTimeoutCount == MaxTimeoutCount) {
 			if (!mAcSensor->serial().isEmpty()) {
@@ -176,8 +175,14 @@ void AcSensorUpdater::onErrorReceived(int errorType, quint8 addr, int exception)
 							 << mAcSensor->slaveAddress();
 			}
 			mState = WaitOnConnectionLost;
-			mAcSensor->setIsConnected(false);
-			emit connectionLost();
+			delete mSettings;
+			mSettings = 0;
+			delete mDataProcessor;
+			mDataProcessor = 0;
+			mTimeoutCount = MaxTimeoutCount - 1;
+			mAcSensor->setSerial(QString());
+			mAcSensor->resetValues();
+			mAcSensor->setConnectionState(Disconnected);
 		} else {
 			++mTimeoutCount;
 		}
@@ -276,7 +281,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr,
 		break;
 	default:
 		QLOG_ERROR() << "Unknown updater state" << mState;
-		mState = Acquisition;
+		mState = mSettings == 0 ? DeviceId : Acquisition;
 		break;
 	}
 	mTimeoutCount = 0;
@@ -366,6 +371,7 @@ void AcSensorUpdater::startNextAction()
 	}
 	switch (mState) {
 	case DeviceId:
+		mAcSensor->setConnectionState(Searched);
 		readRegisters(RegDeviceId, 1);
 		break;
 	case VersionCode:
@@ -415,7 +421,7 @@ void AcSensorUpdater::startNextAction()
 		mDataProcessor = new DataProcessor(mAcSensor, mSettings, this);
 		connect(mSettings, SIGNAL(isMultiPhaseChanged()),
 				this, SLOT(onIsMultiPhaseChanged()));
-		emit deviceFound();
+		mAcSensor->setConnectionState(Detected);
 		break;
 	case Acquisition:
 		switch (mAcSensor->protocolType()) {
@@ -482,8 +488,7 @@ void AcSensorUpdater::startNextAcquisition()
 				++mAcquisitionIndex;
 				if (mAcquisitionIndex == MaxAcquisitionIndex) {
 					mAcquisitionIndex = 0;
-					mAcSensor->setIsConnected(true);
-					setInitialized();
+					mAcSensor->setConnectionState(Connected);
 				}
 				startNextAction();
 				return;
@@ -571,14 +576,6 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 			}
 		}
 	}
-}
-
-void AcSensorUpdater::setInitialized()
-{
-	if (mInitialized)
-		return;
-	mInitialized = true;
-	emit deviceInitialized();
 }
 
 double AcSensorUpdater::getDouble(const QList<quint16> &registers,

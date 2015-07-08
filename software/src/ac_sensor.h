@@ -1,11 +1,20 @@
 #ifndef AC_SENSOR_H
 #define AC_SENSOR_H
 
+#include <QMetaType>
 #include <QObject>
 #include "defines.h"
 
 class PowerInfo;
-struct FroniusDeviceInfo;
+
+enum ConnectionState {
+	Disconnected,
+	Searched,
+	Detected,
+	Connected
+};
+
+Q_DECLARE_METATYPE(ConnectionState)
 
 /*!
  * This class contains properties and measurements retrieved from Carlo Gavazzi
@@ -14,7 +23,7 @@ struct FroniusDeviceInfo;
 class AcSensor : public QObject
 {
 	Q_OBJECT
-	Q_PROPERTY(bool isConnected READ isConnected WRITE setIsConnected NOTIFY isConnectedChanged)
+	Q_PROPERTY(ConnectionState connectionState READ connectionState WRITE setConnectionState NOTIFY connectionStateChanged)
 	Q_PROPERTY(int deviceType READ deviceType WRITE setDeviceType NOTIFY deviceTypeChanged)
 	Q_PROPERTY(int deviceSubType READ deviceSubType WRITE setDeviceSubType NOTIFY deviceSubTypeChanged)
 	Q_PROPERTY(QString productName READ productName)
@@ -25,9 +34,9 @@ class AcSensor : public QObject
 public:
 	AcSensor(const QString &portName, int slaveAddress, QObject *parent = 0);
 
-	bool isConnected() const;
+	ConnectionState connectionState() const;
 
-	void setIsConnected(bool v);
+	void setConnectionState(ConnectionState state);
 
 	/*!
 	 * Returns the device type as reported by the energy meter.
@@ -112,7 +121,7 @@ public:
 	void resetValues();
 
 signals:
-	void isConnectedChanged();
+	void connectionStateChanged();
 
 	void deviceTypeChanged();
 
@@ -125,7 +134,7 @@ signals:
 	void errorCodeChanged();
 
 private:
-	bool mIsConnected;
+	ConnectionState mConnectionState;
 	int mDeviceType;
 	int mDeviceSubType;
 	int mErrorCode;

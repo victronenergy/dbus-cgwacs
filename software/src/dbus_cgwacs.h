@@ -44,6 +44,8 @@ private slots:
 
 	void onConnectionLost();
 
+	void onConnectionStateChanged();
+
 	void onSerialEvent(const char *description);
 
 	void onServicesChanged();

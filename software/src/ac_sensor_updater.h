@@ -29,12 +29,16 @@ public:
 	/*!
 	 * Creates an instance of `AcSensorUpdater`, and starts the setup
 	 * process.
-	 * If the setup succeeds, the `deviceFound` signal will be emitted,
-	 * otherwise the `connectLost` signal. Once the `deviceFound` signal is
-	 * emitted, the object will become idle until `startMeasurement` is called.
+	 * If the setup succeeds, the `connectionState` of the `acSensor` will be
+	 * set to `Detected`, otherwise to `disconnected` signal.
+	 * Once the state is `Detected`, the object will become idle until
+	 * `startMeasurement` is called.
 	 * @param acSensor. The storage object. All retrieved values will be
 	 * stored here. The `portName` property of this object should be set before
 	 * calling this contructor.
+	 * @param modbus. The modbus connection object. This object may be shared
+	 * between multiple `AcSensorUpdater` objects. The `modbus` object will not
+	 * be deleted in the destructor.
 	 */
 	AcSensorUpdater(AcSensor *acSensor, ModbusRtu *modbus, QObject *parent = 0);
 
@@ -47,7 +51,8 @@ public:
 	/*!
 	 * Returns the settings object.
 	 * This object is created by the `AcSensorUpdater` when a device has been
-	 * found. It will be null before the `deviceFound` signal has been fired.
+	 * detected. It will be null while the `connectionState` of the `AcSensor`
+	 * is `Disconnected` or `Searched`.
 	 * The information in the settings will be used for data retrieval and can
 	 * be changed while retrieval is active. This may lead to reinitialization
 	 * of the updater (and the energy meter itself).
@@ -56,32 +61,11 @@ public:
 
 	/*!
 	 * Starts actual measurement.
-	 * This function should be called in while handling the `deviceFound`
-	 * signal, or later. It was intended to allow the user of this class to
-	 * change the settings before starting measurements.
+	 * This function should be called if the `connectionState` is `Detected`
+	 * or later. It was intended to allow the user of this class to change the
+	 * settings before starting measurements.
 	 */
 	void startMeasurements();
-
-signals:
-	/*!
-	 * Fired if an energy meter is found.
-	 * You can call `startMeasurement` now to start data acquisition.
-	 */
-	void deviceFound();
-
-	/*!
-	 * Fired when all relevant measurements have been retrieved from the
-	 * energy meter for this first time.
-	 * This may be a good time to publish to data on the D-Bus etc.
-	 */
-	void deviceInitialized();
-
-	/*!
-	 * Fired when communication with the energy meter timed out for several
-	 * seconds.
-	 * The signals will when no communication was established at all.
-	 */
-	void connectionLost();
 
 private slots:
 	void onErrorReceived(int errorType, quint8 addr, int exception);
@@ -106,8 +90,6 @@ private:
 	void writeRegister(quint16 reg, quint16 value);
 
 	void processAcquisitionData(const QList<quint16> &registers);
-
-	void setInitialized();
 
 	double getDouble(const QList<quint16> &registers, int offset, int size,
 					 double factor);
@@ -151,7 +133,6 @@ private:
 	QTimer *mAcquisitionTimer;
 	QTimer *mSettingsUpdateTimer;
 	int mTimeoutCount;
-	bool mInitialized;
 	int mMeasuringSystem;
 	int mDesiredMeasuringSystem;
 	bool mSetupRequested;

@@ -17,19 +17,16 @@ DBusCGwacs::DBusCGwacs(const QString &portName, QObject *parent):
 	mServiceMonitor(new DbusServiceMonitor("com.victronenergy.vebus", this)),
 	mModbus(new ModbusRtu(portName, 9600, this))
 {
+	qRegisterMetaType<ConnectionState>();
 	qRegisterMetaType<Position>();
 	qRegisterMetaType<QList<quint16> >();
 
 	for (int i=1; i<=2; ++i) {
 		AcSensor *m = new AcSensor(portName, i, this);
-		AcSensorUpdater *mu = new AcSensorUpdater(m, mModbus, m);
+		new AcSensorUpdater(m, mModbus, m);
 		mAcSensors.append(m);
-		connect(mu, SIGNAL(deviceFound()),
-				this, SLOT(onDeviceFound()));
-		connect(mu, SIGNAL(deviceInitialized()),
-				this, SLOT(onDeviceInitialized()));
-		connect(mu, SIGNAL(connectionLost()),
-				this, SLOT(onConnectionLost()));
+		connect(m, SIGNAL(connectionStateChanged()),
+				this, SLOT(onConnectionStateChanged()));
 	}
 	mSettings = new Settings(this);
 	new SettingsBridge(mSettings, this);
@@ -44,10 +41,28 @@ DBusCGwacs::DBusCGwacs(const QString &portName, QObject *parent):
 	updateMultiBridge();
 }
 
+void DBusCGwacs::onConnectionStateChanged()
+{
+	AcSensor *m = static_cast<AcSensor *>(sender());
+	switch (m->connectionState()) {
+	case Disconnected:
+		onConnectionLost();
+		break;
+	case Searched:
+		break;
+	case Detected:
+		onDeviceFound();
+		break;
+	case Connected:
+		onDeviceInitialized();
+		break;
+	}
+}
+
 void DBusCGwacs::onDeviceFound()
 {
-	AcSensorUpdater *mu = static_cast<AcSensorUpdater *>(sender());
-	AcSensor *m = mu->acSensor();
+	AcSensor *m = static_cast<AcSensor *>(sender());
+	AcSensorUpdater *mu = m->findChild<AcSensorUpdater *>();
 	QLOG_INFO() << "Device found:" << m->serial()
 				<< '@' << m->portName();
 	AcSensorSettings *settings = mu->settings();
@@ -80,8 +95,8 @@ void DBusCGwacs::onDeviceSettingsInitialized()
 
 void DBusCGwacs::onDeviceInitialized()
 {
-	AcSensorUpdater *mu = static_cast<AcSensorUpdater *>(sender());
-	AcSensor *m = mu->acSensor();
+	AcSensor *m = static_cast<AcSensor *>(sender());
+	AcSensorUpdater *mu = m->findChild<AcSensorUpdater *>();
 	new AcSensorBridge(m, mu->settings(), mSettings, m);
 	updateControlLoop();
 }
@@ -125,13 +140,11 @@ void DBusCGwacs::onIsSetPointAvailableChanged()
 
 void DBusCGwacs::onConnectionLost()
 {
-	AcSensorUpdater *mu = static_cast<AcSensorUpdater *>(sender());
-	AcSensor *em = mu->acSensor();
-	Q_ASSERT(mAcSensors.contains(em));
-	mAcSensors.removeOne(em);
-	em->deleteLater();
-	if (mAcSensors.isEmpty())
-		emit connectionLost();
+	foreach (AcSensor *sensor, mAcSensors) {
+		if (sensor->connectionState() != Disconnected)
+			return;
+	}
+	emit connectionLost();
 }
 
 void DBusCGwacs::onSerialEvent(const char *description)
@@ -155,11 +168,9 @@ void DBusCGwacs::updateControlLoop()
 		AcSensor *gridMeter = 0;
 		AcSensorSettings *settings = 0;
 		foreach (AcSensor *em, mAcSensors) {
-			AcSensorSettings *s = em->findChild<AcSensorSettings *>();
-			if (s != 0 && s->serviceType() == "grid") {
-				AcSensorBridge *bridge = em->findChild<AcSensorBridge *>();
-				// Check if ac sensor is initialized
-				if (bridge != 0) {
+			if (em->connectionState() == Connected) {
+				AcSensorSettings *s = em->findChild<AcSensorSettings *>();
+				if (s != 0 && s->serviceType() == "grid") {
 					gridMeter = em;
 					settings = s;
 					break;

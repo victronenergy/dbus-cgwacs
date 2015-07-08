@@ -29,7 +29,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor,
 				replace("/dev/", "").
 				replace("/", "_")));
 
-	produce(acSensor, "isConnected", "/Connected");
+	produce(acSensor, "connectionState", "/Connected");
 	produce(acSensor, "errorCode", "/ErrorCode");
 
 	producePowerInfo(acSensor->meanPowerInfo(), "/Ac");
@@ -68,7 +68,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor,
 bool AcSensorBridge::toDBus(const QString &path, QVariant &value)
 {
 	if (path == "/Connected") {
-		value = QVariant(value.toBool() ? 1 : 0);
+		value = QVariant(value.value<ConnectionState>() == Connected ? 1 : 0);
 	} else if (path == "/Position") {
 		value = QVariant(static_cast<int>(value.value<Position>()));
 	} else if (path == "/CustomName") {
