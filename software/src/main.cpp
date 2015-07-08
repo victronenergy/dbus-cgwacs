@@ -27,7 +27,7 @@ void initDBus(const QString &dbusAddress)
 
 	QLOG_INFO() << "Wait for local settings on DBus... ";
 	VBusItem settings;
-	settings.consume("com.victronenergy.settings", "/Settings");
+	settings.consume("com.victronenergy.settings", "/Settings/Vrmlogger/Url");
 	for (;;) {
 		QVariant reply = settings.getValue();
 		QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
