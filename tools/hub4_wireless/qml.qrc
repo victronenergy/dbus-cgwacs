@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/main.qml</file>
+        <file>images/ZigbeeToRs485.jpg</file>
+        <file>images/ZigbeeToUsb.jpg</file>
+    </qresource>
+</RCC>

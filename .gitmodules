@@ -6,3 +6,7 @@
 	path = software/ext/qslog
 	url = https://github.com/victronenergy/QsLog.git
 	branch = master
+[submodule "software/ext/qtserialport"]
+	path = software/ext/qtserialport
+	url = git://code.qt.io/qt/qtserialport.git
+	branch = qt4-dev
