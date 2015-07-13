@@ -136,7 +136,6 @@ void ModbusRtu::handleByteRead(quint8 b)
 			// Exception
 			mCount = 1;
 			mState = Data;
-			mData.clear();
 		} else {
 			switch (mFunction) {
 			case ReadHoldingRegisters:
@@ -154,8 +153,12 @@ void ModbusRtu::handleByteRead(quint8 b)
 		break;
 	case ByteCount:
 		mCount = b;
-		mState = mCount == 0 ? CrcMsb : Data;
-		mData.clear();
+		if (mCount == 0) {
+			mState = CrcMsb;
+			mAddToCrc = false;
+		} else {
+			mState = Data;
+		}
 		break;
 	case StartAddressMsb:
 		mStartAddress = b << 8;
@@ -165,7 +168,6 @@ void ModbusRtu::handleByteRead(quint8 b)
 		mStartAddress |= b;
 		mCount = 2;
 		mState = Data;
-		mData.clear();
 		break;
 	case Data:
 		if (mCount > 0) {
@@ -195,6 +197,7 @@ void ModbusRtu::resetStateEngine()
 	mCrcBuilder.reset();
 	mAddToCrc = true;
 	mCurrentSlave = 0;
+	mData.clear();
 	mTimer->stop();
 }
 
