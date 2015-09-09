@@ -25,6 +25,7 @@ static const int UpdateSettingsInterval = 10 * 60 * 1000; // 10 minutes in ms
 
 enum ParameterType {
 	None,
+	Dummy,
 	Power,
 	Voltage,
 	Current,
@@ -57,12 +58,18 @@ static const CompositeCommand Em24Commands[] = {
 
 static const int Em24CommandCount = sizeof(Em24Commands) / sizeof(Em24Commands[0]);
 
+/// We use dummy commands here to vary the number of requested registers. This
+/// way we avoid problems if a response to a modbus request arrives too late.
+/// This may happen when sending modbus packages over zigbee.
+/// If that happens the packages will be interpreted incorrect (eg. voltage
+/// values as power). By varying the number of registers it easier to detect
+/// late packets.
 static const CompositeCommand Em24CommandsP1[] = {
 	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
-	{ 0x0024, 1, { { 0, Voltage, MultiPhase } } },
-	{ 0x000C, 4, { { 0, Current, MultiPhase } } },
-	{ 0x003E, 5, { { 0, PositiveEnergy, MultiPhase } } },
-	{ 0x005C, 7, { { 0, NegativeEnergy, MultiPhase } } }
+	{ 0x0024, 1, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x000C, 4, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x003E, 5, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x005C, 7, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
 };
 
 static const int Em24CommandP1Count = sizeof(Em24CommandsP1) / sizeof(Em24CommandsP1[0]);
@@ -87,6 +94,17 @@ static const CompositeCommand Em340Commands[] = {
 };
 
 static const int Em340CommandCount = sizeof(Em340Commands) / sizeof(Em340Commands[0]);
+
+int getMaxOffset(const CompositeCommand &cmd) {
+	int maxOffset = 0;
+	for (int i=0; i<MaxRegCount; ++i) {
+		const RegisterCommand &ra = cmd.actions[i];
+		if (ra.action == None)
+			break;
+		maxOffset = qMax(maxOffset, ra.regOffset);
+	}
+	return maxOffset;
+}
 
 AcSensorUpdater::AcSensorUpdater(AcSensor *acSensor, ModbusRtu *modbus, QObject *parent):
 	QObject(parent),
@@ -191,7 +209,7 @@ void AcSensorUpdater::onErrorReceived(int errorType, quint8 addr, int exception)
 }
 
 void AcSensorUpdater::onReadCompleted(int function, quint8 addr,
-										 const QList<quint16> &registers)
+									  const QList<quint16> &registers)
 {
 	if (addr != mAcSensor->slaveAddress())
 		return;
@@ -495,13 +513,7 @@ void AcSensorUpdater::startNextAcquisition()
 			}
 		}
 	}
-	int maxOffset = 0;
-	for (int i=0; i<MaxRegCount; ++i) {
-		const RegisterCommand &ra = cmd->actions[i];
-		if (ra.action == None)
-			break;
-		maxOffset = qMax(maxOffset, ra.regOffset);
-	}
+	int maxOffset = getMaxOffset(*cmd);
 	readRegisters(cmd->reg, maxOffset + 2);
 }
 
@@ -520,7 +532,13 @@ void AcSensorUpdater::writeRegister(quint16 reg, quint16 value)
 void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 {
 	const CompositeCommand &cmd = mCommands[mCommandIndex];
-	for (int i=0; i<MaxRegCount; ++i) {
+	int n = getMaxOffset(cmd);
+	if (n + 2 != registers.size()) {
+		QLOG_WARN() << "Incorrect number of registers received"
+					<< n << registers.size() << mCommandIndex;
+		return;
+	}
+	for (int i=0; i<=n; ++i) {
 		const RegisterCommand &ra = cmd.actions[i];
 		if (ra.action == None)
 			break;
