@@ -1,3 +1,4 @@
+#include <QsLog.h>
 #include <QDBusConnection>
 #include <QDBusVariant>
 #include <velib/qt/v_busitems.h>
@@ -31,6 +32,13 @@ AcSensorSettingsBridge::AcSensorSettingsBridge(
 			path + "/L2ReverseEnergy");
 	consume(Service, settings, "l3ReverseEnergy", 0.0, 0.0, 1e6,
 			path + "/L3ReverseEnergy");
+
+	consume(Service, settings, "l2CustomName", QVariant(""),
+			path + "/L2/CustomName");
+	consume(Service, settings, "l2ServiceType", QVariant(""),
+			path + "/L2/ServiceType");
+	consume(Service, settings, "l2Position", QVariant(0),
+			path + "/L2/Position");
 }
 
 bool AcSensorSettingsBridge::toDBus(const QString &path, QVariant &v)

@@ -10,9 +10,8 @@
 #include "settings.h"
 #include "version.h"
 
-AcSensorBridge::AcSensorBridge(AcSensor *acSensor,
-							   AcSensorSettings *emSettings,
-							   Settings *settings,
+AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
+							   Settings *settings, bool isSecundary,
 							   QObject *parent) :
 	DBusBridge(parent),
 	mAcSensor(acSensor)
@@ -23,8 +22,11 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor,
 	connect(emSettings, SIGNAL(destroyed()), this, SLOT(deleteLater()));
 	setUpdateInterval(1000);
 
+	QString serviceType = isSecundary ?
+		emSettings->l2ServiceType() :
+		emSettings->serviceType();
 	setServiceName(QString("com.victronenergy.%1.%2").
-			arg(emSettings->serviceType()).
+			arg(serviceType).
 			arg(acSensor->portName().
 				replace("/dev/", "").
 				replace("/", "_")));
@@ -37,10 +39,10 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor,
 	producePowerInfo(acSensor->l2PowerInfo(), "/Ac/L2");
 	producePowerInfo(acSensor->l3PowerInfo(), "/Ac/L3");
 
-	produce(emSettings, "position", "/Position");
-	produce(emSettings, "customName", "/CustomName");
+	produce(emSettings, isSecundary ? "l2Position" : "position", "/Position");
+	produce(emSettings, isSecundary ? "l2CustomName" : "customName", "/CustomName");
 
-	if (settings != 0 && emSettings->serviceType() == "grid") {
+	if (settings != 0 && serviceType == "grid") {
 		produce(settings, "acPowerSetPoint", "/Hub4/AcPowerSetpoint");
 		produce(settings, "maxChargePercentage", "/Hub4/MaxChargePercentage");
 		produce(settings, "maxDischargePercentage", "/Hub4/MaxDischargePercentage");
@@ -59,9 +61,14 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor,
 	produce("/ProductId", VE_PROD_ID_CARLO_GAVAZZI_EM);
 	produce("/DeviceType", acSensor->deviceType());
 	QString portName = acSensor->portName();
-	int deviceInstance = getDeviceInstance(portName, "/dev/ttyUSB", 288);
-	if (deviceInstance == -1)
-		deviceInstance = getDeviceInstance(portName, "/dev/ttyO", 256);
+	int deviceInstance = 0;
+	if (isSecundary) {
+		deviceInstance = 25 + settings->deviceIds().indexOf(acSensor->serial());
+	} else {
+		deviceInstance = getDeviceInstance(portName, "/dev/ttyUSB", 288);
+		if (deviceInstance == -1)
+			deviceInstance = getDeviceInstance(portName, "/dev/ttyO", 256);
+	}
 	produce("/Mgmt/Connection", portName);
 	produce("/DeviceInstance", deviceInstance);
 	produce("/Serial", acSensor->serial());

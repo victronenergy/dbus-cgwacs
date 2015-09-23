@@ -52,8 +52,6 @@ private slots:
 
 	void onServiceTypeChanged();
 
-	void onControlLoopEnabledChanged();
-
 	void onHub4ModeChanged();
 
 	void onMultiPhaseChanged();

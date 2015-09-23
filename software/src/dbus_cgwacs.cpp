@@ -25,7 +25,8 @@ DBusCGwacs::DBusCGwacs(const QString &portName, QObject *parent):
 
 	for (int i=1; i<=2; ++i) {
 		AcSensor *m = new AcSensor(portName, i, this);
-		new AcSensorUpdater(m, mModbus, m);
+		AcSensor *pv = new AcSensor(portName, i, this);
+		new AcSensorUpdater(m, pv, mModbus, m);
 		mAcSensors.append(m);
 		connect(m, SIGNAL(connectionStateChanged()),
 				this, SLOT(onConnectionStateChanged()));
@@ -76,8 +77,8 @@ void DBusCGwacs::onDeviceFound()
 			this, SLOT(onServiceTypeChanged()));
 	connect(settings, SIGNAL(isMultiPhaseChanged()),
 			this, SLOT(onMultiPhaseChanged()));
-	connect(settings, SIGNAL(isControlLoopEnabledChanged()),
-			this, SLOT(onControlLoopEnabledChanged()));
+	connect(settings, SIGNAL(l2ServiceTypeChanged()),
+			this, SLOT(onServiceTypeChanged()));
 	AcSensorSettingsBridge *b =
 			new AcSensorSettingsBridge(settings, settings);
 	connect(b, SIGNAL(initialized()),
@@ -99,15 +100,19 @@ void DBusCGwacs::onDeviceInitialized()
 {
 	AcSensor *m = static_cast<AcSensor *>(sender());
 	AcSensorUpdater *mu = m->findChild<AcSensorUpdater *>();
-	new AcSensorBridge(m, mu->settings(), mSettings, m);
+	new AcSensorBridge(m, mu->settings(), mSettings, false, m);
+	if (!mu->settings()->l2ServiceType().isEmpty()) {
+		AcSensor *pvSensor = mu->pvSensor();
+		new AcSensorBridge(pvSensor, mu->settings(), mSettings, true, pvSensor);
+	}
 	updateControlLoop();
 }
 
 void DBusCGwacs::onServiceTypeChanged()
 {
-	AcSensorSettings *s = static_cast<AcSensorSettings *>(sender());
-	AcSensor *m = static_cast<AcSensor *>(s->parent());
-	AcSensorBridge *bridge = m->findChild<AcSensorBridge *>();
+	AcSensorSettings *sensorSettings = static_cast<AcSensorSettings *>(sender());
+	AcSensor *acSensor = static_cast<AcSensor *>(sensorSettings->parent());
+	AcSensorBridge *bridge = acSensor->findChild<AcSensorBridge *>();
 	if (bridge == 0) {
 		// Settings have not been fully initialized yet. We need to have all
 		// settings before creating the D-Bus service.
@@ -116,12 +121,15 @@ void DBusCGwacs::onServiceTypeChanged()
 	// Deleting and recreating the bridge will force recreation of the D-Bus
 	// service with another name.
 	delete bridge;
-	new AcSensorBridge(m, s, mSettings, m);
-	updateControlLoop();
-}
-
-void DBusCGwacs::onControlLoopEnabledChanged()
-{
+	AcSensorUpdater *updater = acSensor->findChild<AcSensorUpdater *>();
+	AcSensor *pvSensor = updater->pvSensor();
+	// Just in case pvInverterOnPhase2 was set, in which case we have to bridge
+	// objects.
+	delete pvSensor->findChild<AcSensorBridge *>();
+	new AcSensorBridge(acSensor, sensorSettings, mSettings, false, acSensor);
+	if (!sensorSettings->l2ServiceType().isEmpty()) {
+		new AcSensorBridge(pvSensor, sensorSettings, mSettings, true, pvSensor);
+	}
 	updateControlLoop();
 }
 

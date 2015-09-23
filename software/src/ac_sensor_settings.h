@@ -28,6 +28,10 @@ class AcSensorSettings : public QObject
 	Q_PROPERTY(double l1ReverseEnergy READ l1ReverseEnergy WRITE setL1ReverseEnergy NOTIFY l1ReverseEnergyChanged)
 	Q_PROPERTY(double l2ReverseEnergy READ l2ReverseEnergy WRITE setL2ReverseEnergy NOTIFY l2ReverseEnergyChanged)
 	Q_PROPERTY(double l3ReverseEnergy READ l3ReverseEnergy WRITE setL3ReverseEnergy NOTIFY l3ReverseEnergyChanged)
+
+	Q_PROPERTY(QString l2CustomName READ l2CustomName WRITE setL2CustomName NOTIFY l2CustomNameChanged)
+	Q_PROPERTY(QString l2ServiceType READ l2ServiceType WRITE setL2ServiceType NOTIFY l2ServiceTypeChanged)
+	Q_PROPERTY(Position l2Position READ l2Position WRITE setL2Position NOTIFY l2PositionChanged)
 public:
 	AcSensorSettings(int deviceType, const QString &serial, QObject *parent = 0);
 
@@ -53,6 +57,18 @@ public:
 	bool isMultiPhase() const;
 
 	void setIsMultiPhase(bool b);
+
+	QString l2CustomName() const;
+
+	void setL2CustomName(const QString &v);
+
+	QString l2ServiceType() const;
+
+	void setL2ServiceType(const QString &v);
+
+	Position l2Position() const;
+
+	void setL2Position(Position p);
 
 	Hub4Mode hub4Mode() const;
 
@@ -85,8 +101,6 @@ signals:
 
 	void isMultiPhaseChanged();
 
-	void isControlLoopEnabledChanged();
-
 	void hub4ModeChanged();
 
 	void positionChanged();
@@ -96,6 +110,12 @@ signals:
 	void l2ReverseEnergyChanged();
 
 	void l3ReverseEnergyChanged();
+
+	void l2CustomNameChanged();
+
+	void l2ServiceTypeChanged();
+
+	void l2PositionChanged();
 
 private:
 	int mDeviceType;
@@ -108,6 +128,10 @@ private:
 	double mL1Energy;
 	double mL2Energy;
 	double mL3Energy;
+
+	QString mL2CustomName;
+	QString mL2ServiceType;
+	Position mL2Position;
 };
 
 #endif // AC_SENSOR_SETTINGS_H

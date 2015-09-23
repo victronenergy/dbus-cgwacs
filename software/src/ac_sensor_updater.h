@@ -40,13 +40,15 @@ public:
 	 * between multiple `AcSensorUpdater` objects. The `modbus` object will not
 	 * be deleted in the destructor.
 	 */
-	AcSensorUpdater(AcSensor *acSensor, ModbusRtu *modbus, QObject *parent = 0);
+	AcSensorUpdater(AcSensor *acSensor, AcSensor *acPvSensor, ModbusRtu *modbus, QObject *parent = 0);
 
 	/*!
 	 * Returns the storage object.
 	 * This is the object passed to the constructor.
 	 */
 	AcSensor *acSensor();
+
+	AcSensor *pvSensor();
 
 	/*!
 	 * Returns the settings object.
@@ -79,6 +81,8 @@ private slots:
 	void onUpdateSettings();
 
 	void onIsMultiPhaseChanged();
+
+	void onL2ServiceTypeChanged();
 
 private:
 	void startNextAction();
@@ -127,7 +131,9 @@ private:
 	};
 
 	DataProcessor *mDataProcessor;
+	DataProcessor *mPvDataProcessor;
 	AcSensor *mAcSensor;
+	AcSensor *mAcPvSensor;
 	AcSensorSettings *mSettings;
 	ModbusRtu *mModbus;
 	QTimer *mAcquisitionTimer;
@@ -143,6 +149,10 @@ private:
 	int mCommandCount;
 	int mCommandIndex;
 	int mAcquisitionIndex;
+	/// Some grid meters return a negative current on backfeed, others don't.
+	/// In case the meter does not, we correct the sing of the current using the
+	/// sign of the power.
+	bool mSetCurrentSign;
 };
 
 #endif // AC_SENSOR_UPDATER_H

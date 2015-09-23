@@ -2,15 +2,17 @@
 #include "ac_sensor_settings.h"
 
 AcSensorSettings::AcSensorSettings(int deviceType, const QString &serial,
-										 QObject *parent) :
+								   QObject *parent) :
 	QObject(parent),
 	mDeviceType(deviceType),
 	mSerial(serial),
+	mIsMultiPhase(false),
 	mHub4Mode(Hub4PhaseL1),
 	mPosition(Input1),
 	mL1Energy(0),
 	mL2Energy(0),
-	mL3Energy(0)
+	mL3Energy(0),
+	mL2Position(Input1)
 {
 }
 
@@ -47,6 +49,8 @@ void AcSensorSettings::setServiceType(const QString &t)
 	if (mServiceType == t)
 		return;
 	mServiceType = t;
+	if (t != "grid")
+		setL2ServiceType(QString());
 	emit serviceTypeChanged();
 }
 
@@ -60,7 +64,50 @@ void AcSensorSettings::setIsMultiPhase(bool b)
 	if (mIsMultiPhase == b)
 		return;
 	mIsMultiPhase = b;
+	if (b)
+		setL2ServiceType(QString());
 	emit isMultiPhaseChanged();
+}
+
+QString AcSensorSettings::l2CustomName() const
+{
+	return mL2CustomName;
+}
+
+void AcSensorSettings::setL2CustomName(const QString &v)
+{
+	if (mL2CustomName == v)
+		return;
+	mL2CustomName = v;
+	emit l2CustomNameChanged();
+}
+
+QString AcSensorSettings::l2ServiceType() const
+{
+	return mL2ServiceType;
+}
+
+void AcSensorSettings::setL2ServiceType(const QString &v)
+{
+	if (mL2ServiceType == v)
+		return;
+	mL2ServiceType = v;
+	if (!v.isEmpty())
+		setIsMultiPhase(false);
+	emit l2ServiceTypeChanged();
+}
+
+Position AcSensorSettings::l2Position() const
+{
+	return mL2Position;
+}
+
+void AcSensorSettings::setL2Position(Position v)
+{
+	if (mL2Position == v)
+		return;
+	mL2Position = v;
+	emit l2PositionChanged();
 }
 
 Hub4Mode AcSensorSettings::hub4Mode() const

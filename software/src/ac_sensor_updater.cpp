@@ -74,6 +74,21 @@ static const CompositeCommand Em24CommandsP1[] = {
 
 static const int Em24CommandP1Count = sizeof(Em24CommandsP1) / sizeof(Em24CommandsP1[0]);
 
+static const CompositeCommand Em24CommandsP1PV[] = {
+	{ 0x0012, 0, { { 0, Power, PhaseL1 } } },
+	{ 0x0014, 1, { { 0, Power, PhaseL2 }, { 1, Dummy, MultiPhase } } },
+	{ 0x0000, 2, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 } } },
+	{ 0x000C, 3, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 } } },
+	{ 0x0046, 4, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 } } },
+	// Note that NegativeEnergy will give us the energy of all phases. Right now
+	// we assume that in case of a shared system L1 is a grid meter and L2 a
+	// PV inverter (which always has ReverseEnergy=0 because power and current
+	// are always positive).
+	{ 0x005C, 5, { { 0, NegativeEnergy, PhaseL1 }, { 1, Dummy, MultiPhase } } }
+};
+
+static const int Em24CommandsP1PVCount = sizeof(Em24CommandsP1PV) / sizeof(Em24CommandsP1PV[0]);
+
 static const CompositeCommand Em112Commands[] = {
 	{ 0x0000, 0, { { 0, Voltage, MultiPhase }, { 2, Current, MultiPhase }, { 4, Power, MultiPhase } } },
 	{ 0x0010, 3, { { 0, PositiveEnergy, MultiPhase } } },
@@ -106,10 +121,12 @@ int getMaxOffset(const CompositeCommand &cmd) {
 	return maxOffset;
 }
 
-AcSensorUpdater::AcSensorUpdater(AcSensor *acSensor, ModbusRtu *modbus, QObject *parent):
+AcSensorUpdater::AcSensorUpdater(AcSensor *acSensor, AcSensor *acPvSensor, ModbusRtu *modbus, QObject *parent):
 	QObject(parent),
 	mDataProcessor(0),
+	mPvDataProcessor(0),
 	mAcSensor(acSensor),
+	mAcPvSensor(acPvSensor),
 	mSettings(0),
 	mModbus(0),
 	mAcquisitionTimer(new QTimer(this)),
@@ -123,9 +140,12 @@ AcSensorUpdater::AcSensorUpdater(AcSensor *acSensor, ModbusRtu *modbus, QObject 
 	mCommands(0),
 	mCommandCount(0),
 	mCommandIndex(0),
-	mAcquisitionIndex(0)
+	mAcquisitionIndex(0),
+	mSetCurrentSign(true)
 {
 	Q_ASSERT(acSensor != 0);
+	Q_ASSERT(acPvSensor != 0);
+	Q_ASSERT(acSensor->slaveAddress() == acPvSensor->slaveAddress());
 	mModbus = modbus;
 	connect(mModbus, SIGNAL(readCompleted(int, quint8, const QList<quint16> &)),
 			this, SLOT(onReadCompleted(int, quint8, QList<quint16>)));
@@ -147,6 +167,11 @@ AcSensorUpdater::AcSensorUpdater(AcSensor *acSensor, ModbusRtu *modbus, QObject 
 AcSensor *AcSensorUpdater::acSensor()
 {
 	return mAcSensor;
+}
+
+AcSensor *AcSensorUpdater::pvSensor()
+{
+	return mAcPvSensor;
 }
 
 AcSensorSettings *AcSensorUpdater::settings()
@@ -197,10 +222,15 @@ void AcSensorUpdater::onErrorReceived(int errorType, quint8 addr, int exception)
 			mSettings = 0;
 			delete mDataProcessor;
 			mDataProcessor = 0;
+			delete mPvDataProcessor;
+			mPvDataProcessor = 0;
 			mTimeoutCount = MaxTimeoutCount - 1;
 			mAcSensor->setSerial(QString());
 			mAcSensor->resetValues();
 			mAcSensor->setConnectionState(Disconnected);
+			mAcPvSensor->setSerial(QString());
+			mAcPvSensor->resetValues();
+			mAcPvSensor->setConnectionState(Disconnected);
 		} else {
 			++mTimeoutCount;
 		}
@@ -218,20 +248,25 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr,
 	case DeviceId:
 		QLOG_INFO() << "DeviceId:" << registers[0];
 		mAcSensor->setDeviceType(registers[0]);
+		mAcPvSensor->setDeviceType(registers[0]);
 		switch (mAcSensor->protocolType()) {
 		case AcSensor::Em24Protocol:
+			mSetCurrentSign = true;
 			mState = VersionCode;
 			break;
 		case AcSensor::Et112Protocol:
+			mSetCurrentSign = true;
 			mState = Serial;
 			break;
 		case AcSensor::Em340Protocol:
+			mSetCurrentSign = false;
 			mState = Serial;
 			break;
 		}
 		break;
 	case VersionCode:
 		mAcSensor->setDeviceSubType(registers[0]);
+		mAcPvSensor->setDeviceSubType(registers[0]);
 		mState = Serial;
 		break;
 	case Serial:
@@ -246,17 +281,20 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr,
 		// registers. Others (EM24) add zero padding at the end.
 		serial.remove(QChar(0));
 		mAcSensor->setSerial(serial);
+		mAcPvSensor->setSerial(serial);
 		mState = FirmwareVersion;
 		break;
 	}
 	case FirmwareVersion:
 		mAcSensor->setFirmwareVersion(registers[0]);
+		mAcPvSensor->setFirmwareVersion(registers[0]);
 		mState = WaitForStart;
 		break;
 	case CheckSetup:
 		Q_ASSERT(registers.size() == 2);
 		mApplication = registers[0];
-		mDesiredMeasuringSystem = mSettings->isMultiPhase() ?
+		mDesiredMeasuringSystem =
+			mSettings->isMultiPhase() || !mSettings->l2ServiceType().isEmpty() ?
 			MeasurementSystemP3 : MeasurementSystemP1;
 		mMeasuringSystem = registers[1];
 		mState = mApplication == ApplicationH &&
@@ -265,7 +303,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr,
 		break;
 	case CheckFrontSelector:
 		if (registers[0] == 3) {
-			// There are 2 reasones to change settings on the device:
+			// There are 2 reasons to change settings on the device:
 			// * Change measuring system (single phase, multi phase, ...).
 			//   EM24: Setting the device in multi phase mode while it is wired
 			//   for single phase (ie. port 1 & 4 connected) will distort
@@ -275,6 +313,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr,
 			QLOG_ERROR() << "Energy meter Application incorrect";
 			mState = WaitFrontSelector;
 			mAcSensor->setErrorCode(ErrorFronSelectorLocked);
+			mAcPvSensor->setErrorCode(ErrorFronSelectorLocked);
 		} else {
 			if (mApplication != RegApplication) {
 				mState = SetApplication;
@@ -284,6 +323,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr,
 				mState = Acquisition;
 			}
 			mAcSensor->setErrorCode(NoError);
+			mAcPvSensor->setErrorCode(NoError);
 		}
 		break;
 	case CheckMeasurementMode:
@@ -371,9 +411,16 @@ void AcSensorUpdater::onUpdateSettings()
 {
 	if (mDataProcessor != 0)
 		mDataProcessor->updateEnergySettings();
+	if (mPvDataProcessor != 0)
+		mPvDataProcessor->updateEnergySettings();
 }
 
 void AcSensorUpdater::onIsMultiPhaseChanged()
+{
+	mSetupRequested = true;
+}
+
+void AcSensorUpdater::onL2ServiceTypeChanged()
 {
 	mSetupRequested = true;
 }
@@ -384,6 +431,7 @@ void AcSensorUpdater::startNextAction()
 		mSetupRequested = false;
 		if (mAcSensor->protocolType() == AcSensor::Em24Protocol) {
 			mAcSensor->resetValues();
+			mAcPvSensor->resetValues();
 			mState = CheckSetup;
 		}
 	}
@@ -437,7 +485,10 @@ void AcSensorUpdater::startNextAction()
 											mAcSensor->serial(),
 											mAcSensor);
 		mDataProcessor = new DataProcessor(mAcSensor, mSettings, this);
+		mPvDataProcessor = new DataProcessor(mAcPvSensor, mSettings, this);
 		connect(mSettings, SIGNAL(isMultiPhaseChanged()),
+				this, SLOT(onIsMultiPhaseChanged()));
+		connect(mSettings, SIGNAL(l2ServiceTypeChanged()),
 				this, SLOT(onIsMultiPhaseChanged()));
 		mAcSensor->setConnectionState(Detected);
 		break;
@@ -447,6 +498,9 @@ void AcSensorUpdater::startNextAction()
 			if (mSettings->isMultiPhase()) {
 				mCommands = Em24Commands;
 				mCommandCount = Em24CommandCount;
+			} else if (!mSettings->l2ServiceType().isEmpty()) {
+				mCommands = Em24CommandsP1PV;
+				mCommandCount = Em24CommandsP1PVCount;
 			} else {
 				mCommands = Em24CommandsP1;
 				mCommandCount = Em24CommandP1Count;
@@ -532,41 +586,50 @@ void AcSensorUpdater::writeRegister(quint16 reg, quint16 value)
 void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 {
 	const CompositeCommand &cmd = mCommands[mCommandIndex];
-	int n = getMaxOffset(cmd);
-	if (n + 2 != registers.size()) {
+	int regCount = getMaxOffset(cmd) + 2;
+	if (regCount != registers.size()) {
 		QLOG_WARN() << "Incorrect number of registers received"
-					<< n << registers.size() << mCommandIndex;
+					<< regCount << registers.size() << mCommandIndex;
 		return;
 	}
-	for (int i=0; i<=n; ++i) {
-		const RegisterCommand &ra = cmd.actions[i];
+	for (int i=0; i<=regCount; ++i) {
+		RegisterCommand ra = cmd.actions[i];
 		if (ra.action == None)
 			break;
+		DataProcessor *dest = mDataProcessor;
+		if (!mSettings->l2ServiceType().isEmpty()) {
+			if (ra.phase == PhaseL2)
+				dest = mPvDataProcessor;
+			ra.phase = MultiPhase;
+		}
 		if (mSettings->isMultiPhase() || ra.phase == MultiPhase) {
 			bool setPhaseL1 = ra.phase == MultiPhase && !mSettings->isMultiPhase();
 			double v = 0;
 			switch (ra.action) {
 			case Power:
 				v = getDouble(registers, ra.regOffset, 2, 0.1);
-				mDataProcessor->setPower(ra.phase, v);
+				dest->setPower(ra.phase, v);
 				if (setPhaseL1)
-					mDataProcessor->setPower(PhaseL1, v);
+					dest->setPower(PhaseL1, v);
 				break;
 			case Voltage:
 				v = getDouble(registers, ra.regOffset, 2, 0.1);
-				mDataProcessor->setVoltage(ra.phase, v);
+				dest->setVoltage(ra.phase, v);
 				if (setPhaseL1)
-					mDataProcessor->setVoltage(PhaseL1, v);
+					dest->setVoltage(PhaseL1, v);
 				break;
 			case Current:
-				// Note energy meters (EM340) report a negative current if
-				// current flows in direction of net.
-				v = qAbs(getDouble(registers, ra.regOffset, 2, 1e-3));
-				mDataProcessor->setCurrent(ra.phase, v);
+				v = getDouble(registers, ra.regOffset, 2, 1e-3);
+				if (mSetCurrentSign &&
+					dest == mDataProcessor &&
+					mAcSensor->getPowerInfo(ra.phase)->power() < 0) {
+					v = -v;
+				}
+				dest->setCurrent(ra.phase, v);
 				if (setPhaseL1)
-					mDataProcessor->setCurrent(PhaseL1, v);
+					dest->setCurrent(PhaseL1, v);
 				if (mSettings->isMultiPhase() && ra.phase == PhaseL3) {
-					mDataProcessor->setCurrent(MultiPhase,
+					dest->setCurrent(MultiPhase,
 						mAcSensor->l1PowerInfo()->current() +
 						mAcSensor->l2PowerInfo()->current() +
 						mAcSensor->l3PowerInfo()->current());
@@ -574,19 +637,19 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 				break;
 			case PositiveEnergy:
 				v = getDouble(registers, ra.regOffset, 2, 0.1);
-				mDataProcessor->setPositiveEnergy(ra.phase, v);
+				dest->setPositiveEnergy(ra.phase, v);
 				if (setPhaseL1)
-					mDataProcessor->setPositiveEnergy(PhaseL1, v);
+					dest->setPositiveEnergy(PhaseL1, v);
 				break;
 			case NegativeEnergy:
 				// ET112 seems to return negative values for kWh(-), unlike the
 				// other meters.
 				v = qAbs(getDouble(registers, ra.regOffset, 2, 0.1));
 				if (mSettings->isMultiPhase()) {
-					mDataProcessor->setNegativeEnergy(v);
+					dest->setNegativeEnergy(v);
 				} else {
-					mDataProcessor->setNegativeEnergy(MultiPhase, v);
-					mDataProcessor->setNegativeEnergy(PhaseL1, v);
+					dest->setNegativeEnergy(MultiPhase, v);
+					dest->setNegativeEnergy(PhaseL1, v);
 				}
 				break;
 			default:
