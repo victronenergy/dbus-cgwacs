@@ -1,7 +1,6 @@
 #ifndef SETTINGS_BRIDGE_H
 #define SETTINGS_BRIDGE_H
 
-#include <QMetaType>
 #include "dbus_bridge.h"
 #include "defines.h"
 

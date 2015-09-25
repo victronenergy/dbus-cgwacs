@@ -14,7 +14,26 @@ enum MultiMode {
 	MultiOff = 4
 };
 
+enum MultiState {
+	MultiStateOff = 0,
+	MultiStateLowPower = 1,
+	MultiStateFault = 2,
+	MultiStateBulk = 3,
+	MultiStateAbsorption = 4,
+	MultiStateFloat = 5,
+	MultiStateStorage = 6,
+	MultiStateEqualize = 7,
+	MultiStatePassthrough = 8,
+	MultiStateInverting = 9,
+	MultiStateAssisting = 10,
+	MultiStatePowerSupply = 11,
+	MultiStateBlocked = 0xFA,
+	MultiStateTest = 0xFB,
+	MultiStateHub4 = 0xFC
+};
+
 Q_DECLARE_METATYPE(MultiMode)
+Q_DECLARE_METATYPE(MultiState)
 
 /*!
  * This class stores data from a Multi (or Quattro) needed for the Hub-4 control
@@ -26,10 +45,12 @@ class Multi : public QObject
 	Q_PROPERTY(double acPowerSetPoint READ acPowerSetPoint WRITE setAcPowerSetPoint NOTIFY acPowerSetPointChanged)
 	Q_PROPERTY(bool isSetPointAvailable READ isSetPointAvailable WRITE setIsSetPointAvailable NOTIFY isSetPointAvailableChanged)
 	Q_PROPERTY(double dcVoltage READ dcVoltage WRITE setDcVoltage NOTIFY dcVoltageChanged)
+	Q_PROPERTY(double stateOfCharge READ stateOfCharge WRITE setStateOfCharge NOTIFY stateOfChargeChanged)
 	Q_PROPERTY(double maxChargeCurrent READ maxChargeCurrent WRITE setMaxChargeCurrent NOTIFY maxChargeCurrentChanged)
 	Q_PROPERTY(bool isChargeDisabled READ isChargeDisabled WRITE setIsChargeDisabled NOTIFY isChargeDisabledChanged)
 	Q_PROPERTY(bool isFeedbackDisabled READ isFeedbackDisabled WRITE setIsFeedbackDisabled NOTIFY isFeedbackDisabledChanged)
 	Q_PROPERTY(MultiMode mode READ mode WRITE setMode NOTIFY modeChanged)
+	Q_PROPERTY(MultiState state READ state WRITE setState NOTIFY stateChanged)
 public:
 	explicit Multi(QObject *parent = 0);
 
@@ -45,6 +66,10 @@ public:
 
 	void setDcVoltage(double v);
 
+	double stateOfCharge() const;
+
+	void setStateOfCharge(double s);
+
 	double maxChargeCurrent() const;
 
 	void setMaxChargeCurrent(double c);
@@ -52,6 +77,10 @@ public:
 	MultiMode mode() const;
 
 	void setMode(MultiMode m);
+
+	MultiState state() const;
+
+	void setState(MultiState m);
 
 	bool isChargeDisabled() const;
 
@@ -78,9 +107,13 @@ signals:
 
 	void dcVoltageChanged();
 
+	void stateOfChargeChanged();
+
 	void maxChargeCurrentChanged();
 
 	void modeChanged();
+
+	void stateChanged();
 
 	void isChargeDisabledChanged();
 
@@ -94,8 +127,10 @@ private:
 	double mAcPowerSetPoint;
 	bool mIsSetPointAvailable;
 	double mDcVoltage;
+	double mStateOfCharge;
 	double mMaxChargeCurrent;
 	MultiMode mMode;
+	MultiState mState;
 	bool mChargeDisabled;
 	bool mFeedbackDisabled;
 };

@@ -2,6 +2,7 @@
 #define DEFINES_H
 
 #include <QtGlobal>
+#include <qnumeric.h>
 
 enum Phase {
 	MultiPhase = 0,
@@ -30,5 +31,7 @@ inline quint16 toUInt16(quint8 msb, quint8 lsb)
 {
 	return (msb << 8) | lsb;
 }
+
+const double NaN = qQNaN();
 
 #endif // DEFINES_H

@@ -1,9 +1,9 @@
-#include <limits>
+// #include <limits>
 #include <QsLog.h>
 #include "multi.h"
 #include "multi_phase_data.h"
 
-static const double NaN = std::numeric_limits<double>::quiet_NaN();
+// static const double NaN = std::numeric_limits<double>::quiet_NaN();
 
 Multi::Multi(QObject *parent) :
 	QObject(parent),
@@ -14,6 +14,7 @@ Multi::Multi(QObject *parent) :
 	mAcPowerSetPoint(0),
 	mIsSetPointAvailable(false),
 	mDcVoltage(NaN),
+	mStateOfCharge(NaN),
 	mMaxChargeCurrent(NaN),
 	mMode(MultiOff),
 	mChargeDisabled(false),
@@ -60,6 +61,19 @@ void Multi::setDcVoltage(double v)
 	emit dcVoltageChanged();
 }
 
+double Multi::stateOfCharge() const
+{
+	return mStateOfCharge;
+}
+
+void Multi::setStateOfCharge(double s)
+{
+	if (mStateOfCharge == s)
+		return;
+	mStateOfCharge = s;
+	emit stateOfChargeChanged();
+}
+
 double Multi::maxChargeCurrent() const
 {
 	return mMaxChargeCurrent;
@@ -84,6 +98,19 @@ void Multi::setMode(MultiMode m)
 		return;
 	mMode = m;
 	emit modeChanged();
+}
+
+MultiState Multi::state() const
+{
+	return mState;
+}
+
+void Multi::setState(MultiState m)
+{
+	if (mState == m)
+		return;
+	mState = m;
+	emit stateChanged();
 }
 
 bool Multi::isChargeDisabled() const

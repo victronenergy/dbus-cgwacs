@@ -18,10 +18,12 @@ MultiBridge::MultiBridge(Multi *multi, const QString &service,
 	// Order matters here. Retrieve acPowerSetPoint as last item, so we know all
 	// items are synced once IsSetPointAvailable is set.
 	consume(service, multi, "dcVoltage", "/Dc/0/Voltage");
+	consume(service, multi, "stateOfCharge", "/Soc");
 	consume(service, multi, "maxChargeCurrent", "/Dc/0/MaxChargeCurrent");
 	consume(service, multi, "isChargeDisabled", "/Hub4/DisableCharge");
 	consume(service, multi, "isFeedbackDisabled", "/Hub4/DisableFeedback");
 	consume(service, multi, "mode", "/Mode");
+	consume(service, multi, "state", "/State");
 	consume(service, multi, "acPowerSetPoint", "/Hub4/AcPowerSetpoint");
 }
 
@@ -29,6 +31,8 @@ bool MultiBridge::toDBus(const QString &path, QVariant &v)
 {
 	if (path == "/Mode") {
 		v = QVariant(static_cast<int>(v.value<MultiMode>()));
+	} else if (path == "/State") {
+		return false;
 	} else if (path == "/Hub4/DisableCharge" || path == "/Hub4/DisableFeedback") {
 		v = v.toBool() ? 1 : 0;
 	}
@@ -41,6 +45,8 @@ bool MultiBridge::fromDBus(const QString &path, QVariant &v)
 		mMulti->setIsSetPointAvailable(v.isValid());
 	} else if (path == "/Mode") {
 		v = QVariant::fromValue(static_cast<MultiMode>(v.toInt()));
+	} else if (path == "/State") {
+		v = QVariant::fromValue(static_cast<MultiState>(v.toInt()));
 	}
 	return true;
 }

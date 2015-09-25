@@ -20,6 +20,7 @@ DBusCGwacs::DBusCGwacs(const QString &portName, QObject *parent):
 	qRegisterMetaType<ConnectionState>();
 	qRegisterMetaType<Position>();
 	qRegisterMetaType<MultiMode>();
+	qRegisterMetaType<Hub4State>();
 	qRegisterMetaType<QList<quint16> >();
 
 	for (int i=1; i<=2; ++i) {
@@ -187,22 +188,22 @@ void DBusCGwacs::updateControlLoop()
 		switch (settings->hub4Mode()) {
 		case Hub4PhaseL1:
 			QLOG_INFO() << "Control loop: multi phase, phase L1";
-			mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, this));
+			mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, 0, this));
 			break;
 		case Hub4PhaseCompensation:
 			QLOG_INFO() << "Control loop: multi phase, phase compensation";
-			mControlLoops.append(new ControlLoop(mMulti, MultiPhase, gridMeter, mSettings, this));
+			mControlLoops.append(new ControlLoop(mMulti, MultiPhase, gridMeter, mSettings, 0, this));
 			break;
 		case Hub4PhaseSplit:
 			QLOG_INFO() << "Control loop: multi phase, each phase has a dedicated control loop";
-			mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, this));
-			mControlLoops.append(new ControlLoop(mMulti, PhaseL2, gridMeter, mSettings, this));
-			mControlLoops.append(new ControlLoop(mMulti, PhaseL3, gridMeter, mSettings, this));
+			mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, 0, this));
+			mControlLoops.append(new ControlLoop(mMulti, PhaseL2, gridMeter, mSettings, 0, this));
+			mControlLoops.append(new ControlLoop(mMulti, PhaseL3, gridMeter, mSettings, 0, this));
 			break;
 		}
 	} else {
 		QLOG_INFO() << "Control loop: single phase";
-		mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, this));
+		mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, 0, this));
 	}
 }
 

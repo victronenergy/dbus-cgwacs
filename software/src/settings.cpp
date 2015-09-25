@@ -4,7 +4,9 @@ Settings::Settings(QObject *parent) :
 	QObject(parent),
 	mAcPowerSetPoint(0),
 	mMaxChargePercentage(100),
-	mMaxDischargePercentage(100)
+	mMaxDischargePercentage(100),
+	mState(Hub4SelfConsumption),
+	mMaintenanceInterval(7)
 {
 }
 
@@ -60,6 +62,45 @@ void Settings::setMaxDischargePercentage(double p)
 		return;
 	mMaxDischargePercentage = p;
 	emit maxDischargePercentageChanged();
+}
+
+int Settings::maintenanceInterval() const
+{
+	return mMaintenanceInterval;
+}
+
+void Settings::setMaintenanceInterval(int v)
+{
+	if (mMaintenanceInterval == v)
+		return;
+	mMaintenanceInterval = v;
+	emit maintenanceIntervalChanged();
+}
+
+int Settings::state() const
+{
+	return mState;
+}
+
+void Settings::setState(int v)
+{
+	if (mState == v)
+		return;
+	mState = v;
+	emit stateChanged();
+}
+
+QDateTime Settings::maintenanceDate() const
+{
+	return mMaintenanceDate;
+}
+
+void Settings::setMaintenanceDate(const QDateTime &v)
+{
+	if (mMaintenanceDate == v)
+		return;
+	mMaintenanceDate = v;
+	emit maintenanceDateChanged();
 }
 
 void Settings::registerDevice(const QString &serial)

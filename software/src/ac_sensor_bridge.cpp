@@ -44,6 +44,9 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor,
 		produce(settings, "acPowerSetPoint", "/Hub4/AcPowerSetpoint");
 		produce(settings, "maxChargePercentage", "/Hub4/MaxChargePercentage");
 		produce(settings, "maxDischargePercentage", "/Hub4/MaxDischargePercentage");
+		produce(settings, "state", "/Hub4/State");
+		produce(settings, "maintenanceInterval", "/Hub4/Maintenance/Interval");
+		produce(settings, "maintenanceDate", "/Hub4/Maintenance/Date");
 	}
 
 	QString processName = QCoreApplication::arguments()[0];
@@ -76,6 +79,11 @@ bool AcSensorBridge::toDBus(const QString &path, QVariant &value)
 		QString name = value.toString();
 		if (name.isEmpty())
 			value = mAcSensor->productName();
+	} else if (path == "/Hub4/State") {
+		// value = static_cast<int>(value.value<Hub4State>());
+	} else if (path == "/Hub4/Maintenance/Date") {
+		QDateTime t = value.value<QDateTime>();
+		value = t.isValid() ? t.toTime_t() : 0;
 	}
 	if (value.type() == QVariant::Double && !std::isfinite(value.toDouble()))
 		value = QVariant();
@@ -88,6 +96,13 @@ bool AcSensorBridge::fromDBus(const QString &path, QVariant &value)
 		QString name = value.toString();
 		if (name == mAcSensor->productName())
 			value = "";
+		return true;
+	} else if (path == "/Hub4/Maintenance/Date") {
+		time_t t = value.value<time_t>();
+		value = t == 0 ? QDateTime() : QDateTime::fromTime_t(t);
+		return true;
+	} else if (path == "/Hub4/State") {
+		// value = static_cast<Hub4State>(value.toInt());
 		return true;
 	} else if (path.startsWith("/Hub4/")) {
 		return true;
