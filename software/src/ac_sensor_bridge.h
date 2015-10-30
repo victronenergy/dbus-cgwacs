@@ -34,9 +34,6 @@ protected:
 private:
 	void producePowerInfo(PowerInfo *pi, const QString &path);
 
-	int getDeviceInstance(const QString &path, const QString &prefix,
-						  int instanceBase);
-
 	AcSensor *mAcSensor;
 };
 

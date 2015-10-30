@@ -60,16 +60,9 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 	produce("/ProductName", acSensor->productName());
 	produce("/ProductId", VE_PROD_ID_CARLO_GAVAZZI_EM);
 	produce("/DeviceType", acSensor->deviceType());
-	QString portName = acSensor->portName();
-	int deviceInstance = 0;
-	if (isSecundary) {
-		deviceInstance = 25 + settings->deviceIds().indexOf(acSensor->serial());
-	} else {
-		deviceInstance = getDeviceInstance(portName, "/dev/ttyUSB", 288);
-		if (deviceInstance == -1)
-			deviceInstance = getDeviceInstance(portName, "/dev/ttyO", 256);
-	}
-	produce("/Mgmt/Connection", portName);
+	produce("/Mgmt/Connection", acSensor->portName());
+	int deviceInstance = settings->getDeviceInstance(serviceType,
+													 acSensor->serial());
 	produce("/DeviceInstance", deviceInstance);
 	produce("/Serial", acSensor->serial());
 
@@ -124,14 +117,4 @@ void AcSensorBridge::producePowerInfo(PowerInfo *pi, const QString &path)
 	produce(pi, "power", path + "/Power", "W", 0);
 	produce(pi, "energyForward", path + "/Energy/Forward", "kWh", 1);
 	produce(pi, "energyReverse", path + "/Energy/Reverse", "kWh", 1);
-}
-
-int AcSensorBridge::getDeviceInstance(const QString &path,
-										 const QString &prefix,
-										 int instanceBase)
-{
-	if (path.startsWith(prefix)) {
-		return instanceBase + path.mid(prefix.size()).toInt();
-	}
-	return -1;
 }

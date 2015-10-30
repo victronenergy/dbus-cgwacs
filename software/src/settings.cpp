@@ -1,3 +1,4 @@
+#include "defines.h"
 #include "settings.h"
 
 Settings::Settings(QObject *parent) :
@@ -109,4 +110,16 @@ void Settings::registerDevice(const QString &serial)
 		return;
 	mDeviceIds.append(serial);
 	emit deviceIdsChanged();
+}
+
+int Settings::getDeviceInstance(const QString &serviceType, const QString &serial) const
+{
+	if (serviceType == "grid")
+		return GridDeviceInstance;
+	if (serviceType == "genset")
+		return GensetDeviceInstance;
+	int i = mDeviceIds.indexOf(serial);
+	if (i == -1)
+		return InvalidDeviceInstance;
+	return MinDeviceInstance + i % (MaxDeviceInstance - MinDeviceInstance + 1);
 }

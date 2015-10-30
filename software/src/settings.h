@@ -79,6 +79,8 @@ public:
 
 	void registerDevice(const QString &serial);
 
+	int getDeviceInstance(const QString &serviceType, const QString &serial) const;
+
 signals:
 	void deviceIdsChanged();
 
