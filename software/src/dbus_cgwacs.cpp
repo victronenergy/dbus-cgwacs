@@ -7,6 +7,7 @@
 #include "control_loop.h"
 #include "dbus_cgwacs.h"
 #include "dbus_service_monitor.h"
+#include "hub4_control_bridge.h"
 #include "multi.h"
 #include "multi_bridge.h"
 #include "settings.h"
@@ -100,10 +101,14 @@ void DBusCGwacs::onDeviceInitialized()
 {
 	AcSensor *m = static_cast<AcSensor *>(sender());
 	AcSensorUpdater *mu = m->findChild<AcSensorUpdater *>();
-	new AcSensorBridge(m, mu->settings(), mSettings, false, m);
-	if (!mu->settings()->l2ServiceType().isEmpty()) {
+	AcSensorSettings *sensorSettings = mu->settings();
+	AcSensorBridge *bridge = new AcSensorBridge(m, sensorSettings, mSettings,
+												false, m);
+	if (sensorSettings->serviceType() == "grid")
+		new Hub4ControlBridge(mSettings, bridge);
+	if (!sensorSettings->l2ServiceType().isEmpty()) {
 		AcSensor *pvSensor = mu->pvSensor();
-		new AcSensorBridge(pvSensor, mu->settings(), mSettings, true, pvSensor);
+		new AcSensorBridge(pvSensor, sensorSettings, mSettings, true, pvSensor);
 	}
 	updateControlLoop();
 }
@@ -126,7 +131,10 @@ void DBusCGwacs::onServiceTypeChanged()
 	// Just in case pvInverterOnPhase2 was set, in which case we have to bridge
 	// objects.
 	delete pvSensor->findChild<AcSensorBridge *>();
-	new AcSensorBridge(acSensor, sensorSettings, mSettings, false, acSensor);
+	bridge = new AcSensorBridge(acSensor, sensorSettings,
+								mSettings, false, acSensor);
+	if (sensorSettings->serviceType() == "grid")
+		new Hub4ControlBridge(mSettings, bridge);
 	if (!sensorSettings->l2ServiceType().isEmpty()) {
 		new AcSensorBridge(pvSensor, sensorSettings, mSettings, true, pvSensor);
 	}

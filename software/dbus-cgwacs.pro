@@ -82,7 +82,8 @@ SOURCES += \
     src/ac_sensor_settings.cpp \
     src/ac_sensor_settings_bridge.cpp \
     src/ac_sensor_updater.cpp \
-    src/dbus_cgwacs.cpp
+    src/dbus_cgwacs.cpp \
+    src/hub4_control_bridge.cpp
 
 HEADERS += \
     ext/velib/src/qt/v_busitem_adaptor.h \
@@ -113,4 +114,5 @@ HEADERS += \
     src/ac_sensor_settings.h \
     src/ac_sensor_updater.h \
     src/dbus_cgwacs.h \
-    src/ac_sensor_settings_bridge.h
+    src/ac_sensor_settings_bridge.h \
+    src/hub4_control_bridge.h
