@@ -1,9 +1,6 @@
-// #include <limits>
 #include <QsLog.h>
 #include "multi.h"
 #include "multi_phase_data.h"
-
-// static const double NaN = std::numeric_limits<double>::quiet_NaN();
 
 Multi::Multi(QObject *parent) :
 	QObject(parent),

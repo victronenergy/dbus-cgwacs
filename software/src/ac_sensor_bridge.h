@@ -1,8 +1,6 @@
 #ifndef AC_SENSOR_BRIDGE_H
 #define AC_SENSOR_BRIDGE_H
 
-#include <QPointer>
-#include <QString>
 #include "dbus_bridge.h"
 
 class AcSensor;
@@ -20,11 +18,11 @@ class AcSensorBridge : public DBusBridge
 {
 	Q_OBJECT
 public:
-	explicit AcSensorBridge(AcSensor *acSensor,
-							AcSensorSettings *emSettings,
-							Settings *settings,
-							bool isSecundary,
-							QObject *parent = 0);
+	AcSensorBridge(AcSensor *acSensor,
+				   AcSensorSettings *emSettings,
+				   Settings *settings,
+				   bool isSecundary,
+				   QObject *parent = 0);
 
 protected:
 	virtual bool toDBus(const QString &path, QVariant &value);

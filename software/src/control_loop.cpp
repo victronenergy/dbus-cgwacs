@@ -111,9 +111,6 @@ void ControlLoop::performStep()
 			setHub4State(Hub4ChargeFromGrid);
 		}
 
-//		QLOG_WARN() << __FUNCTION__ << "Days to next charge:"
-//					<< now.secsTo(nextCharge)/(24 * 3600.0);
-
 		if (isMultiCharged()) {
 			setHub4State(Hub4Charged);
 		}
