@@ -120,8 +120,8 @@ bool Multi::isChargeDisabled() const
 
 void Multi::setIsChargeDisabled(bool b)
 {
-	if (mChargeDisabled == b)
-		return;
+//	if (mChargeDisabled == b)
+//		return;
 	mChargeDisabled = b;
 	emit isChargeDisabledChanged();
 }
@@ -133,8 +133,8 @@ bool Multi::isFeedbackDisabled() const
 
 void Multi::setIsFeedbackDisabled(bool b)
 {
-	if (mFeedbackDisabled == b)
-		return;
+//	if (mFeedbackDisabled == b)
+//		return;
 	mFeedbackDisabled = b;
 	emit isFeedbackDisabledChanged();
 }

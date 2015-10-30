@@ -144,7 +144,11 @@ void ControlLoop::performStep()
 	}
 
 	bool feedbackDisabled = maxDischargePct < 50;
-	bool chargeDisabled = maxChargePct <= 0;
+	// It seems that enabling the the ChargeDisabled flag disables both charge
+	// and discharge. So we're only setting the flags when we are not
+	// discharging.
+	bool chargeDisabled = maxChargePct <= 0 &&
+						  (feedbackDisabled || pMultiNew < -30);
 	pMultiNew = qMax(minPower, pMultiNew);
 
 	// Ugly workaround: the value of pMultiNew must always be sent over the
