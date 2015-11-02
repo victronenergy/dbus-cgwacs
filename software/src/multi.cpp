@@ -11,7 +11,6 @@ Multi::Multi(QObject *parent) :
 	mAcPowerSetPoint(0),
 	mIsSetPointAvailable(false),
 	mDcVoltage(NaN),
-	mStateOfCharge(NaN),
 	mMaxChargeCurrent(NaN),
 	mMode(MultiOff),
 	mChargeDisabled(false),
@@ -56,19 +55,6 @@ void Multi::setDcVoltage(double v)
 		return;
 	mDcVoltage = v;
 	emit dcVoltageChanged();
-}
-
-double Multi::stateOfCharge() const
-{
-	return mStateOfCharge;
-}
-
-void Multi::setStateOfCharge(double s)
-{
-	if (mStateOfCharge == s)
-		return;
-	mStateOfCharge = s;
-	emit stateOfChargeChanged();
 }
 
 double Multi::maxChargeCurrent() const

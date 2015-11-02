@@ -185,8 +185,7 @@ double ControlLoop::computeSetpoint() const
 
 bool ControlLoop::isMultiCharged() const
 {
-	return (mMulti->state() == MultiStateFloat || mMulti->state() == MultiStateStorage) &&
-			mMulti->stateOfCharge() == 100;
+	return mMulti->state() == MultiStateFloat || mMulti->state() == MultiStateStorage;
 }
 
 void ControlLoop::updateMaintenanceDate()
@@ -194,15 +193,24 @@ void ControlLoop::updateMaintenanceDate()
 	QDateTime nextCharge = mClock->now();
 	nextCharge.setTime(QTime(1, 0, 0));
 	mSettings->setMaintenanceDate(nextCharge);
-	QLOG_INFO() << "Next maintenance date set at:" << nextCharge;
+	QLOG_INFO() << "Next maintenance base date set at:" << nextCharge;
 }
 
 void ControlLoop::setHub4State(Hub4State state)
 {
 	if (mSettings->state() == state)
 		return;
-	static const char *StateNames[] = { "SelfConsumption", "ChargeFromGrid", "Charged", "Storage", "External" };
-	QLOG_INFO() << "Changing Hub4 state from" << StateNames[mSettings->state()]
-				<< "to" << StateNames[state];
+	QLOG_INFO() << "Changing Hub4 state from"
+				<< getStateName(mSettings->state())
+				<< "to" << getStateName(state);
 	mSettings->setState(state);
+}
+
+const char *ControlLoop::getStateName(int state)
+{
+	static const char *StateNames[] = { "SelfConsumption", "ChargeFromGrid", "Charged", "Storage", "External" };
+	static const int StateNameCount	= static_cast<int>(sizeof(StateNames)/sizeof(StateNames[0]));
+	if (state < 0 || state >= StateNameCount)
+		return "Unknown";
+	return StateNames[state];
 }

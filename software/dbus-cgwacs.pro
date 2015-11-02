@@ -115,4 +115,5 @@ HEADERS += \
     src/ac_sensor_updater.h \
     src/dbus_cgwacs.h \
     src/ac_sensor_settings_bridge.h \
-    src/hub4_control_bridge.h
+    src/hub4_control_bridge.h \
+    src/fastclock.h

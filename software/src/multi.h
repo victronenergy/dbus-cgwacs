@@ -45,7 +45,6 @@ class Multi : public QObject
 	Q_PROPERTY(double acPowerSetPoint READ acPowerSetPoint WRITE setAcPowerSetPoint NOTIFY acPowerSetPointChanged)
 	Q_PROPERTY(bool isSetPointAvailable READ isSetPointAvailable WRITE setIsSetPointAvailable NOTIFY isSetPointAvailableChanged)
 	Q_PROPERTY(double dcVoltage READ dcVoltage WRITE setDcVoltage NOTIFY dcVoltageChanged)
-	Q_PROPERTY(double stateOfCharge READ stateOfCharge WRITE setStateOfCharge NOTIFY stateOfChargeChanged)
 	Q_PROPERTY(double maxChargeCurrent READ maxChargeCurrent WRITE setMaxChargeCurrent NOTIFY maxChargeCurrentChanged)
 	Q_PROPERTY(bool isChargeDisabled READ isChargeDisabled WRITE setIsChargeDisabled NOTIFY isChargeDisabledChanged)
 	Q_PROPERTY(bool isFeedbackDisabled READ isFeedbackDisabled WRITE setIsFeedbackDisabled NOTIFY isFeedbackDisabledChanged)
@@ -65,10 +64,6 @@ public:
 	double dcVoltage() const;
 
 	void setDcVoltage(double v);
-
-	double stateOfCharge() const;
-
-	void setStateOfCharge(double s);
 
 	double maxChargeCurrent() const;
 
@@ -107,8 +102,6 @@ signals:
 
 	void dcVoltageChanged();
 
-	void stateOfChargeChanged();
-
 	void maxChargeCurrentChanged();
 
 	void modeChanged();
@@ -127,7 +120,6 @@ private:
 	double mAcPowerSetPoint;
 	bool mIsSetPointAvailable;
 	double mDcVoltage;
-	double mStateOfCharge;
 	double mMaxChargeCurrent;
 	MultiMode mMode;
 	MultiState mState;

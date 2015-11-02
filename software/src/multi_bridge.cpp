@@ -18,7 +18,6 @@ MultiBridge::MultiBridge(Multi *multi, const QString &service,
 	// Order matters here. Retrieve acPowerSetPoint as last item, so we know all
 	// items are synced once IsSetPointAvailable is set.
 	consume(service, multi, "dcVoltage", "/Dc/0/Voltage");
-	consume(service, multi, "stateOfCharge", "/Soc");
 	consume(service, multi, "maxChargeCurrent", "/Dc/0/MaxChargeCurrent");
 	consume(service, multi, "isChargeDisabled", "/Hub4/DisableCharge");
 	consume(service, multi, "isFeedbackDisabled", "/Hub4/DisableFeedback");

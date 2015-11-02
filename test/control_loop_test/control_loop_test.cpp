@@ -78,11 +78,11 @@ TEST_F(ControlLoopTest, autoChargeLoop)
 	triggerUpdate();
 	EXPECT_NEAR(mMulti->acPowerSetPoint(), 12 * 90, 1);
 	mMulti->setState(MultiStateFloat);
-	mMulti->setStateOfCharge(100);
+	// mMulti->setStateOfCharge(100);
 	triggerUpdate();
 	EXPECT_EQ(mSettings->state(), Hub4SelfConsumption);
 	mMulti->setState(MultiStateBulk);
-	mMulti->setStateOfCharge(90);
+	// mMulti->setStateOfCharge(90);
 	mClock->addDays(7);
 	mClock->setHours(12);
 	triggerUpdate();
@@ -99,19 +99,21 @@ TEST_F(ControlLoopTest, chargedToSelfConsumption)
 	EXPECT_EQ(mSettings->state(), Hub4SelfConsumption);
 	mClock->addDays(1);
 	mMulti->setState(MultiStateFloat);
-	mMulti->setStateOfCharge(100);
+	// mMulti->setStateOfCharge(100);
 	triggerUpdate();
 	EXPECT_EQ(mSettings->state(), Hub4Charged);
 	EXPECT_EQ(mSettings->maintenanceDate(), mClock->now().addDays(-1));
 
 	mClock->addDays(1);
-	mMulti->setStateOfCharge(95);
+	// mMulti->setStateOfCharge(95);
+	mMulti->setState(MultiStateAbsorption);
 	triggerUpdate();
 	EXPECT_EQ(mSettings->state(), Hub4SelfConsumption);
 	EXPECT_EQ(mSettings->maintenanceDate(), mClock->now());
 
 	mClock->addDays(1);
-	mMulti->setStateOfCharge(100);
+	// mMulti->setStateOfCharge(100);
+	mMulti->setState(MultiStateFloat);
 	triggerUpdate();
 	EXPECT_EQ(mSettings->state(), Hub4Charged);
 	EXPECT_EQ(mSettings->maintenanceDate(), mClock->now().addDays(-1));
@@ -135,7 +137,7 @@ TEST_F(ControlLoopTest, storageFullCharge)
 	EXPECT_EQ(mSettings->state(), Hub4Storage);
 	mClock->addDays(200);
 	mMulti->setState(MultiStateStorage);
-	mMulti->setStateOfCharge(100);
+	// mMulti->setStateOfCharge(100);
 	triggerUpdate();
 	mSettings->setState(Hub4SelfConsumption);
 	triggerUpdate();
@@ -213,7 +215,7 @@ TEST_F(ControlLoopTest, restartChargeFromGrid)
 	EXPECT_EQ(mSettings->state(), Hub4ChargeFromGrid);
 	EXPECT_NEAR(mMulti->acPowerSetPoint(), 12 * 90, 1);
 	mMulti->setState(MultiStateFloat);
-	mMulti->setStateOfCharge(100);
+	// mMulti->setStateOfCharge(100);
 	// Check if we return to self consumption are charge has been completed.
 	triggerUpdate();
 	EXPECT_EQ(mSettings->state(), Hub4SelfConsumption);
@@ -231,7 +233,7 @@ TEST_F(ControlLoopTest, restartStorageFromGrid)
 	EXPECT_NEAR(mMulti->acPowerSetPoint(), 12 * 90, 1);
 	EXPECT_EQ(mSettings->state(), Hub4Storage);
 	mMulti->setState(MultiStateFloat);
-	mMulti->setStateOfCharge(100);
+	// mMulti->setStateOfCharge(100);
 	triggerUpdate();
 	EXPECT_FALSE(mSettings->maintenanceDate().isValid());
 	EXPECT_EQ(mSettings->state(), Hub4Storage);
@@ -253,12 +255,12 @@ TEST_F(ControlLoopTest, externalControl)
 	triggerUpdate();
 	EXPECT_EQ(mSettings->state(), Hub4External);
 	mMulti->setState(MultiStateFloat);
-	mMulti->setStateOfCharge(100);
+	// mMulti->setStateOfCharge(100);
 	mClock->addDays(1);
 	triggerUpdate();
 	EXPECT_EQ(mSettings->state(), Hub4External);
-	mMulti->setState(MultiStateFloat);
-	mMulti->setStateOfCharge(80);
+	mMulti->setState(MultiStateAbsorption);
+	// mMulti->setStateOfCharge(80);
 	mClock->addDays(1);
 	mClock->addDays(100);
 	triggerUpdate();
@@ -283,7 +285,7 @@ void ControlLoopTest::SetUp()
 	mMulti->setIsChargeDisabled(false);
 	mMulti->setIsFeedbackDisabled(false);
 	mMulti->setState(MultiStateBulk);
-	mMulti->setStateOfCharge(50);
+	// mMulti->setStateOfCharge(50);
 	mSettings.reset(new Settings);
 	mClock = new TestClock();
 	mClock->setTime(QDateTime::currentDateTime());

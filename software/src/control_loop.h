@@ -61,6 +61,8 @@ private:
 
 	void setHub4State(Hub4State state);
 
+	static const char *getStateName(int state);
+
 	Multi *mMulti;
 	AcSensor *mAcSensor;
 	Settings *mSettings;
