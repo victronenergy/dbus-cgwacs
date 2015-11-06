@@ -52,6 +52,7 @@ void pltExit(int ret)
 int main(int argc, char *argv[])
 {
 	QCoreApplication app(argc, argv);
+	app.setApplicationVersion(VERSION);
 
 	initLogger(QsLogging::InfoLevel);
 

@@ -8,7 +8,6 @@
 #include "ac_sensor_settings.h"
 #include "power_info.h"
 #include "settings.h"
-#include "version.h"
 
 AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 							   Settings *settings, bool isSecundary,
@@ -46,7 +45,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 	// The values of the items below will not change after creation, so we don't
 	// need an update mechanism.
 	produce("/Mgmt/ProcessName", processName);
-	produce("/Mgmt/ProcessVersion", VERSION);
+	produce("/Mgmt/ProcessVersion", QCoreApplication::applicationVersion());
 	produce("/FirmwareVersion", acSensor->firmwareVersion());
 	produce("/ProductName", acSensor->productName());
 	produce("/ProductId", VE_PROD_ID_CARLO_GAVAZZI_EM);
