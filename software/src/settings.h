@@ -79,7 +79,7 @@ public:
 
 	void registerDevice(const QString &serial);
 
-	int getDeviceInstance(const QString &serviceType, const QString &serial) const;
+	int getDeviceInstance(const QString &serial, bool isSecundary) const;
 
 signals:
 	void deviceIdsChanged();

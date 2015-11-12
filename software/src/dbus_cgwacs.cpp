@@ -76,6 +76,10 @@ void DBusCGwacs::onDeviceFound()
 			this, SLOT(onHub4ModeChanged()));
 	connect(settings, SIGNAL(serviceTypeChanged()),
 			this, SLOT(onServiceTypeChanged()));
+	connect(settings, SIGNAL(deviceInstanceChanged()),
+			this, SLOT(onServiceTypeChanged()));
+	connect(settings, SIGNAL(l2DeviceInstanceChanged()),
+			this, SLOT(onServiceTypeChanged()));
 	connect(settings, SIGNAL(isMultiPhaseChanged()),
 			this, SLOT(onMultiPhaseChanged()));
 	connect(settings, SIGNAL(l2ServiceTypeChanged()),
@@ -91,6 +95,10 @@ void DBusCGwacs::onDeviceSettingsInitialized()
 {
 	AcSensorSettingsBridge *b = static_cast<AcSensorSettingsBridge *>(sender());
 	AcSensorSettings *s = static_cast<AcSensorSettings *>(b->parent());
+	if (s->deviceInstance() == -1)
+		s->setDeviceInstance(mSettings->getDeviceInstance(s->serial(), false));
+	if (s->l2DeviceInstance() == -1)
+		s->setL2DeviceInstance(mSettings->getDeviceInstance(s->serial(), true));
 	AcSensor *m = static_cast<AcSensor *>(s->parent());
 	AcSensorUpdater *mu = m->findChild<AcSensorUpdater *>();
 	mu->startMeasurements();
@@ -102,13 +110,12 @@ void DBusCGwacs::onDeviceInitialized()
 	AcSensor *m = static_cast<AcSensor *>(sender());
 	AcSensorUpdater *mu = m->findChild<AcSensorUpdater *>();
 	AcSensorSettings *sensorSettings = mu->settings();
-	AcSensorBridge *bridge = new AcSensorBridge(m, sensorSettings, mSettings,
-												false, m);
+	AcSensorBridge *bridge = new AcSensorBridge(m, sensorSettings, false, m);
 	if (sensorSettings->serviceType() == "grid")
 		new Hub4ControlBridge(mSettings, bridge);
 	if (!sensorSettings->l2ServiceType().isEmpty()) {
 		AcSensor *pvSensor = mu->pvSensor();
-		new AcSensorBridge(pvSensor, sensorSettings, mSettings, true, pvSensor);
+		new AcSensorBridge(pvSensor, sensorSettings, true, pvSensor);
 	}
 	updateControlLoop();
 }
@@ -131,13 +138,11 @@ void DBusCGwacs::onServiceTypeChanged()
 	// Just in case pvInverterOnPhase2 was set, in which case we have to bridge
 	// objects.
 	delete pvSensor->findChild<AcSensorBridge *>();
-	bridge = new AcSensorBridge(acSensor, sensorSettings,
-								mSettings, false, acSensor);
+	bridge = new AcSensorBridge(acSensor, sensorSettings, false, acSensor);
 	if (sensorSettings->serviceType() == "grid")
 		new Hub4ControlBridge(mSettings, bridge);
-	if (!sensorSettings->l2ServiceType().isEmpty()) {
-		new AcSensorBridge(pvSensor, sensorSettings, mSettings, true, pvSensor);
-	}
+	if (!sensorSettings->l2ServiceType().isEmpty())
+		new AcSensorBridge(pvSensor, sensorSettings, true, pvSensor);
 	updateControlLoop();
 }
 

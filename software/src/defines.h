@@ -37,9 +37,7 @@ const double NaN = qQNaN();
 /// This value is used to indicate that the correct device instance has not
 /// been set yet.
 const int InvalidDeviceInstance = -1;
-const int MinDeviceInstance = 32;
+const int MinDeviceInstance = 30;
 const int MaxDeviceInstance = 39;
-const int GridDeviceInstance = 30;
-const int GensetDeviceInstance = 31;
 
 #endif // DEFINES_H

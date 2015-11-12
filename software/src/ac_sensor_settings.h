@@ -27,6 +27,7 @@ class AcSensorSettings : public QObject
 	Q_PROPERTY(bool isMultiPhase READ isMultiPhase WRITE setIsMultiPhase NOTIFY isMultiPhaseChanged)
 	Q_PROPERTY(Hub4Mode hub4Mode READ hub4Mode WRITE setHub4Mode NOTIFY hub4ModeChanged)
 	Q_PROPERTY(Position position READ position WRITE setPosition NOTIFY positionChanged)
+	Q_PROPERTY(int deviceInstance READ deviceInstance WRITE setDeviceInstance NOTIFY deviceInstanceChanged)
 	Q_PROPERTY(double l1ReverseEnergy READ l1ReverseEnergy WRITE setL1ReverseEnergy NOTIFY l1ReverseEnergyChanged)
 	Q_PROPERTY(double l2ReverseEnergy READ l2ReverseEnergy WRITE setL2ReverseEnergy NOTIFY l2ReverseEnergyChanged)
 	Q_PROPERTY(double l3ReverseEnergy READ l3ReverseEnergy WRITE setL3ReverseEnergy NOTIFY l3ReverseEnergyChanged)
@@ -36,6 +37,7 @@ class AcSensorSettings : public QObject
 	Q_PROPERTY(QString l2ProductName READ l2ProductName NOTIFY l2ProductNameChanged)
 	Q_PROPERTY(QString l2ServiceType READ l2ServiceType WRITE setL2ServiceType NOTIFY l2ServiceTypeChanged)
 	Q_PROPERTY(Position l2Position READ l2Position WRITE setL2Position NOTIFY l2PositionChanged)
+	Q_PROPERTY(int l2DeviceInstance READ l2DeviceInstance WRITE setL2DeviceInstance NOTIFY l2DeviceInstanceChanged)
 public:
 	AcSensorSettings(int deviceType, const QString &serial, QObject *parent = 0);
 
@@ -101,6 +103,14 @@ public:
 
 	void setPosition(Position p);
 
+	int deviceInstance() const;
+
+	void setDeviceInstance(int d);
+
+	int l2DeviceInstance() const;
+
+	void setL2DeviceInstance(int d);
+
 	double l1ReverseEnergy() const;
 
 	void setL1ReverseEnergy(double e);
@@ -132,6 +142,8 @@ signals:
 
 	void positionChanged();
 
+	void deviceInstanceChanged();
+
 	void l1ReverseEnergyChanged();
 
 	void l2ReverseEnergyChanged();
@@ -148,6 +160,8 @@ signals:
 
 	void l2PositionChanged();
 
+	void l2DeviceInstanceChanged();
+
 private:
 	static QString getProductName(const QString &serviceType, Position position);
 
@@ -158,6 +172,7 @@ private:
 	bool mIsMultiPhase;
 	Hub4Mode mHub4Mode;
 	Position mPosition;
+	int mDeviceInstance;
 	double mL1Energy;
 	double mL2Energy;
 	double mL3Energy;
@@ -165,6 +180,7 @@ private:
 	QString mL2CustomName;
 	QString mL2ServiceType;
 	Position mL2Position;
+	int mL2DeviceInstance;
 };
 
 #endif // AC_SENSOR_SETTINGS_H

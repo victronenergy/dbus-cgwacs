@@ -10,8 +10,7 @@
 #include "settings.h"
 
 AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
-							   Settings *settings, bool isSecundary,
-							   QObject *parent) :
+							   bool isSecundary, QObject *parent) :
 	DBusBridge(parent),
 	mAcSensor(acSensor)
 {
@@ -24,11 +23,20 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 	QString serviceType = isSecundary ?
 		emSettings->l2ServiceType() :
 		emSettings->serviceType();
-	setServiceName(QString("com.victronenergy.%1.%2").
+	QString portId = acSensor->portName().
+			replace("/dev/", "").
+			replace("/", "_");
+	int deviceInstance = isSecundary ?
+		emSettings->l2DeviceInstance() :
+		emSettings->deviceInstance();
+	QString serviceName = QString("com.victronenergy.%1.cgwacs_%2_di%3_mb%4").
 			arg(serviceType).
-			arg(acSensor->portName().
-				replace("/dev/", "").
-				replace("/", "_")));
+			arg(portId).
+			arg(deviceInstance).
+			arg(acSensor->slaveAddress());
+	if (isSecundary)
+		serviceName += "_l2";
+	setServiceName(serviceName);
 
 	produce(acSensor, "connectionState", "/Connected");
 	produce(acSensor, "errorCode", "/ErrorCode");
@@ -51,8 +59,6 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 	produce("/ProductId", VE_PROD_ID_CARLO_GAVAZZI_EM);
 	produce("/DeviceType", acSensor->deviceType());
 	produce("/Mgmt/Connection", acSensor->portName());
-	int deviceInstance = settings->getDeviceInstance(serviceType,
-													 acSensor->serial());
 	produce("/DeviceInstance", deviceInstance);
 	produce("/Serial", acSensor->serial());
 

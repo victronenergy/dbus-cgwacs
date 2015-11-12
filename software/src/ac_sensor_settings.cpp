@@ -9,10 +9,12 @@ AcSensorSettings::AcSensorSettings(int deviceType, const QString &serial,
 	mIsMultiPhase(false),
 	mHub4Mode(Hub4PhaseL1),
 	mPosition(Input1),
+	mDeviceInstance(-1),
 	mL1Energy(0),
 	mL2Energy(0),
 	mL3Energy(0),
-	mL2Position(Input1)
+	mL2Position(Input1),
+	mL2DeviceInstance(-1)
 {
 }
 
@@ -182,6 +184,34 @@ void AcSensorSettings::setPosition(Position p)
 	emit productNameChanged();
 	if (mCustomName.isEmpty())
 		emit effectiveCustomNameChanged();
+}
+
+int AcSensorSettings::deviceInstance() const
+{
+	return mDeviceInstance;
+}
+
+void AcSensorSettings::setDeviceInstance(int d)
+{
+	qDebug() << __FUNCTION__ << d << mSerial;
+	if (mDeviceInstance == d)
+		return;
+	mDeviceInstance = d;
+	emit deviceInstanceChanged();
+}
+
+int AcSensorSettings::l2DeviceInstance() const
+{
+	return mL2DeviceInstance;
+}
+
+void AcSensorSettings::setL2DeviceInstance(int d)
+{
+	qDebug() << __FUNCTION__ << d << mSerial;
+	if (mL2DeviceInstance == d)
+		return;
+	mL2DeviceInstance = d;
+	emit l2DeviceInstanceChanged();
 }
 
 double AcSensorSettings::l1ReverseEnergy() const

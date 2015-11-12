@@ -20,7 +20,6 @@ class AcSensorBridge : public DBusBridge
 public:
 	AcSensorBridge(AcSensor *acSensor,
 				   AcSensorSettings *emSettings,
-				   Settings *settings,
 				   bool isSecundary,
 				   QObject *parent = 0);
 

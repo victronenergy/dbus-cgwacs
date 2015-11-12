@@ -26,6 +26,8 @@ AcSensorSettingsBridge::AcSensorSettingsBridge(
 			path + "/Hub4Mode");
 	consume(Service, settings, "position", QVariant(0),
 			path + "/Position");
+	consume(Service, settings, "deviceInstance", QVariant(-1),
+			path + "/DeviceInstance");
 	consume(Service, settings, "l1ReverseEnergy", 0.0, 0.0, 1e6,
 			path + "/L1ReverseEnergy");
 	consume(Service, settings, "l2ReverseEnergy", 0.0, 0.0, 1e6,
@@ -39,6 +41,8 @@ AcSensorSettingsBridge::AcSensorSettingsBridge(
 			path + "/L2/ServiceType");
 	consume(Service, settings, "l2Position", QVariant(0),
 			path + "/L2/Position");
+	consume(Service, settings, "l2DeviceInstance", QVariant(-1),
+			path + "/L2/DeviceInstance");
 }
 
 bool AcSensorSettingsBridge::toDBus(const QString &path, QVariant &v)

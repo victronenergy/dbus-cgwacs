@@ -112,14 +112,10 @@ void Settings::registerDevice(const QString &serial)
 	emit deviceIdsChanged();
 }
 
-int Settings::getDeviceInstance(const QString &serviceType, const QString &serial) const
+int Settings::getDeviceInstance(const QString &serial, bool isSecundary) const
 {
-	if (serviceType == "grid")
-		return GridDeviceInstance;
-	if (serviceType == "genset")
-		return GensetDeviceInstance;
 	int i = mDeviceIds.indexOf(serial);
 	if (i == -1)
 		return InvalidDeviceInstance;
-	return MinDeviceInstance + i % (MaxDeviceInstance - MinDeviceInstance + 1);
+	return MinDeviceInstance + (2 * i + (isSecundary ? 1 : 0)) % (MaxDeviceInstance - MinDeviceInstance + 1);
 }
