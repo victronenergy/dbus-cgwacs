@@ -37,6 +37,24 @@ void AcSensorSettings::setCustomName(const QString &n)
 		return;
 	mCustomName	= n;
 	emit customNameChanged();
+	emit effectiveCustomNameChanged();
+}
+
+QString AcSensorSettings::productName() const
+{
+	return getProductName(mServiceType, mPosition);
+}
+
+QString AcSensorSettings::effectiveCustomName() const
+{
+	if (!mCustomName.isEmpty())
+		return mCustomName;
+	return productName();
+}
+
+void AcSensorSettings::setEffectiveCustomName(const QString &n)
+{
+	setCustomName(n == productName() ? QString() : n);
 }
 
 QString AcSensorSettings::serviceType() const
@@ -52,6 +70,9 @@ void AcSensorSettings::setServiceType(const QString &t)
 	if (t != "grid")
 		setL2ServiceType(QString());
 	emit serviceTypeChanged();
+	emit productNameChanged();
+	if (mCustomName.isEmpty())
+		emit effectiveCustomNameChanged();
 }
 
 bool AcSensorSettings::isMultiPhase() const
@@ -80,6 +101,24 @@ void AcSensorSettings::setL2CustomName(const QString &v)
 		return;
 	mL2CustomName = v;
 	emit l2CustomNameChanged();
+	emit l2EffectiveCustomNameChanged();
+}
+
+QString AcSensorSettings::l2ProductName() const
+{
+	return getProductName(mL2ServiceType, mL2Position);
+}
+
+QString AcSensorSettings::l2EffectiveCustomName() const
+{
+	if (!mL2CustomName.isEmpty())
+		return mL2CustomName;
+	return l2ProductName();
+}
+
+void AcSensorSettings::setL2EffectiveCustomName(const QString &n)
+{
+	setL2CustomName(n == l2ProductName() ? QString() : n);
 }
 
 QString AcSensorSettings::l2ServiceType() const
@@ -95,6 +134,9 @@ void AcSensorSettings::setL2ServiceType(const QString &v)
 	if (!v.isEmpty())
 		setIsMultiPhase(false);
 	emit l2ServiceTypeChanged();
+	emit l2ProductNameChanged();
+	if (mL2CustomName.isEmpty())
+		emit l2EffectiveCustomNameChanged();
 }
 
 Position AcSensorSettings::l2Position() const
@@ -108,6 +150,9 @@ void AcSensorSettings::setL2Position(Position v)
 		return;
 	mL2Position = v;
 	emit l2PositionChanged();
+	emit l2ProductNameChanged();
+	if (mL2CustomName.isEmpty())
+		emit l2EffectiveCustomNameChanged();
 }
 
 Hub4Mode AcSensorSettings::hub4Mode() const
@@ -134,6 +179,9 @@ void AcSensorSettings::setPosition(Position p)
 		return;
 	mPosition = p;
 	emit positionChanged();
+	emit productNameChanged();
+	if (mCustomName.isEmpty())
+		emit effectiveCustomNameChanged();
 }
 
 double AcSensorSettings::l1ReverseEnergy() const
@@ -206,4 +254,33 @@ void AcSensorSettings::setReverseEnergy(Phase phase, double value)
 		QLOG_ERROR() << "Incorrect phase:" << phase;
 		break;
 	}
+}
+
+QString AcSensorSettings::getProductName(const QString &serviceType, Position position)
+{
+	if (serviceType == "grid")
+		return "Grid meter";
+	if (serviceType == "genset")
+		return "Generator";
+	if (serviceType == "pvinverter") {
+		QString productName = "PV inverter";
+		QString p;
+		switch (position) {
+		case Input1:
+			p = "input 1";
+			break;
+		case Input2:
+			p = "input 2";
+			break;
+		case Output:
+			p = "output";
+			break;
+		default:
+			break;
+		}
+		if (!p.isEmpty())
+			productName.append(" on ").append(p);
+		return productName;
+	}
+	return "AC sensor";
 }

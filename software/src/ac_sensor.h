@@ -26,7 +26,6 @@ class AcSensor : public QObject
 	Q_PROPERTY(ConnectionState connectionState READ connectionState WRITE setConnectionState NOTIFY connectionStateChanged)
 	Q_PROPERTY(int deviceType READ deviceType WRITE setDeviceType NOTIFY deviceTypeChanged)
 	Q_PROPERTY(int deviceSubType READ deviceSubType WRITE setDeviceSubType NOTIFY deviceSubTypeChanged)
-	Q_PROPERTY(QString productName READ productName)
 	Q_PROPERTY(QString serial READ serial WRITE setSerial NOTIFY serialChanged)
 	Q_PROPERTY(int firmwareVersion READ firmwareVersion WRITE setFirmwareVersion NOTIFY firmwareVersionChanged)
 	Q_PROPERTY(int errorCode READ errorCode WRITE setErrorCode NOTIFY errorCodeChanged)
@@ -64,14 +63,6 @@ public:
 	 * The return value is based on the value of `deviceType`.
 	 */
 	ProtocolTypes protocolType() const;
-
-	/*!
-	 * Returns the full official producet name of the energy meter.
-	 * For example: EM24=DIN.AV9.3.X.IS.X.
-	 * The return value is based on the value of `deviceType` and
-	 * `subDeviceType`.
-	 */
-	QString productName() const;
 
 	/*!
 	 * Returned the serial number of the energy meter.

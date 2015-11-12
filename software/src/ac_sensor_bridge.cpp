@@ -39,7 +39,8 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 	producePowerInfo(acSensor->l3PowerInfo(), "/Ac/L3");
 
 	produce(emSettings, isSecundary ? "l2Position" : "position", "/Position");
-	produce(emSettings, isSecundary ? "l2CustomName" : "customName", "/CustomName");
+	produce(emSettings, isSecundary ? "l2ProductName" : "productName", "/ProductName");
+	produce(emSettings, isSecundary ? "l2EffectiveCustomName" : "effectiveCustomName", "/CustomName");
 
 	QString processName = QCoreApplication::arguments()[0];
 	// The values of the items below will not change after creation, so we don't
@@ -47,7 +48,6 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 	produce("/Mgmt/ProcessName", processName);
 	produce("/Mgmt/ProcessVersion", QCoreApplication::applicationVersion());
 	produce("/FirmwareVersion", acSensor->firmwareVersion());
-	produce("/ProductName", acSensor->productName());
 	produce("/ProductId", VE_PROD_ID_CARLO_GAVAZZI_EM);
 	produce("/DeviceType", acSensor->deviceType());
 	produce("/Mgmt/Connection", acSensor->portName());
@@ -65,10 +65,6 @@ bool AcSensorBridge::toDBus(const QString &path, QVariant &value)
 		value = QVariant(value.value<ConnectionState>() == Connected ? 1 : 0);
 	} else if (path == "/Position") {
 		value = QVariant(static_cast<int>(value.value<Position>()));
-	} else if (path == "/CustomName") {
-		QString name = value.toString();
-		if (name.isEmpty())
-			value = mAcSensor->productName();
 	}
 	if (value.type() == QVariant::Double && !std::isfinite(value.toDouble()))
 		value = QVariant();
@@ -77,12 +73,9 @@ bool AcSensorBridge::toDBus(const QString &path, QVariant &value)
 
 bool AcSensorBridge::fromDBus(const QString &path, QVariant &value)
 {
-	if (path == "/CustomName") {
-		QString name = value.toString();
-		if (name == mAcSensor->productName())
-			value = "";
+	Q_UNUSED(value)
+	if (path == "/CustomName")
 		return true;
-	}
 	return false;
 }
 
