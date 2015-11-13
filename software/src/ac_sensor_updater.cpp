@@ -280,6 +280,14 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr,
 		// Some grid meters (ET112, ET340) add zero values in the MSB's of the
 		// registers. Others (EM24) add zero padding at the end.
 		serial.remove(QChar(0));
+		// Sometimes the serial reported contains this first character of the
+		// serial number only. If that happens we simulate a timeout to the
+		// detection process will be reset or aborted.
+		if (serial.size() < 2) {
+			QLOG_WARN() << "Incorrect serial reported:" << serial;
+			onErrorReceived(ModbusRtu::Timeout, mAcPvSensor->slaveAddress(), 0);
+			return;
+		}
 		mAcSensor->setSerial(serial);
 		mAcPvSensor->setSerial(serial);
 		mState = FirmwareVersion;
