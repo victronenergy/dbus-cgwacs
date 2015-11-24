@@ -82,13 +82,16 @@ void ControlLoop::performStep()
 {
 	// pMultiNew < 0: battery is discharging
 	// pMultiNew > 0: battery is charging
+	const double MaxMultiPower = 32700;
+	const double MinMultiPower = -MaxMultiPower;
 	double pMultiNew = 0;
 	double maxChargePct = qMax(0.0, qMin(100.0, mSettings->maxChargePercentage()));
 	double maxDischargePct = qMax(0.0, qMin(100.0, mSettings->maxDischargePercentage()));
-	double maxPower =
+	double maxPower = maxChargePct <= 99 ?
 			maxChargePct *
 			mMulti->maxChargeCurrent() *
-			mMulti->dcVoltage() / 100;
+			mMulti->dcVoltage() / 100:
+			MaxMultiPower;
 
 	if (mSettings->maintenanceInterval() == 0) {
 		setHub4State(Hub4External);
@@ -146,7 +149,7 @@ void ControlLoop::performStep()
 	// discharging.
 	bool chargeDisabled = maxChargePct <= 0 &&
 						  (feedbackDisabled || pMultiNew > 30);
-	pMultiNew = qMin(maxPower, pMultiNew);
+	pMultiNew = qBound(MinMultiPower, pMultiNew, maxPower);
 
 	// Ugly workaround: the value of pMultiNew must always be sent over the
 	// D-Bus, even when it does not change, because the multi will reset its
@@ -162,6 +165,11 @@ void ControlLoop::performStep()
 	// 'charge only', it will not start inverting so the system on AC-In and
 	// AC-Out will lose power.
 	// mMulti->setMode(feedbackDisabled ? MultiChargerOnly : MultiOn);
+	QLOG_TRACE() << mAcSensor->getPowerInfo(mPhase)->power()
+				 << '\t' << mMulti->getPhaseData(mPhase)->acPowerIn()
+				 << '\t' << pMultiNew
+				 << '\t' << chargeDisabled
+				 << '\t' << feedbackDisabled;
 	if (std::isfinite(pMultiNew))
 		mMulti->setAcPowerSetPoint(pMultiNew);
 }

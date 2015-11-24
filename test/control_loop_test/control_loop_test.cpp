@@ -70,13 +70,13 @@ TEST_F(ControlLoopTest, autoChargeLoop)
 	triggerUpdate();
 	EXPECT_EQ(mSettings->state(), Hub4ChargeFromGrid);
 	triggerUpdate();
-	EXPECT_NEAR(mMulti->acPowerSetPoint(), 12 * 90, 1);
+	EXPECT_GE(mMulti->acPowerSetPoint(), 12 * 90);
 	mClock->addDays(1);
 	mClock->setHours(1);
 	triggerUpdate();
 	EXPECT_EQ(mSettings->state(), Hub4ChargeFromGrid);
 	triggerUpdate();
-	EXPECT_NEAR(mMulti->acPowerSetPoint(), 12 * 90, 1);
+	EXPECT_GE(mMulti->acPowerSetPoint(), 12 * 90);
 	mMulti->setState(MultiStateFloat);
 	// mMulti->setStateOfCharge(100);
 	triggerUpdate();
@@ -202,7 +202,7 @@ TEST_F(ControlLoopTest, adjustInterval)
 	EXPECT_EQ(mSettings->state(), Hub4ChargeFromGrid);
 	triggerUpdate();
 	EXPECT_EQ(mSettings->state(), Hub4ChargeFromGrid);
-	EXPECT_NEAR(mMulti->acPowerSetPoint(), 12 * 90, 1);
+	EXPECT_GE(mMulti->acPowerSetPoint(), 12 * 90);
 }
 
 TEST_F(ControlLoopTest, restartChargeFromGrid)
@@ -213,7 +213,7 @@ TEST_F(ControlLoopTest, restartChargeFromGrid)
 	mSettings->setState(Hub4ChargeFromGrid);
 	triggerUpdate();
 	EXPECT_EQ(mSettings->state(), Hub4ChargeFromGrid);
-	EXPECT_NEAR(mMulti->acPowerSetPoint(), 12 * 90, 1);
+	EXPECT_GE(mMulti->acPowerSetPoint(), 12 * 90);
 	mMulti->setState(MultiStateFloat);
 	// mMulti->setStateOfCharge(100);
 	// Check if we return to self consumption are charge has been completed.
@@ -230,7 +230,7 @@ TEST_F(ControlLoopTest, restartStorageFromGrid)
 	mSettings->setState(Hub4Storage);
 	triggerUpdate();
 	EXPECT_EQ(md, mSettings->maintenanceDate());
-	EXPECT_NEAR(mMulti->acPowerSetPoint(), 12 * 90, 1);
+	EXPECT_GE(mMulti->acPowerSetPoint(), 12 * 90);
 	EXPECT_EQ(mSettings->state(), Hub4Storage);
 	mMulti->setState(MultiStateFloat);
 	// mMulti->setStateOfCharge(100);
