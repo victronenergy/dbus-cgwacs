@@ -193,7 +193,6 @@ int AcSensorSettings::deviceInstance() const
 
 void AcSensorSettings::setDeviceInstance(int d)
 {
-	qDebug() << __FUNCTION__ << d << mSerial;
 	if (mDeviceInstance == d)
 		return;
 	mDeviceInstance = d;
@@ -207,7 +206,6 @@ int AcSensorSettings::l2DeviceInstance() const
 
 void AcSensorSettings::setL2DeviceInstance(int d)
 {
-	qDebug() << __FUNCTION__ << d << mSerial;
 	if (mL2DeviceInstance == d)
 		return;
 	mL2DeviceInstance = d;
