@@ -80,13 +80,13 @@ void ControlLoop::checkStep()
 
 void ControlLoop::performStep()
 {
-	// pMultiNew > 0: battery is discharging
-	// pMultiNew < 0: battery is charging
+	// pMultiNew < 0: battery is discharging
+	// pMultiNew > 0: battery is charging
 	double pMultiNew = 0;
 	double maxChargePct = qMax(0.0, qMin(100.0, mSettings->maxChargePercentage()));
 	double maxDischargePct = qMax(0.0, qMin(100.0, mSettings->maxDischargePercentage()));
-	double minPower =
-			-maxChargePct *
+	double maxPower =
+			maxChargePct *
 			mMulti->maxChargeCurrent() *
 			mMulti->dcVoltage() / 100;
 
@@ -127,14 +127,14 @@ void ControlLoop::performStep()
 		pMultiNew = computeSetpoint();
 		break;
 	case Hub4ChargeFromGrid:
-		pMultiNew = minPower;
+		pMultiNew = maxPower;
 		if (isMultiCharged()) {
 			setHub4State(Hub4SelfConsumption);
 			updateMaintenanceDate();
 		}
 		break;
 	case Hub4Storage:
-		pMultiNew = minPower;
+		pMultiNew = maxPower;
 		if (isMultiCharged())
 			mSettings->setMaintenanceDate(QDateTime());
 		break;
@@ -145,15 +145,15 @@ void ControlLoop::performStep()
 	// and discharge. So we're only setting the flags when we are not
 	// discharging.
 	bool chargeDisabled = maxChargePct <= 0 &&
-						  (feedbackDisabled || pMultiNew < -30);
-	pMultiNew = qMax(minPower, pMultiNew);
+						  (feedbackDisabled || pMultiNew > 30);
+	pMultiNew = qMin(maxPower, pMultiNew);
 
 	// Ugly workaround: the value of pMultiNew must always be sent over the
 	// D-Bus, even when it does not change, because the multi will reset its
 	// power setpoint if no value has been set during the last 10 seconds.
 	// So we add a random value to ensure pMultiNew changes. Other solution
 	// would involve changes in velib (VBusItem and friends).
-	pMultiNew += qrand() / (100.0 * RAND_MAX);
+	pMultiNew -= qrand() / (10.0 * RAND_MAX);
 
 	mMulti->setIsChargeDisabled(chargeDisabled);
 	mMulti->setIsFeedbackDisabled(feedbackDisabled);
@@ -163,24 +163,22 @@ void ControlLoop::performStep()
 	// AC-Out will lose power.
 	// mMulti->setMode(feedbackDisabled ? MultiChargerOnly : MultiOn);
 	if (std::isfinite(pMultiNew))
-		mMulti->setAcPowerSetPoint(-pMultiNew);
+		mMulti->setAcPowerSetPoint(pMultiNew);
 }
 
 double ControlLoop::computeSetpoint() const
 {
 	PowerInfo *pi = mAcSensor->getPowerInfo(mPhase);
 	double pNet = pi->power();
-	MultiPhaseData *mpd = mMulti->getPhaseData(mPhase);
-	double pMulti = -mpd->acPowerIn();
-	double pLoad = pNet + pMulti - mSettings->acPowerSetPoint();
 	if (!std::isfinite(pNet))
 		return NaN;
+	MultiPhaseData *mpd = mMulti->getPhaseData(mPhase);
+	double pMulti = mpd->acPowerIn();
+	double pTarget = mSettings->acPowerSetPoint();
 	// EV: EM340 seems to work better with Alpha = 0.6. Possibly due to lower
 	// update rate.
 	const double Alpha = 0.8;
-	double pMultiNew = Alpha * pLoad + (1 - Alpha) * pMulti;
-	QLOG_TRACE() << pNet << '\t' << pLoad << '\t' << pMulti << '\t' << pMultiNew;
-	return pMultiNew;
+	return pMulti + Alpha * (pTarget - pNet);
 }
 
 bool ControlLoop::isMultiCharged() const
