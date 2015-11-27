@@ -62,6 +62,10 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 	produce("/DeviceInstance", deviceInstance);
 	produce("/Serial", acSensor->serial());
 
+	// Changes in QT properties will not be propagated to the D-Bus at once, but
+	// in 2500ms invervals.
+	setUpdateInterval(2500);
+
 	registerService();
 }
 
