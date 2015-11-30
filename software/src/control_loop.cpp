@@ -147,9 +147,12 @@ void ControlLoop::performStep()
 	// It seems that enabling the the ChargeDisabled flag disables both charge
 	// and discharge. So we're only setting the flags when we are not
 	// discharging.
-	bool chargeDisabled = maxChargePct <= 0 &&
-						  (feedbackDisabled || pMultiNew > 30);
-	pMultiNew = qBound(MinMultiPower, pMultiNew, maxPower);
+	bool chargeDisabled = maxChargePct <= 0 && (
+		feedbackDisabled || (
+			std::isfinite(pMultiNew) &&
+			pMultiNew > 30));
+	if (std::isfinite(pMultiNew))
+		pMultiNew = qBound(MinMultiPower, pMultiNew, maxPower);
 
 	// Ugly workaround: the value of pMultiNew must always be sent over the
 	// D-Bus, even when it does not change, because the multi will reset its
