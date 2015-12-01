@@ -43,9 +43,11 @@ class Multi : public QObject
 {
 	Q_OBJECT
 	Q_PROPERTY(double dcVoltage READ dcVoltage WRITE setDcVoltage NOTIFY dcVoltageChanged)
+	Q_PROPERTY(double dcCurrent READ dcCurrent WRITE setDcCurrent NOTIFY dcCurrentChanged)
 	Q_PROPERTY(double maxChargeCurrent READ maxChargeCurrent WRITE setMaxChargeCurrent NOTIFY maxChargeCurrentChanged)
 	Q_PROPERTY(bool isChargeDisabled READ isChargeDisabled WRITE setIsChargeDisabled NOTIFY isChargeDisabledChanged)
 	Q_PROPERTY(bool isFeedbackDisabled READ isFeedbackDisabled WRITE setIsFeedbackDisabled NOTIFY isFeedbackDisabledChanged)
+	Q_PROPERTY(bool isSustainActive READ isSustainActive WRITE setIsSustainActive NOTIFY isSustainActiveChanged)
 	Q_PROPERTY(MultiMode mode READ mode WRITE setMode NOTIFY modeChanged)
 	Q_PROPERTY(MultiState state READ state WRITE setState NOTIFY stateChanged)
 	Q_PROPERTY(int firmwareVersion READ firmwareVersion WRITE setFirmwareVersion NOTIFY firmwareVersionChanged)
@@ -55,6 +57,10 @@ public:
 	double dcVoltage() const;
 
 	void setDcVoltage(double v);
+
+	double dcCurrent() const;
+
+	void setDcCurrent(double c);
 
 	double maxChargeCurrent() const;
 
@@ -80,6 +86,10 @@ public:
 
 	QList<Phase> getSetpointPhases() const;
 
+	bool isSustainActive() const;
+
+	void setIsSustainActive(bool s);
+
 	int firmwareVersion() const;
 
 	void setFirmwareVersion(int v);
@@ -97,6 +107,8 @@ public:
 signals:
 	void dcVoltageChanged();
 
+	void dcCurrentChanged();
+
 	void maxChargeCurrentChanged();
 
 	void modeChanged();
@@ -107,6 +119,8 @@ signals:
 
 	void isFeedbackDisabledChanged();
 
+	void isSustainActiveChanged();
+
 	void firmwareVersionChanged();
 
 private:
@@ -115,11 +129,13 @@ private:
 	MultiPhaseData *mL2Data;
 	MultiPhaseData *mL3Data;
 	double mDcVoltage;
+	double mDcCurrent;
 	double mMaxChargeCurrent;
 	bool mChargeDisabled;
 	bool mFeedbackDisabled;
 	MultiMode mMode;
 	MultiState mState;
+	bool mSustainActive;
 	int mFirmwareVersion;
 };
 

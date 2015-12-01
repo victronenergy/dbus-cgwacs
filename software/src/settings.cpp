@@ -1,3 +1,4 @@
+#include <QsLog.h>
 #include "defines.h"
 #include "settings.h"
 
@@ -6,12 +7,14 @@ Settings::Settings(QObject *parent) :
 	mAcPowerSetPoint(0),
 	mMaxChargePercentage(100),
 	mMaxDischargePercentage(100),
-	mState(Hub4SelfConsumption),
-	mMaintenanceInterval(7)
+	mState(BatteryLifeStateDisabled),
+	mFlags(0),
+	mSocLimit(SocSwitchDefaultMin),
+	mMinSocLimit(SocSwitchDefaultMin)
 {
 }
 
-const QStringList &Settings::deviceIds() const
+QStringList Settings::deviceIds() const
 {
 	return mDeviceIds;
 }
@@ -65,25 +68,12 @@ void Settings::setMaxDischargePercentage(double p)
 	emit maxDischargePercentageChanged();
 }
 
-int Settings::maintenanceInterval() const
-{
-	return mMaintenanceInterval;
-}
-
-void Settings::setMaintenanceInterval(int v)
-{
-	if (mMaintenanceInterval == v)
-		return;
-	mMaintenanceInterval = v;
-	emit maintenanceIntervalChanged();
-}
-
-int Settings::state() const
+BatteryLifeState Settings::state() const
 {
 	return mState;
 }
 
-void Settings::setState(int v)
+void Settings::setState(BatteryLifeState v)
 {
 	if (mState == v)
 		return;
@@ -91,17 +81,56 @@ void Settings::setState(int v)
 	emit stateChanged();
 }
 
-QDateTime Settings::maintenanceDate() const
+quint8 Settings::flags() const
 {
-	return mMaintenanceDate;
+	return mFlags;
 }
 
-void Settings::setMaintenanceDate(const QDateTime &v)
+void Settings::setFlags(quint8 flags)
 {
-	if (mMaintenanceDate == v)
+	if (mFlags == flags)
 		return;
-	mMaintenanceDate = v;
-	emit maintenanceDateChanged();
+	mFlags = flags;
+	emit flagsChanged();
+}
+
+double Settings::socLimit() const
+{
+	return mSocLimit;
+}
+
+void Settings::setSocLimit(double v)
+{
+	if (mSocLimit == v)
+		return;
+	mSocLimit = v;
+	emit socLimitChanged();
+}
+
+double Settings::minSocLimit() const
+{
+	return mMinSocLimit;
+}
+
+void Settings::setMinSocLimit(double l)
+{
+	if (mMinSocLimit == l)
+		return;
+	mMinSocLimit = l;
+	emit minSocLimitChanged();
+}
+
+QDateTime Settings::dischargedTime() const
+{
+	return mDischargedTime;
+}
+
+void Settings::setDischargedTime(const QDateTime &t)
+{
+	if (mDischargedTime == t)
+		return;
+	mDischargedTime = t;
+	emit dischargedTimeChanged();
 }
 
 void Settings::registerDevice(const QString &serial)

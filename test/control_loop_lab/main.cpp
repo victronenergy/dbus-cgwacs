@@ -2,6 +2,7 @@
 #include <ac_sensor_settings.h>
 #include <battery_info.h>
 #include <dbus_service_monitor.h>
+#include <charge_phase_control.h>
 #include <multi.h>
 #include <multi_phase_data.h>
 #include <phase_compensation_control.h>
@@ -29,16 +30,18 @@ void run_test()
 	double pLoadL1 = 200;
 	double pLoadL2 = -100;
 	double pLoadL3 = 400;
+	multi.setDcVoltage(12);
 	multi.l1Data()->setAcPowerSetPoint(0);
 	multi.l2Data()->setAcPowerSetPoint(0);
 	multi.l3Data()->setAcPowerSetPoint(0);
 	settings.setAcPowerSetPoint(0);
 
-//	SinglePhaseControl controlLoopL1(&multi, &sensor, &settings, PhaseL1, false);
-//	SinglePhaseControl controlLoopL2(&multi, &sensor, &settings, PhaseL2, false);
-//	SinglePhaseControl controlLoopL3(&multi, &sensor, &settings, PhaseL3, false);
+//	SinglePhaseControl controlLoopL1(&multi, &sensor, &settings, PhaseL1, Hub4PhaseSplit);
+//	SinglePhaseControl controlLoopL2(&multi, &sensor, &settings, PhaseL2, Hub4PhaseSplit);
+//	SinglePhaseControl controlLoopL3(&multi, &sensor, &settings, PhaseL3, Hub4PhaseSplit);
 	PhaseCompensationControl controlLoop(&multi, &sensor, &settings);
 	controlLoop.setBatteryInfo(&bi);
+//	ChargePhaseControl controlLoop(&multi, &sensor, &settings, PhaseL1);
 	double pLoad = 0;
 	if (qIsFinite(pLoadL1))
 		pLoad += pLoadL1;
@@ -57,9 +60,9 @@ void run_test()
 		sensor.meanPowerInfo()->setPower(pLoad);
 	}
 	for (int i=0; i<20; ++i) {
-		double pL1 = qRound(multi.l1Data()->acPowerSetPoint());
-		double pL2 = qRound(multi.l2Data()->acPowerSetPoint());
-		double pL3 = qRound(multi.l3Data()->acPowerSetPoint());
+		double pL1 = qRound(0.5 * multi.l1Data()->acPowerIn() + 0.5 * multi.l1Data()->acPowerSetPoint());
+		double pL2 = qRound(0.5 * multi.l2Data()->acPowerIn() + 0.5 * multi.l2Data()->acPowerSetPoint());
+		double pL3 = qRound(0.5 * multi.l3Data()->acPowerIn() + 0.5 * multi.l3Data()->acPowerSetPoint());
 //		pL1 += rnd(-10, 10);
 //		pL2 += rnd(-10, 10);
 //		pL3 += rnd(-10, 10);
@@ -81,7 +84,7 @@ void run_test()
 		}
 		for (int i=0; i<5; ++i)
 			sensor.meanPowerInfo()->setPower(pLoad + pT);
-		QLOG_WARN() << pLoad + pT;
+		// QLOG_WARN() << pLoad + pT;
 		if (qIsFinite(pL1))
 			multi.l1Data()->setAcPowerIn(pL1);
 		if (qIsFinite(pL2))
@@ -89,6 +92,8 @@ void run_test()
 		if (qIsFinite(pL3))
 			multi.l3Data()->setAcPowerIn(pL3);
 		multi.meanData()->setAcPowerIn(pT);
+		multi.setDcCurrent(pT * (pT > 0 ? 0.8 : 1.3) / multi.dcVoltage());
+		// controlLoop.onTimer();
 	}
 }
 

@@ -34,7 +34,7 @@ SOURCES += \
     $$SRCDIR/battery_info.cpp \
     $$SRCDIR/control_loop.cpp \
     $$SRCDIR/dbus_bridge.cpp \
-    $$SRCDIR/maintenance_control.cpp \
+    $$SRCDIR/battery_life.cpp \
     $$SRCDIR/multi.cpp \
     $$SRCDIR/multi_phase_data.cpp \
     $$SRCDIR/power_info.cpp \
@@ -45,7 +45,8 @@ SOURCES += \
     $$SRCDIR/v_bus_node.cpp \
     main.cpp \
     ac_in_power_control_test.cpp \
-    control_loop_test.cpp
+    # control_loop_test.cpp \
+    maintenance_control_test.cpp
 
 HEADERS += \
     $$EXTDIR/velib/src/qt/v_busitem_adaptor.h \
@@ -62,7 +63,7 @@ HEADERS += \
     $$SRCDIR/battery_info.h \
     $$SRCDIR/control_loop.h \
     $$SRCDIR/dbus_bridge.h \
-    $$SRCDIR/maintenance_control.h \
+    $$SRCDIR/battery_life.h \
     $$SRCDIR/multi.h \
     $$SRCDIR/multi_phase_data.h \
     $$SRCDIR/power_info.h \
@@ -72,4 +73,5 @@ HEADERS += \
     $$SRCDIR/multi_phase_control.h \
     $$SRCDIR/v_bus_node.h \
     ac_in_power_control_test.h \
-    control_loop_test.h
+    # control_loop_test.h \
+    maintenance_control_test.h

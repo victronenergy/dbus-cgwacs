@@ -67,4 +67,31 @@ const int MaxDeviceInstance = 39;
 const double MaxMultiPower = 32700;
 const double MinMultiPower = -MaxMultiPower;
 
+// This enum is used to store the state in local settings, so do not change any values here.
+enum BatteryLifeState {
+	BatteryLifeStateDisabled = 0,
+	BatteryLifeStateRestart = 1,
+	BatteryLifeStateDefault = 2,
+	BatteryLifeStateAbsorption = 3,
+	BatteryLifeStateFloat = 4,
+	BatteryLifeStateDischarged = 5,
+	BatteryLifeStateForceCharge = 6
+};
+
+enum BatteryLifeFlags {
+	BatteryLifeFlagFloat = 0x01,
+	BatteryLifeFlagAbsorption = 0x02,
+	BatteryLifeFlagDischarged = 0x04
+};
+
+const double SocSwitchOffset = 5;
+const double SocSwitchIncrement = 5;
+const double SocSwitchDefaultMin = 10;
+const double SocSwitchMax = 80;
+const double ForceChargeCurrent = 5;
+
+const int SocInterval = 15 * 60 * 1000; // 15 minutes
+const int SocIntervalsPerDay = 24 * 60 * 60 * 1000 / SocInterval;
+const int ForceChargeInterval = 24 * 60 * 60 * 1000;
+
 #endif // DEFINES_H

@@ -9,10 +9,12 @@ Multi::Multi(QObject *parent) :
 	mL2Data(new MultiPhaseData(this)),
 	mL3Data(new MultiPhaseData(this)),
 	mDcVoltage(qQNaN()),
+	mDcCurrent(qQNaN()),
 	mMaxChargeCurrent(qQNaN()),
 	mChargeDisabled(false),
 	mFeedbackDisabled(false),
 	mMode(MultiOff),
+	mSustainActive(false),
 	mFirmwareVersion(0)
 {
 }
@@ -28,6 +30,19 @@ void Multi::setDcVoltage(double v)
 		return;
 	mDcVoltage = v;
 	emit dcVoltageChanged();
+}
+
+double Multi::dcCurrent() const
+{
+	return mDcCurrent;
+}
+
+void Multi::setDcCurrent(double c)
+{
+	if (mDcCurrent == c)
+		return;
+	mDcCurrent = c;
+	emit dcCurrentChanged();
 }
 
 double Multi::maxChargeCurrent() const
@@ -115,6 +130,19 @@ QList<Phase> Multi::getSetpointPhases() const
 			phases.append(phase);
 	}
 	return phases;
+}
+
+bool Multi::isSustainActive() const
+{
+	return mSustainActive;
+}
+
+void Multi::setIsSustainActive(bool s)
+{
+	if (mSustainActive == s)
+		return;
+	mSustainActive = s;
+	emit isSustainActiveChanged();
 }
 
 int Multi::firmwareVersion() const

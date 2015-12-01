@@ -52,6 +52,7 @@ SOURCES += \
     $$SRCDIR/battery_info.cpp \
     $$SRCDIR/v_bus_node.cpp \
     $$SRCDIR/dbus_service_monitor.cpp \
+    $$SRCDIR/charge_phase_control.cpp \
     main.cpp
 
 HEADERS += \
@@ -79,4 +80,5 @@ HEADERS += \
     $$SRCDIR/battery_bridge.h \
     $$SRCDIR/battery_info.h \
     $$SRCDIR/v_bus_node.h \
+    $$SRCDIR/charge_phase_control.h \
     $$SRCDIR/dbus_service_monitor.h

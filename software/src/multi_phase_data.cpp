@@ -6,6 +6,7 @@
 MultiPhaseData::MultiPhaseData(QObject *parent) :
 	QObject(parent),
 	mAcPowerIn(qQNaN()),
+	mAcPowerOut(qQNaN()),
 	mAcPowerSetPoint(qQNaN()),
 	mIsSetPointAvailable(false)
 {
@@ -22,6 +23,17 @@ void MultiPhaseData::setAcPowerIn(double o)
 //		return;
 	mAcPowerIn = o;
 	emit acPowerInChanged();
+}
+
+double MultiPhaseData::acPowerOut() const
+{
+	return mAcPowerOut;
+}
+
+void MultiPhaseData::setAcPowerOut(double o)
+{
+	mAcPowerOut = o;
+	emit acPowerOutChanged();
 }
 
 double MultiPhaseData::acPowerSetPoint() const

@@ -11,8 +11,6 @@ Hub4ControlBridge::Hub4ControlBridge(BatteryInfo *batteryInfo, Settings *setting
 	produce(settings, "maxChargePercentage", "/MaxChargePercentage");
 	produce(settings, "maxDischargePercentage", "/MaxDischargePercentage");
 	produce(settings, "state", "/State");
-	produce(settings, "maintenanceInterval", "/Maintenance/Interval");
-	produce(settings, "maintenanceDate", "/Maintenance/Date");
 	produce(batteryInfo, "maxChargePower", "/MaxChargePower", "W", 0);
 	produce(batteryInfo, "maxDischargePower", "/MaxDischargePower", "W", 0);
 	produce("/DeviceInstance", 0);
@@ -22,10 +20,7 @@ Hub4ControlBridge::Hub4ControlBridge(BatteryInfo *batteryInfo, Settings *setting
 bool Hub4ControlBridge::toDBus(const QString &path, QVariant &value)
 {
 	if (path == "/State") {
-		// value = static_cast<int>(value.value<Hub4State>());
-	} else if (path == "/Maintenance/Date") {
-		QDateTime t = value.value<QDateTime>();
-		value = t.isValid() ? t.toTime_t() : 0;
+		value = static_cast<int>(value.value<BatteryLifeState>());
 	}
 	if (value.type() == QVariant::Double && !qIsFinite(value.toDouble()))
 		value = QVariant();
@@ -35,10 +30,9 @@ bool Hub4ControlBridge::toDBus(const QString &path, QVariant &value)
 bool Hub4ControlBridge::fromDBus(const QString &path, QVariant &value)
 {
 	if (path == "/State") {
-		// value = static_cast<Hub4State>(value.toInt());
-	} else if (path == "/Maintenance/Date") {
-		time_t t = value.value<time_t>();
-		value = t == 0 ? QDateTime() : QDateTime::fromTime_t(t);
+		value = static_cast<BatteryLifeState>(value.toInt());
+	} else if (path == "/DeviceInstance") {
+		return false;
 	}
 	return true;
 }

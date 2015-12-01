@@ -12,7 +12,7 @@ class ChargePhaseControl : public ControlLoop
 public:
 	ChargePhaseControl(Multi *multi, AcSensor *acSensor, Settings *settings, QObject *parent = 0);
 
-private slots:
+public slots:
 	void onTimer();
 
 private:

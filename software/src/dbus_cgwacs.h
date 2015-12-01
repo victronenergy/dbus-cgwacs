@@ -10,7 +10,7 @@ class BatteryInfo;
 class ControlLoop;
 class DbusServiceMonitor;
 class Hub4ControlBridge;
-class MaintenanceControl;
+class BatteryLife;
 class ModbusRtu;
 class Multi;
 class Settings;
@@ -48,8 +48,6 @@ private slots:
 
 	void onHub4ModeChanged();
 
-	void onHub4StateChanged();
-
 	void onMultiPhaseChanged();
 
 	void onIsSetPointAvailableChanged();
@@ -63,7 +61,7 @@ private:
 	Settings *mSettings;
 	AcSensorMediator *mAcSensorMediator;
 	Multi *mMulti;
-	MaintenanceControl *mMaintenanceControl;
+	BatteryLife *mMaintenanceControl;
 	ControlLoop *mControlLoop;
 	BatteryInfo *mBatteryInfo;
 	Hub4ControlBridge *mHub4ControlBridge;

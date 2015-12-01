@@ -1,0 +1,32 @@
+digraph {
+    graph [splines=ortho];
+    edge [weight=1, fontsize=10];
+    fully_charged[label="Fully charged", shape="box", style=rounded];
+    charged[label="Charged", shape="box", style=rounded];
+    normal[label="Normal", shape="box", style=rounded];
+    discharged[label="Discharged", shape="box", style=rounded];
+    forcecharge[label="Force charge\n(5A per phase)", shape="box", style=rounded];
+
+    switchon[label="switch_on is always\nswitch_off + 5%", shape="note"];
+
+    incrswitchoff[label="switch_off: switch_off + 5%", shape="box"];
+    incrforcecharge[label="switch_off: switch_off + 5%", shape="box"];
+    incrsustain[label="switch_off: SoC + 5%\n(rounded to closest 5%)", shape="box"];
+    decrswitchoff1[label="switch_off: switch_off - 5%", shape="box"];
+    decrswitchoff2[label="switch_off: switch_off - 5%", shape="box"];
+
+    normal->decrswitchoff1 [xlabel="Absorption,\nFloat or Storage"]
+    decrswitchoff1->charged
+    charged->decrswitchoff2 [xlabel="Float or Storage"]
+    charged->normal [xlabel="Bulk"]
+    decrswitchoff2->fully_charged
+    fully_charged->normal [xlabel="Bulk"]
+    normal->incrswitchoff [xlabel="SoC < switch_off"]
+    normal->incrsustain [xlabel="sustain active"]
+    incrswitchoff->discharged
+    incrsustain->discharged
+    discharged->normal [xlabel="SoC > switch_on and\nsustain not active"]
+    discharged->incrforcecharge
+    incrforcecharge->forcecharge[xlabel="after 24hours"]
+    forcecharge->discharged [xlabel="Soc > switch_off"]
+}
