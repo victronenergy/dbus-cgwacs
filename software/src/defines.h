@@ -69,4 +69,31 @@ const int MaxDeviceInstance = 39;
 const double MaxMultiPower = 32700;
 const double MinMultiPower = -MaxMultiPower;
 
+// This enum is used to store the state in local settings, so do not change any values here.
+enum MaintenanceState {
+	MaintenanceStateDisabled = 0,
+	MaintenanceStateRestart = 1,
+	MaintenanceStateDefault = 2,
+	MaintenanceStateAbsorption = 3,
+	MaintenanceStateFloat = 4,
+	MaintenanceStateDischarged = 5,
+	MaintenanceStateForceCharge = 6
+};
+
+enum MaintenanceFlags {
+	MaintenanceFlagFloat = 0x01,
+	MaintenanceFlagAbsorption = 0x02,
+	MaintenanceFlagDischarged = 0x04
+};
+
+const double SocSwitchOffset = 5;
+const double SocSwitchIncrement = 5;
+const double SocSwitchDefaultMin = 10;
+const double SocSwitchMax = 80;
+const double ForceChargeCurrent = 5;
+
+const int SocInterval = 15 * 60 * 1000; // 15 minutes
+const int SocIntervalsPerDay = 24 * 60 * 60 * 1000 / SocInterval;
+const int ForceChargeInterval = 24 * 60 * 60 * 1000;
+
 #endif // DEFINES_H

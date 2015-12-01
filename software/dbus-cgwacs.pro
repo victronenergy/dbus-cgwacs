@@ -137,3 +137,6 @@ HEADERS += \
     src/split_phase_control.h \
     src/battery_info.h \
     src/ac_sensor_mediator.h
+
+DISTFILES += \
+    ../documents/battery_life.dot

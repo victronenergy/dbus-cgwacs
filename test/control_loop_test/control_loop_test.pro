@@ -33,7 +33,8 @@ SOURCES += \
     $$SRCDIR/single_phase_control.cpp \
     main.cpp \
     ac_in_power_control_test.cpp \
-    control_loop_test.cpp
+    control_loop_test.cpp \
+    maintenance_control_test.cpp
 
 HEADERS += \
     $$SRCDIR/ac_sensor.h \
@@ -47,4 +48,5 @@ HEADERS += \
     $$SRCDIR/settings.h \
     $$SRCDIR/single_phase_control.h \
     ac_in_power_control_test.h \
-    control_loop_test.h
+    control_loop_test.h \
+    maintenance_control_test.h

@@ -48,17 +48,14 @@ void MultiPhaseControl::adjustSetpoints(double setpoints[])
 	}
 	BatteryInfo *bi = batteryInfo();
 	double f = bi == 0 ? 1 : bi->applyLimits(setpointTotal) / setpointTotal;
-	QLOG_WARN() << __func__ << setpointTotal << f << setpointTotal * f;
 	AcSensor *acSensor = this->acSensor();
 	Multi *multi = this->multi();
 	for (int p=0; p<3; ++p) {
 		Phase phase = static_cast<Phase>(PhaseL1 + p);
 		MultiPhaseData *mpd = multi->getPhaseData(phase);
 		PowerInfo *pi = acSensor->getPowerInfo(phase);
-		if (qIsFinite(setpoints[p])) {
-			QLOG_WARN() << __func__ << setpoints[p] * f;
+		if (qIsFinite(setpoints[p]))
 			adjustSetpoint(pi, phase, mpd, setpoints[p] * f);
-		}
 	}
 }
 

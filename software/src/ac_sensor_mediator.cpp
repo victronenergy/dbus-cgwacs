@@ -16,7 +16,7 @@ AcSensorMediator::AcSensorMediator(const QString &portName, bool isZigbee, Setti
 	mHub4Mode(Hub4Disabled),
 	mIsMultiPhase(false)
 {
-	connect(mModbus, SIGNAL(serialEvent(const char *)), this, SIGNAL(onSerialEvent(const char *)));
+	connect(mModbus, SIGNAL(serialEvent(const char *)), this, SIGNAL(serialEvent(const char *)));
 	for (int i=1; i<=2; ++i) {
 		AcSensor *m = new AcSensor(portName, i, this);
 		AcSensor *pv = new AcSensor(portName, i, this);

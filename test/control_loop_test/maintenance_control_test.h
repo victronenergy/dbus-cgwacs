@@ -7,18 +7,13 @@
 #include <multi.h>
 #include <settings.h>
 
-class TestClock;
-
-class ControlLoopTest : public testing::Test
+class MaintenanceControlTest : public testing::Test
 {
 protected:
 	virtual void SetUp();
 
 	virtual void TearDown();
 
-	void triggerUpdate();
-
-	TestClock *mClock;
 	QScopedPointer<MaintenanceControl> mControlLoop;
 	QScopedPointer<Multi> mMulti;
 	QScopedPointer<Settings> mSettings;

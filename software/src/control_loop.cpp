@@ -37,6 +37,44 @@ void ControlLoop::adjustSetpoint(PowerInfo *source, Phase targetPhase, MultiPhas
 	}
 
 	bool feedbackDisabled = mBatteryInfo->maxDischargePower() <= 0;
+
+	switch (mSettings->state()) {
+	case MaintenanceStateForceCharge:
+	{
+		double dcCurrent = mMulti->dcCurrent();
+		double dcVoltage = mMulti->dcVoltage();
+		if (qIsFinite(dcCurrent) && qIsFinite(dcCurrent)) {
+			double dcPower = dcCurrent * dcVoltage;
+			double acPower = 0;
+			double acPhaseOut = 0;
+			for (int i=0; i<3; ++i) {
+				Phase phase = static_cast<Phase>(PhaseL1 + i);
+				MultiPhaseData *mpd = mMulti->getPhaseData(phase);
+				double acPowerIn = mpd->acPowerIn();
+				if (qIsFinite(acPowerIn))
+					acPower += acPowerIn;
+				double acPowerOut = mpd->acPowerOut();
+				if (qIsFinite(acPowerOut)) {
+					acPhaseOut = acPowerOut;
+					acPower -= acPowerOut;
+				}
+			}
+			double minAcPower = dcVoltage * ForceChargeCurrent;
+			if (dcPower > 0.1 && acPower > 0)
+				minAcPower *= qBound(1.0, acPower / dcPower, 2.0);
+			minAcPower += acPhaseOut;
+			setpoint = qMax(minAcPower, setpoint);
+			setpoint = qMin(setpoint, mBatteryInfo->maxChargePower());
+		}
+		// Fall through
+	}
+	case MaintenanceStateDischarged:
+		feedbackDisabled = true;
+		break;
+	default:
+		break;
+	}
+
 	// It seems that enabling the the ChargeDisabled flag disables both charge and discharge. So
 	// we're only setting the flags when we are not discharging.
 	bool chargeDisabled = mBatteryInfo->maxChargePower() <= 0 && (
