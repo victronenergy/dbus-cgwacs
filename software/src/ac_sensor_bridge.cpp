@@ -18,7 +18,9 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 	Q_ASSERT(emSettings != 0);
 	connect(acSensor, SIGNAL(destroyed()), this, SLOT(deleteLater()));
 	connect(emSettings, SIGNAL(destroyed()), this, SLOT(deleteLater()));
-	setUpdateInterval(1000);
+	// Changes in QT properties will not be propagated to the D-Bus at once, but
+	// in 2500ms invervals.
+	setUpdateInterval(2500);
 
 	QString serviceType = isSecundary ?
 		emSettings->l2ServiceType() :
@@ -61,10 +63,6 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 	produce("/Mgmt/Connection", acSensor->portName());
 	produce("/DeviceInstance", deviceInstance);
 	produce("/Serial", acSensor->serial());
-
-	// Changes in QT properties will not be propagated to the D-Bus at once, but
-	// in 2500ms invervals.
-	setUpdateInterval(2500);
 
 	registerService();
 }

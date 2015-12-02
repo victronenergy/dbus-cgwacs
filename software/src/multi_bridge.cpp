@@ -9,30 +9,29 @@ MultiBridge::MultiBridge(Multi *multi, const QString &service,
 	mMulti(multi)
 {
 	Q_ASSERT(mMulti != 0);
-	consumePhase(service, "/Ac/ActiveIn", multi->meanData());
-	consumePhase(service, "/Ac/ActiveIn/L1", multi->l1Data());
+	consumePhase(service, "L1", multi->l1Data());
 	// /Ac/ActiveIn/L2 tree is invalid for single phase system, which means that
 	// the initialized signal will never fire.
-	consumePhase(service, "/Ac/ActiveIn/L2", multi->l2Data());
-	consumePhase(service, "/Ac/ActiveIn/L3", multi->l3Data());
+	consumePhase(service, "L2", multi->l2Data());
+	consumePhase(service, "L3", multi->l3Data());
 	// Order matters here. Retrieve acPowerSetPoint as last item, so we know all
 	// items are synced once IsSetPointAvailable is set.
+	consume(service, multi->meanData(), "acPowerIn", "/Ac/ActiveIn/P");
 	consume(service, multi, "dcVoltage", "/Dc/0/Voltage");
 	consume(service, multi, "maxChargeCurrent", "/Dc/0/MaxChargeCurrent");
-	consume(service, multi, "isChargeDisabled", "/Hub4/DisableCharge");
-	consume(service, multi, "isFeedbackDisabled", "/Hub4/DisableFeedback");
 	consume(service, multi, "mode", "/Mode");
 	consume(service, multi, "state", "/State");
-	consume(service, multi, "acPowerSetPoint", "/Hub4/AcPowerSetpoint");
+	consume(service, multi, "isChargeDisabled", "/Hub4/DisableCharge");
+	consume(service, multi, "isFeedbackDisabled", "/Hub4/DisableFeedback");
 }
 
 bool MultiBridge::toDBus(const QString &path, QVariant &v)
 {
-	if (path == "/Mode") {
-		v = QVariant(static_cast<int>(v.value<MultiMode>()));
+	if (path.endsWith("/AcPowerSetpoint")) {
+		v = QVariant::fromValue(static_cast<short>(v.toDouble()));
 		return true;
-	} else if (path.endsWith("/AcPowerSetpoint")) {
-		v = QVariant::fromValue(static_cast<int>(v.toDouble()));
+	} else if (path == "/Mode") {
+		v = QVariant(static_cast<int>(v.value<MultiMode>()));
 		return true;
 	} else if (path == "/Hub4/DisableCharge" || path == "/Hub4/DisableFeedback") {
 		v = v.toBool() ? 1 : 0;
@@ -43,8 +42,8 @@ bool MultiBridge::toDBus(const QString &path, QVariant &v)
 
 bool MultiBridge::fromDBus(const QString &path, QVariant &v)
 {
-	if (path == "/Hub4/AcPowerSetpoint") {
-		mMulti->setIsSetPointAvailable(v.isValid());
+	if (path.endsWith("/AcPowerSetpoint")) {
+		v = static_cast<double>(v.toInt());
 	} else if (path == "/Mode") {
 		v = QVariant::fromValue(static_cast<MultiMode>(v.toInt()));
 	} else if (path == "/State") {
@@ -55,8 +54,9 @@ bool MultiBridge::fromDBus(const QString &path, QVariant &v)
 	return true;
 }
 
-void MultiBridge::consumePhase(const QString &service, const QString &path,
+void MultiBridge::consumePhase(const QString &service, const QString &phase,
 							   MultiPhaseData *phaseData)
 {
-	consume(service, phaseData, "acPowerIn", path + "/P");
+	consume(service, phaseData, "acPowerIn", "/Ac/ActiveIn/" + phase + "/P");
+	consume(service, phaseData, "acPowerSetPoint", "/Hub4/" + phase + "/AcPowerSetpoint");
 }

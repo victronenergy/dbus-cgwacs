@@ -27,7 +27,7 @@ ControlLoop::ControlLoop(Multi *multi, Phase phase, AcSensor *AcSensor,
 	mTimer->setInterval(5000);
 	mTimer->start();
 	connect(mMulti, SIGNAL(destroyed()), this, SLOT(onDestroyed()));
-	connect(mMulti->getPhaseData(mPhase), SIGNAL(acPowerOutChanged()),
+	connect(mMulti->getPhaseData(mPhase), SIGNAL(acPowerInChanged()),
 			this, SLOT(onPowerFromMulti()));
 	connect(mAcSensor, SIGNAL(destroyed()), this, SLOT(onDestroyed()));
 	connect(mAcSensor->getPowerInfo(mPhase), SIGNAL(powerChanged()),
@@ -120,6 +120,7 @@ void ControlLoop::performStep()
 	// would involve changes in velib (VBusItem and friends).
 	pMultiNew -= qrand() / (10.0 * RAND_MAX);
 
+	MultiPhaseData *mpd = mMulti->getPhaseData(mPhase);
 	mMulti->setIsChargeDisabled(chargeDisabled);
 	mMulti->setIsFeedbackDisabled(feedbackDisabled);
 	// If feedback is disabled and the multi is 'on', it will start inverting
@@ -128,12 +129,12 @@ void ControlLoop::performStep()
 	// AC-Out will lose power.
 	// mMulti->setMode(feedbackDisabled ? MultiChargerOnly : MultiOn);
 	QLOG_TRACE() << mAcSensor->getPowerInfo(mPhase)->power()
-				 << '\t' << mMulti->getPhaseData(mPhase)->acPowerIn()
+				 << '\t' << mpd->acPowerIn()
 				 << '\t' << pMultiNew
 				 << '\t' << chargeDisabled
 				 << '\t' << feedbackDisabled;
-	if (std::isfinite(pMultiNew))
-		mMulti->setAcPowerSetPoint(pMultiNew);
+	if (std::isfinite(pMultiNew) && std::isfinite(mpd->acPowerSetPoint()))
+		mpd->setAcPowerSetPoint(pMultiNew);
 }
 
 double ControlLoop::computeSetpoint() const

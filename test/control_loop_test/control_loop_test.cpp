@@ -275,11 +275,11 @@ void ControlLoopTest::SetUp()
 {
 	mMulti.reset(new Multi);
 	mMulti->setDcVoltage(12);
-	mMulti->setAcPowerSetPoint(0);
+	// mMulti->setAcPowerSetPoint(0);
 	mMulti->setMaxChargeCurrent(90);
 	mMulti->setMode(MultiOn);
-	mMulti->setIsChargeDisabled(false);
-	mMulti->setIsFeedbackDisabled(false);
+	// mMulti->setIsChargeDisabled(false);
+	// mMulti->setIsFeedbackDisabled(false);
 	mMulti->setState(MultiStateBulk);
 	mSettings.reset(new Settings);
 	mClock = new TestClock();

@@ -1,12 +1,14 @@
-#include <cmath>
+#include <qmath.h>
 #include <limits>
+#include <QsLog.h>
+#include "defines.h"
 #include "multi_phase_data.h"
-
-static const double NaN = std::numeric_limits<double>::quiet_NaN();
 
 MultiPhaseData::MultiPhaseData(QObject *parent) :
 	QObject(parent),
-	mAcPowerIn(NaN)
+	mAcPowerIn(NaN),
+	mAcPowerSetPoint(NaN),
+	mIsSetPointAvailable(false)
 {
 }
 
@@ -17,8 +19,31 @@ double MultiPhaseData::acPowerIn() const
 
 void MultiPhaseData::setAcPowerIn(double o)
 {
-	if (mAcPowerIn == o || (std::isnan(mAcPowerIn) && std::isnan(o)))
-		return;
+//	if (mAcPowerIn == o || (std::isnan(mAcPowerIn) && std::isnan(o)))
+//		return;
 	mAcPowerIn = o;
-	emit acPowerOutChanged();
+	emit acPowerInChanged();
+}
+
+double MultiPhaseData::acPowerSetPoint() const
+{
+	return mAcPowerSetPoint;
+}
+
+void MultiPhaseData::setAcPowerSetPoint(double o)
+{
+//	if (mAcPowerSetPoint == o || (std::isnan(mAcPowerSetPoint) && std::isnan(o)))
+//		return;
+	mAcPowerSetPoint = o;
+	emit acPowerSetPointChanged();
+	bool setpointAvailable = !qIsNaN(mAcPowerSetPoint);
+	if (setpointAvailable != mIsSetPointAvailable) {
+		mIsSetPointAvailable = setpointAvailable;
+		emit isSetPointAvailableChanged();
+	}
+}
+
+bool MultiPhaseData::isSetPointAvailable() const
+{
+	return mIsSetPointAvailable;
 }

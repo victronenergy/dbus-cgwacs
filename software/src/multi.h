@@ -42,8 +42,6 @@ Q_DECLARE_METATYPE(MultiState)
 class Multi : public QObject
 {
 	Q_OBJECT
-	Q_PROPERTY(double acPowerSetPoint READ acPowerSetPoint WRITE setAcPowerSetPoint NOTIFY acPowerSetPointChanged)
-	Q_PROPERTY(bool isSetPointAvailable READ isSetPointAvailable WRITE setIsSetPointAvailable NOTIFY isSetPointAvailableChanged)
 	Q_PROPERTY(double dcVoltage READ dcVoltage WRITE setDcVoltage NOTIFY dcVoltageChanged)
 	Q_PROPERTY(double maxChargeCurrent READ maxChargeCurrent WRITE setMaxChargeCurrent NOTIFY maxChargeCurrentChanged)
 	Q_PROPERTY(bool isChargeDisabled READ isChargeDisabled WRITE setIsChargeDisabled NOTIFY isChargeDisabledChanged)
@@ -53,14 +51,6 @@ class Multi : public QObject
 public:
 	explicit Multi(QObject *parent = 0);
 
-	double acPowerSetPoint() const;
-
-	void setAcPowerSetPoint(double o);
-
-	bool isSetPointAvailable() const;
-
-	void setIsSetPointAvailable(bool s);
-
 	double dcVoltage() const;
 
 	void setDcVoltage(double v);
@@ -69,14 +59,6 @@ public:
 
 	void setMaxChargeCurrent(double c);
 
-	MultiMode mode() const;
-
-	void setMode(MultiMode m);
-
-	MultiState state() const;
-
-	void setState(MultiState m);
-
 	bool isChargeDisabled() const;
 
 	void setIsChargeDisabled(bool b);
@@ -84,6 +66,14 @@ public:
 	bool isFeedbackDisabled() const;
 
 	void setIsFeedbackDisabled(bool b);
+
+	MultiMode mode() const;
+
+	void setMode(MultiMode m);
+
+	MultiState state() const;
+
+	void setState(MultiState m);
 
 	MultiPhaseData *meanData();
 
@@ -96,10 +86,6 @@ public:
 	MultiPhaseData *getPhaseData(Phase phase);
 
 signals:
-	void acPowerSetPointChanged();
-
-	void isSetPointAvailableChanged();
-
 	void dcVoltageChanged();
 
 	void maxChargeCurrentChanged();
@@ -117,14 +103,12 @@ private:
 	MultiPhaseData *mL1Data;
 	MultiPhaseData *mL2Data;
 	MultiPhaseData *mL3Data;
-	double mAcPowerSetPoint;
-	bool mIsSetPointAvailable;
 	double mDcVoltage;
 	double mMaxChargeCurrent;
-	MultiMode mMode;
-	MultiState mState;
 	bool mChargeDisabled;
 	bool mFeedbackDisabled;
+	MultiMode mMode;
+	MultiState mState;
 };
 
 #endif // MULTI_H

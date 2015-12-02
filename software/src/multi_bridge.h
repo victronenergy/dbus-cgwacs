@@ -24,7 +24,7 @@ protected:
 
 private:
 	void consumePhase(const QString &service,
-					  const QString &path, MultiPhaseData *phaseData);
+					  const QString &phase, MultiPhaseData *phaseData);
 
 	Multi *mMulti;
 };

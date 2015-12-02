@@ -8,40 +8,12 @@ Multi::Multi(QObject *parent) :
 	mL1Data(new MultiPhaseData(this)),
 	mL2Data(new MultiPhaseData(this)),
 	mL3Data(new MultiPhaseData(this)),
-	mAcPowerSetPoint(0),
-	mIsSetPointAvailable(false),
 	mDcVoltage(NaN),
 	mMaxChargeCurrent(NaN),
-	mMode(MultiOff),
 	mChargeDisabled(false),
-	mFeedbackDisabled(false)
+	mFeedbackDisabled(false),
+	mMode(MultiOff)
 {
-}
-
-double Multi::acPowerSetPoint() const
-{
-	return mAcPowerSetPoint;
-}
-
-void Multi::setAcPowerSetPoint(double o)
-{
-	if (mAcPowerSetPoint == o)
-		return;
-	mAcPowerSetPoint = o;
-	emit acPowerSetPointChanged();
-}
-
-bool Multi::isSetPointAvailable() const
-{
-	return mIsSetPointAvailable;
-}
-
-void Multi::setIsSetPointAvailable(bool s)
-{
-	if (mIsSetPointAvailable == s)
-		return;
-	mIsSetPointAvailable = s;
-	emit isSetPointAvailableChanged();
 }
 
 double Multi::dcVoltage() const
@@ -70,32 +42,6 @@ void Multi::setMaxChargeCurrent(double c)
 	emit maxChargeCurrentChanged();
 }
 
-MultiMode Multi::mode() const
-{
-	return mMode;
-}
-
-void Multi::setMode(MultiMode m)
-{
-	if (mMode == m)
-		return;
-	mMode = m;
-	emit modeChanged();
-}
-
-MultiState Multi::state() const
-{
-	return mState;
-}
-
-void Multi::setState(MultiState m)
-{
-	if (mState == m)
-		return;
-	mState = m;
-	emit stateChanged();
-}
-
 bool Multi::isChargeDisabled() const
 {
 	return mChargeDisabled;
@@ -120,6 +66,32 @@ void Multi::setIsFeedbackDisabled(bool b)
 //		return;
 	mFeedbackDisabled = b;
 	emit isFeedbackDisabledChanged();
+}
+
+MultiMode Multi::mode() const
+{
+	return mMode;
+}
+
+void Multi::setMode(MultiMode m)
+{
+	if (mMode == m)
+		return;
+	mMode = m;
+	emit modeChanged();
+}
+
+MultiState Multi::state() const
+{
+	return mState;
+}
+
+void Multi::setState(MultiState m)
+{
+	if (mState == m)
+		return;
+	mState = m;
+	emit stateChanged();
 }
 
 MultiPhaseData *Multi::meanData()
