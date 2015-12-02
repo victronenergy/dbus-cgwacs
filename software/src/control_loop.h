@@ -10,23 +10,6 @@ class AcSensor;
 class Multi;
 class QTimer;
 
-class Clock
-{
-public:
-	virtual ~Clock() {}
-
-	virtual QDateTime now() const = 0;
-};
-
-class DefaultClock : public Clock
-{
-public:
-	virtual QDateTime now() const
-	{
-		return QDateTime::currentDateTime();
-	}
-};
-
 /*!
  * Implements the Hub-4 control loop.
  */
@@ -35,7 +18,7 @@ class ControlLoop : public QObject
 	Q_OBJECT
 public:
 	ControlLoop(Multi *multi, Phase phase, AcSensor *AcSensor,
-				Settings *settings, Clock *clock = 0, QObject *parent = 0);
+				Settings *settings, QObject *parent = 0);
 
 	Phase phase() const;
 
@@ -55,19 +38,10 @@ private:
 
 	double computeSetpoint() const;
 
-	bool isMultiCharged() const;
-
-	void updateMaintenanceDate();
-
-	void setHub4State(Hub4State state);
-
-	static const char *getStateName(int state);
-
 	Multi *mMulti;
 	AcSensor *mAcSensor;
 	Settings *mSettings;
 	QTimer *mTimer;
-	QScopedPointer<Clock> mClock;
 	Phase mPhase;
 	bool mMultiUpdate;
 	bool mMeterUpdate;

@@ -10,6 +10,7 @@ class AcSensorUpdater;
 class ControlLoop;
 class DbusServiceMonitor;
 class Hub4ManagerBridge;
+class MaintenanceControl;
 class ModbusRtu;
 class Multi;
 class Settings;
@@ -71,6 +72,7 @@ private:
 	QList<AcSensor *> mAcSensors;
 	Settings *mSettings;
 	Multi *mMulti;
+	MaintenanceControl *mMaintenanceControl;
 	QList<ControlLoop *> mControlLoops;
 	VBusItem *mTimeZone;
 };

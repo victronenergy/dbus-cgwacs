@@ -10,13 +10,12 @@
 #include "settings.h"
 
 ControlLoop::ControlLoop(Multi *multi, Phase phase, AcSensor *AcSensor,
-						 Settings *settings, Clock *clock, QObject *parent):
+						 Settings *settings, QObject *parent):
 	QObject(parent),
 	mMulti(multi),
 	mAcSensor(AcSensor),
 	mSettings(settings),
 	mTimer(new QTimer(this)),
-	mClock(clock),
 	mPhase(phase),
 	mMultiUpdate(false),
 	mMeterUpdate(false)
@@ -25,8 +24,6 @@ ControlLoop::ControlLoop(Multi *multi, Phase phase, AcSensor *AcSensor,
 	Q_ASSERT(multi->getPhaseData(phase) != 0);
 	Q_ASSERT(AcSensor != 0);
 	Q_ASSERT(settings != 0);
-	if (mClock == 0)
-		mClock.reset(new DefaultClock());
 	mTimer->setInterval(5000);
 	mTimer->start();
 	connect(mMulti, SIGNAL(destroyed()), this, SLOT(onDestroyed()));
@@ -93,53 +90,15 @@ void ControlLoop::performStep()
 			mMulti->dcVoltage() / 100:
 			MaxMultiPower;
 
-	if (mSettings->maintenanceInterval() == 0) {
-		setHub4State(Hub4External);
-	} else if (mSettings->state() == Hub4External) {
-		setHub4State(Hub4SelfConsumption);
-	}
-
 	switch (mSettings->state()) {
 	case Hub4SelfConsumption:
-	{
-		pMultiNew = computeSetpoint();
-		QDateTime nextCharge = mSettings->maintenanceDate();
-		if (!nextCharge.isValid()) {
-			updateMaintenanceDate();
-			nextCharge = mSettings->maintenanceDate();
-		}
-		nextCharge = nextCharge.addDays(mSettings->maintenanceInterval());
-		QDateTime now = mClock->now();
-		if (now >= nextCharge && now.time().hour() == 12) {
-			setHub4State(Hub4ChargeFromGrid);
-		}
-
-		if (isMultiCharged()) {
-			setHub4State(Hub4Charged);
-		}
-		break;
-	}
 	case Hub4Charged:
-		pMultiNew = computeSetpoint();
-		if (!isMultiCharged()) {
-			setHub4State(Hub4SelfConsumption);
-			updateMaintenanceDate();
-		}
-		break;
 	case Hub4External:
 		pMultiNew = computeSetpoint();
 		break;
 	case Hub4ChargeFromGrid:
-		pMultiNew = maxPower;
-		if (isMultiCharged()) {
-			setHub4State(Hub4SelfConsumption);
-			updateMaintenanceDate();
-		}
-		break;
 	case Hub4Storage:
 		pMultiNew = maxPower;
-		if (isMultiCharged())
-			mSettings->setMaintenanceDate(QDateTime());
 		break;
 	}
 
@@ -190,36 +149,4 @@ double ControlLoop::computeSetpoint() const
 	// update rate.
 	const double Alpha = 0.8;
 	return pMulti + Alpha * (pTarget - pNet);
-}
-
-bool ControlLoop::isMultiCharged() const
-{
-	return mMulti->state() == MultiStateFloat || mMulti->state() == MultiStateStorage;
-}
-
-void ControlLoop::updateMaintenanceDate()
-{
-	QDateTime nextCharge = mClock->now();
-	nextCharge.setTime(QTime(1, 0, 0));
-	mSettings->setMaintenanceDate(nextCharge);
-	QLOG_INFO() << "Next maintenance base date set at:" << nextCharge;
-}
-
-void ControlLoop::setHub4State(Hub4State state)
-{
-	if (mSettings->state() == state)
-		return;
-	QLOG_INFO() << "Changing Hub4 state from"
-				<< getStateName(mSettings->state())
-				<< "to" << getStateName(state);
-	mSettings->setState(state);
-}
-
-const char *ControlLoop::getStateName(int state)
-{
-	static const char *StateNames[] = { "SelfConsumption", "ChargeFromGrid", "Charged", "Storage", "External" };
-	static const int StateNameCount	= static_cast<int>(sizeof(StateNames)/sizeof(StateNames[0]));
-	if (state < 0 || state >= StateNameCount)
-		return "Unknown";
-	return StateNames[state];
 }

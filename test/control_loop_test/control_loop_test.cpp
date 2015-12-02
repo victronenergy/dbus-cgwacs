@@ -1,10 +1,7 @@
 #include <cmath>
-#include "ac_sensor.h"
-#include "control_loop.h"
 #include "control_loop_test.h"
+#include "maintenance_control.h"
 #include "multi.h"
-#include "multi_phase_data.h"
-#include "power_info.h"
 #include "settings.h"
 
 class TestClock : public Clock
@@ -48,7 +45,7 @@ TEST_F(ControlLoopTest, defaultStartup)
 	EXPECT_EQ(mSettings->maintenanceDate(), mClock->now());
 	EXPECT_EQ(mSettings->maintenanceInterval(), 7);
 	EXPECT_EQ(mSettings->state(), Hub4SelfConsumption);
-	EXPECT_LT(mMulti->acPowerSetPoint(), 0);
+	// EXPECT_LT(mMulti->acPowerSetPoint(), 0);
 }
 
 TEST_F(ControlLoopTest, autoChargeLoop)
@@ -70,13 +67,13 @@ TEST_F(ControlLoopTest, autoChargeLoop)
 	triggerUpdate();
 	EXPECT_EQ(mSettings->state(), Hub4ChargeFromGrid);
 	triggerUpdate();
-	EXPECT_GE(mMulti->acPowerSetPoint(), 12 * 90);
+	// EXPECT_GE(mMulti->acPowerSetPoint(), 12 * 90);
 	mClock->addDays(1);
 	mClock->setHours(1);
 	triggerUpdate();
 	EXPECT_EQ(mSettings->state(), Hub4ChargeFromGrid);
 	triggerUpdate();
-	EXPECT_GE(mMulti->acPowerSetPoint(), 12 * 90);
+	// EXPECT_GE(mMulti->acPowerSetPoint(), 12 * 90);
 	mMulti->setState(MultiStateFloat);
 	// mMulti->setStateOfCharge(100);
 	triggerUpdate();
@@ -202,7 +199,7 @@ TEST_F(ControlLoopTest, adjustInterval)
 	EXPECT_EQ(mSettings->state(), Hub4ChargeFromGrid);
 	triggerUpdate();
 	EXPECT_EQ(mSettings->state(), Hub4ChargeFromGrid);
-	EXPECT_GE(mMulti->acPowerSetPoint(), 12 * 90);
+	// EXPECT_GE(mMulti->acPowerSetPoint(), 12 * 90);
 }
 
 TEST_F(ControlLoopTest, restartChargeFromGrid)
@@ -213,7 +210,7 @@ TEST_F(ControlLoopTest, restartChargeFromGrid)
 	mSettings->setState(Hub4ChargeFromGrid);
 	triggerUpdate();
 	EXPECT_EQ(mSettings->state(), Hub4ChargeFromGrid);
-	EXPECT_GE(mMulti->acPowerSetPoint(), 12 * 90);
+	// EXPECT_GE(mMulti->acPowerSetPoint(), 12 * 90);
 	mMulti->setState(MultiStateFloat);
 	// mMulti->setStateOfCharge(100);
 	// Check if we return to self consumption are charge has been completed.
@@ -230,7 +227,7 @@ TEST_F(ControlLoopTest, restartStorageFromGrid)
 	mSettings->setState(Hub4Storage);
 	triggerUpdate();
 	EXPECT_EQ(md, mSettings->maintenanceDate());
-	EXPECT_GE(mMulti->acPowerSetPoint(), 12 * 90);
+	// EXPECT_GE(mMulti->acPowerSetPoint(), 12 * 90);
 	EXPECT_EQ(mSettings->state(), Hub4Storage);
 	mMulti->setState(MultiStateFloat);
 	// mMulti->setStateOfCharge(100);
@@ -276,7 +273,6 @@ TEST_F(ControlLoopTest, externalControl)
 
 void ControlLoopTest::SetUp()
 {
-	mAcSensor.reset(new AcSensor("/dev/ttyUSB0", 0));
 	mMulti.reset(new Multi);
 	mMulti->setDcVoltage(12);
 	mMulti->setAcPowerSetPoint(0);
@@ -285,31 +281,21 @@ void ControlLoopTest::SetUp()
 	mMulti->setIsChargeDisabled(false);
 	mMulti->setIsFeedbackDisabled(false);
 	mMulti->setState(MultiStateBulk);
-	// mMulti->setStateOfCharge(50);
 	mSettings.reset(new Settings);
 	mClock = new TestClock();
 	mClock->setTime(QDateTime::currentDateTime());
 	mClock->setHours(1);
-	mControlLoop.reset(new ControlLoop(mMulti.data(), PhaseL1, mAcSensor.data(),
-									   mSettings.data(), mClock));
+	mControlLoop.reset(new MaintenanceControl(mMulti.data(), mSettings.data(), mClock));
 }
 
 void ControlLoopTest::TearDown()
 {
 	mControlLoop.reset();
-	mAcSensor.reset();
 	mMulti.reset();
 	mSettings.reset();
 }
 
 void ControlLoopTest::triggerUpdate()
 {
-	PowerInfo *pi = mAcSensor->getPowerInfo(PhaseL1);
-	double p = pi->power();
-	p = std::isfinite(p) ? p + 1 : 0;
-	pi->setPower(p);
-	MultiPhaseData *mpd = mMulti->l1Data();
-	p = mpd->acPowerIn();
-	p = std::isfinite(p) ? p + 1 : 0;
-	mpd->setAcPowerIn(p);
+	mControlLoop->update();
 }

@@ -9,6 +9,7 @@
 #include "dbus_cgwacs.h"
 #include "dbus_service_monitor.h"
 #include "hub4_control_bridge.h"
+#include "maintenance_control.h"
 #include "multi.h"
 #include "multi_bridge.h"
 #include "settings.h"
@@ -18,6 +19,7 @@ DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 	QObject(parent),
 	mServiceMonitor(new DbusServiceMonitor("com.victronenergy.vebus", this)),
 	mModbus(new ModbusRtu(portName, 9600, isZigbee ? 2000 : 250, this)),
+	mMaintenanceControl(0),
 	mTimeZone(new VBusItem(this))
 {
 	qRegisterMetaType<ConnectionState>();
@@ -206,6 +208,8 @@ void DBusCGwacs::updateControlLoop()
 	mControlLoops.clear();
 	if (!mMulti->isSetPointAvailable())
 		return;
+	if (mMaintenanceControl == 0)
+		mMaintenanceControl = new MaintenanceControl(mMulti, mSettings, 0, mMulti);
 	AcSensor *gridMeter = 0;
 	AcSensorSettings *settings = 0;
 	foreach (AcSensor *em, mAcSensors) {
@@ -226,17 +230,17 @@ void DBusCGwacs::updateControlLoop()
 		switch (settings->hub4Mode()) {
 		case Hub4PhaseL1:
 			QLOG_INFO() << "Control loop: multi phase, phase L1";
-			mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, 0, this));
+			mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, this));
 			break;
 		case Hub4PhaseCompensation:
 			QLOG_INFO() << "Control loop: multi phase, phase compensation";
-			mControlLoops.append(new ControlLoop(mMulti, MultiPhase, gridMeter, mSettings, 0, this));
+			mControlLoops.append(new ControlLoop(mMulti, MultiPhase, gridMeter, mSettings, this));
 			break;
 		case Hub4PhaseSplit:
 			QLOG_INFO() << "Control loop: multi phase, each phase has a dedicated control loop";
-			mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, 0, this));
-			mControlLoops.append(new ControlLoop(mMulti, PhaseL2, gridMeter, mSettings, 0, this));
-			mControlLoops.append(new ControlLoop(mMulti, PhaseL3, gridMeter, mSettings, 0, this));
+			mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, this));
+			mControlLoops.append(new ControlLoop(mMulti, PhaseL2, gridMeter, mSettings, this));
+			mControlLoops.append(new ControlLoop(mMulti, PhaseL3, gridMeter, mSettings, this));
 			break;
 		case Hub4Disabled:
 		default:
@@ -250,7 +254,7 @@ void DBusCGwacs::updateControlLoop()
 			break;
 		default:
 			QLOG_INFO() << "Control loop: single phase";
-			mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, 0, this));
+			mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, this));
 			break;
 		}
 	}

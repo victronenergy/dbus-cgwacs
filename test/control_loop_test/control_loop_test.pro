@@ -21,20 +21,16 @@ INCLUDEPATH += \
 
 SOURCES += \
     $$EXTDIR/googletest/googletest/src/gtest-all.cc \
-    $$SRCDIR/ac_sensor.cpp \
-    $$SRCDIR/control_loop.cpp \
+    $$SRCDIR/maintenance_control.cpp \
     $$SRCDIR/multi.cpp \
-    $$SRCDIR/power_info.cpp \
     $$SRCDIR/multi_phase_data.cpp \
     $$SRCDIR/settings.cpp \
     main.cpp \
     control_loop_test.cpp
 
 HEADERS += \
-    $$SRCDIR/ac_sensor.h \
-    $$SRCDIR/control_loop.h \
+    $$SRCDIR/maintenance_control.h \
     $$SRCDIR/multi.h \
-    $$SRCDIR/power_info.h \
     $$SRCDIR/multi_phase_data.h \
     $$SRCDIR/settings.h \
     control_loop_test.h
