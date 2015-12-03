@@ -84,7 +84,10 @@ SOURCES += \
     src/ac_sensor_updater.cpp \
     src/dbus_cgwacs.cpp \
     src/hub4_control_bridge.cpp \
-    src/maintenance_control.cpp
+    src/maintenance_control.cpp \
+    src/phase_compensation_control.cpp \
+    src/single_phase_control.cpp \
+    src/charge_phase_control.cpp
 
 HEADERS += \
     ext/velib/src/qt/v_busitem_adaptor.h \
@@ -118,4 +121,7 @@ HEADERS += \
     src/ac_sensor_settings_bridge.h \
     src/hub4_control_bridge.h \
     src/fastclock.h \
-    src/maintenance_control.h
+    src/maintenance_control.h \
+    src/phase_compensation_control.h \
+    src/single_phase_control.h \
+    src/charge_phase_control.h

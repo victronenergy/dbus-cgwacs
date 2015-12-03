@@ -1,5 +1,5 @@
-#ifndef HUB4CONTROLBRIDGE_H
-#define HUB4CONTROLBRIDGE_H
+#ifndef HUB4_CONTROL_BRIDGE_H
+#define HUB4_CONTROL_BRIDGE_H
 
 #include "dbus_bridge.h"
 
@@ -16,4 +16,4 @@ protected:
 	virtual bool fromDBus(const QString &path, QVariant &value);
 };
 
-#endif // HUB4CONTROLBRIDGE_H
+#endif // HUB4_CONTROL_BRIDGE_H

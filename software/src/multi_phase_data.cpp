@@ -1,5 +1,4 @@
 #include <qmath.h>
-#include <limits>
 #include <QsLog.h>
 #include "defines.h"
 #include "multi_phase_data.h"
@@ -19,7 +18,7 @@ double MultiPhaseData::acPowerIn() const
 
 void MultiPhaseData::setAcPowerIn(double o)
 {
-//	if (mAcPowerIn == o || (std::isnan(mAcPowerIn) && std::isnan(o)))
+//	if (mAcPowerIn == o || (qIsNaN(mAcPowerIn) && qIsNaN(o)))
 //		return;
 	mAcPowerIn = o;
 	emit acPowerInChanged();
@@ -32,11 +31,11 @@ double MultiPhaseData::acPowerSetPoint() const
 
 void MultiPhaseData::setAcPowerSetPoint(double o)
 {
-//	if (mAcPowerSetPoint == o || (std::isnan(mAcPowerSetPoint) && std::isnan(o)))
+//	if (mAcPowerSetPoint == o || (qIsNaN(mAcPowerSetPoint) && qIsNaN(o)))
 //		return;
 	mAcPowerSetPoint = o;
 	emit acPowerSetPointChanged();
-	bool setpointAvailable = !qIsNaN(mAcPowerSetPoint);
+	bool setpointAvailable = qIsFinite(mAcPowerSetPoint);
 	if (setpointAvailable != mIsSetPointAvailable) {
 		mIsSetPointAvailable = setpointAvailable;
 		emit isSetPointAvailableChanged();

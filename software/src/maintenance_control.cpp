@@ -16,9 +16,12 @@ MaintenanceControl::MaintenanceControl(Multi *multi, Settings *settings,
 	if (mClock == 0)
 		mClock.reset(new DefaultClock());
 	QTimer *timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), this, SLOT(onTimer()));
 	timer->setInterval(5000);
 	timer->start();
+
+	connect(timer, SIGNAL(timeout()), this, SLOT(onTimer()));
+	connect(mSettings, SIGNAL(maintenanceIntervalChanged()),
+			this, SLOT(onIntervalChanged()));
 }
 
 void MaintenanceControl::update()
@@ -70,6 +73,11 @@ void MaintenanceControl::update()
 }
 
 void MaintenanceControl::onTimer()
+{
+	update();
+}
+
+void MaintenanceControl::onIntervalChanged()
 {
 	update();
 }

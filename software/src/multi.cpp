@@ -94,6 +94,28 @@ void Multi::setState(MultiState m)
 	emit stateChanged();
 }
 
+int Multi::getSetpointCount() const
+{
+	int phaseCount = 0;
+	for (int i=0; i<3; ++i) {
+		Phase phase = static_cast<Phase>(PhaseL1 + i);
+		if (getPhaseData(phase)->isSetPointAvailable())
+			++phaseCount;
+	}
+	return phaseCount;
+}
+
+QList<Phase> Multi::getSetpointPhases() const
+{
+	QList<Phase> phases;
+	for (int i=0; i<3; ++i) {
+		Phase phase = static_cast<Phase>(PhaseL1 + i);
+		if (getPhaseData(phase)->isSetPointAvailable())
+			phases.append(phase);
+	}
+	return phases;
+}
+
 MultiPhaseData *Multi::meanData()
 {
 	return mMeanData;
@@ -114,7 +136,7 @@ MultiPhaseData *Multi::l3Data()
 	return mL3Data;
 }
 
-MultiPhaseData *Multi::getPhaseData(Phase phase)
+MultiPhaseData *Multi::getPhaseData(Phase phase) const
 {
 	switch (phase) {
 	case MultiPhase:

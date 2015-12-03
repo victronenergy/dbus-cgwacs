@@ -5,13 +5,6 @@
 #include <QObject>
 #include "defines.h"
 
-enum Hub4Mode {
-	Hub4PhaseL1 = 0,
-	Hub4PhaseCompensation = 1,
-	Hub4PhaseSplit = 2,
-	Hub4Disabled = 3
-};
-
 Q_DECLARE_METATYPE(Hub4Mode)
 Q_DECLARE_METATYPE(Phase)
 Q_DECLARE_METATYPE(Position)

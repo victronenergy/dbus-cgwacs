@@ -1,8 +1,6 @@
-#include <cmath>
-#include <limits>
+#include <qmath.h>
+#include "defines.h"
 #include "power_info.h"
-
-static const double NaN = std::numeric_limits<double>::quiet_NaN();
 
 PowerInfo::PowerInfo(QObject *parent) :
 	QObject(parent),
@@ -46,10 +44,6 @@ double PowerInfo::power() const
 
 void PowerInfo::setPower(double p)
 {
-	const double Fc = 0.5;
-	const double Dt = 0.5;
-	const double Alpha = Fc/(Fc + 1/(2 * M_PI * Dt));
-	p = qIsNaN(mPower) ? p : (1 - Alpha) * mPower + Alpha * p;
 	if (valuesEqual(mPower, p))
 		return;
 	mPower = p;
@@ -93,5 +87,5 @@ void PowerInfo::resetValues()
 
 bool PowerInfo::valuesEqual(double v1, double v2)
 {
-	return (std::isnan(v1) && std::isnan(v2)) || (v1 == v2);
+	return (qIsNaN(v1) && qIsNaN(v2)) || (v1 == v2);
 }

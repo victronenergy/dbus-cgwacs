@@ -1,5 +1,5 @@
-#ifndef FASTCLOCK
-#define FASTCLOCK
+#ifndef FASTCLOCK_H
+#define FASTCLOCK_H
 
 #include "control_loop.h"
 
@@ -32,4 +32,4 @@ private:
 	static QDateTime mStartTime;
 };
 
-#endif // FASTCLOCK
+#endif // FASTCLOCK_H

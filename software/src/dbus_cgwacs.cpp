@@ -5,7 +5,7 @@
 #include "ac_sensor_settings.h"
 #include "ac_sensor_settings_bridge.h"
 #include "ac_sensor_updater.h"
-#include "control_loop.h"
+#include "charge_phase_control.h"
 #include "dbus_cgwacs.h"
 #include "dbus_service_monitor.h"
 #include "hub4_control_bridge.h"
@@ -13,8 +13,10 @@
 #include "multi.h"
 #include "multi_bridge.h"
 #include "multi_phase_data.h"
+#include "phase_compensation_control.h"
 #include "settings.h"
 #include "settings_bridge.h"
+#include "single_phase_control.h"
 
 DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 	QObject(parent),
@@ -113,6 +115,10 @@ void DBusCGwacs::onDeviceSettingsInitialized()
 		s->setDeviceInstance(mSettings->getDeviceInstance(s->serial(), false));
 	if (s->l2DeviceInstance() == -1)
 		s->setL2DeviceInstance(mSettings->getDeviceInstance(s->serial(), true));
+	// Conversion from v1.0.8 to v1.0.9: Compensating over Phase 1 is no longer used for multi
+	// phase systems.
+	if (s->isMultiPhase() && s->hub4Mode() == Hub4PhaseL1)
+		s->setHub4Mode(Hub4PhaseCompensation);
 	AcSensor *m = static_cast<AcSensor *>(s->parent());
 	AcSensorUpdater *mu = m->findChild<AcSensorUpdater *>();
 	mu->startMeasurements();
@@ -121,16 +127,10 @@ void DBusCGwacs::onDeviceSettingsInitialized()
 
 void DBusCGwacs::onDeviceInitialized()
 {
-	AcSensor *m = static_cast<AcSensor *>(sender());
-	AcSensorUpdater *mu = m->findChild<AcSensorUpdater *>();
+	AcSensor *acSensor = static_cast<AcSensor *>(sender());
+	AcSensorUpdater *mu = acSensor->findChild<AcSensorUpdater *>();
 	AcSensorSettings *sensorSettings = mu->settings();
-	AcSensorBridge *bridge = new AcSensorBridge(m, sensorSettings, false, m);
-	if (sensorSettings->serviceType() == "grid")
-		new Hub4ControlBridge(mSettings, bridge);
-	if (!sensorSettings->l2ServiceType().isEmpty()) {
-		AcSensor *pvSensor = mu->pvSensor();
-		new AcSensorBridge(pvSensor, sensorSettings, true, pvSensor);
-	}
+	publishSensor(acSensor, mu->pvSensor(), sensorSettings);
 	updateControlLoop();
 }
 
@@ -152,15 +152,16 @@ void DBusCGwacs::onServiceTypeChanged()
 	// Just in case pvInverterOnPhase2 was set, in which case we have to bridge
 	// objects.
 	delete pvSensor->findChild<AcSensorBridge *>();
-	bridge = new AcSensorBridge(acSensor, sensorSettings, false, acSensor);
-	if (sensorSettings->serviceType() == "grid")
-		new Hub4ControlBridge(mSettings, bridge);
-	if (!sensorSettings->l2ServiceType().isEmpty())
-		new AcSensorBridge(pvSensor, sensorSettings, true, pvSensor);
+	publishSensor(acSensor, pvSensor, sensorSettings);
 	updateControlLoop();
 }
 
 void DBusCGwacs::onHub4ModeChanged()
+{
+	updateControlLoop();
+}
+
+void DBusCGwacs::onHub4StateChanged()
 {
 	updateControlLoop();
 }
@@ -210,8 +211,6 @@ void DBusCGwacs::updateControlLoop()
 	foreach (ControlLoop *c, mControlLoops)
 		delete c;
 	mControlLoops.clear();
-	if (mMaintenanceControl == 0)
-		mMaintenanceControl = new MaintenanceControl(mMulti, mSettings, 0, mMulti);
 	AcSensor *gridMeter = 0;
 	AcSensorSettings *settings = 0;
 	foreach (AcSensor *em, mAcSensors) {
@@ -226,31 +225,63 @@ void DBusCGwacs::updateControlLoop()
 	}
 	if (settings == 0) {
 		QLOG_INFO() << "Control loop: no energy meter with service type 'grid'";
+		delete mMaintenanceControl;
+		mMaintenanceControl = 0;
 		return;
 	}
-	if (settings->isMultiPhase()) {
+	if (mMaintenanceControl == 0)
+		mMaintenanceControl = new MaintenanceControl(mMulti, mSettings, 0, mMulti);
+	bool charge = false;
+	switch (mSettings->state()) {
+	case Hub4ChargeFromGrid:
+	case Hub4Storage:
+		charge = true;
+		break;
+	default:
+		charge = false;
+		break;
+	}
+	// Keep in mind that:
+	// 1) It may take some time for the vebus service to report all setpoint, so
+	//    at this moment, there may be some missing setpoints.
+	// 2) If a control loop is started on a phase without setpoint, it won't do
+	//    anything until the setpoint is reported.
+	// So it is safer to create a control loop on a phase the may not have a
+	// setpoint. Of cource, the ControlLoop classes should check for the
+	// presence of the setpoint regularly.
+	if (charge) {
+		if (settings->isMultiPhase()) {
+			for (int i=0; i<3; ++i) {
+				Phase phase = static_cast<Phase>(PhaseL1 + i);
+				QLOG_INFO() << QString("Control loop: charging phase L%1").arg(phase);
+				mControlLoops.append(new ChargePhaseControl(mMulti, gridMeter, mSettings, phase));
+			}
+		} else {
+			mControlLoops.append(new ChargePhaseControl(mMulti, gridMeter, mSettings, PhaseL1));
+		}
+	} else if (settings->isMultiPhase()) {
 		switch (settings->hub4Mode()) {
-		case Hub4PhaseL1:
-			if (mMulti->l1Data()->isSetPointAvailable()) {
-				QLOG_INFO() << "Control loop: multi phase, phase L1";
-				mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, this));
-			}
+		case Hub4SinglePhaseCompensation:
+		{
+			QList<Phase> setpointPhases = mMulti->getSetpointPhases();
+			Phase phase = setpointPhases.isEmpty() ? PhaseL1 : setpointPhases.first();
+			QLOG_INFO() << QString("Control loop: multi phase, phase L%1").arg(phase);
+			mControlLoops.append(new SinglePhaseControl(mMulti, gridMeter, mSettings,
+														phase, Hub4PhaseCompensation, this));
 			break;
+		}
 		case Hub4PhaseCompensation:
-			if (mMulti->l1Data()->isSetPointAvailable()) {
-				QLOG_INFO() << "Control loop: multi phase, phase compensation";
-				mControlLoops.append(new ControlLoop(mMulti, MultiPhase, gridMeter, mSettings, this));
-			}
+			QLOG_INFO() << "Control loop: multi phase, phase compensation";
+			mControlLoops.append(new PhaseCompensationControl(mMulti, gridMeter, mSettings, this));
 			break;
 		case Hub4PhaseSplit:
 			for (int i=0; i<3; ++i) {
 				Phase phase = static_cast<Phase>(PhaseL1 + i);
-				if (mMulti->l1Data()->isSetPointAvailable()) {
-					QLOG_INFO() << QString("Control loop: phase split, phase L%1").arg(i + 1);
-					mControlLoops.append(new ControlLoop(mMulti, phase, gridMeter, mSettings, this));
-				}
+				QLOG_INFO() << QString("Control loop: phase split, phase L%1").arg(phase);
+				mControlLoops.append(new SinglePhaseControl(mMulti, gridMeter, mSettings, phase, Hub4PhaseSplit, this));
 			}
 			break;
+		case Hub4PhaseL1:
 		case Hub4Disabled:
 		default:
 			QLOG_INFO() << "Control loop: disabled";
@@ -262,10 +293,8 @@ void DBusCGwacs::updateControlLoop()
 			QLOG_INFO() << "Control loop: disabled";
 			break;
 		default:
-			if (mMulti->l1Data()->isSetPointAvailable()) {
-				QLOG_INFO() << "Control loop: single phase";
-				mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, this));
-			}
+			QLOG_INFO() << "Control loop: single phase";
+			mControlLoops.append(new SinglePhaseControl(mMulti, gridMeter, mSettings, PhaseL1, Hub4PhaseL1, this));
 			break;
 		}
 	}
@@ -284,4 +313,14 @@ void DBusCGwacs::updateMultiBridge()
 		QLOG_INFO() << "Multi found @" << services.first();
 		new MultiBridge(mMulti, services.first(), mMulti);
 	}
+}
+
+void DBusCGwacs::publishSensor(AcSensor *acSensor, AcSensor *pvSensor, AcSensorSettings *acSensorSettings)
+{
+	AcSensorBridge *bridge = new AcSensorBridge(acSensor, acSensorSettings, false, acSensor);
+	if (acSensorSettings->serviceType() == "grid") {
+		new Hub4ControlBridge(mSettings, bridge);
+	}
+	if (!acSensorSettings->l2ServiceType().isEmpty())
+		new AcSensorBridge(pvSensor, acSensorSettings, true, pvSensor);
 }

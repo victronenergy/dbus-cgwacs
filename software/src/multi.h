@@ -75,6 +75,10 @@ public:
 
 	void setState(MultiState m);
 
+	int getSetpointCount() const;
+
+	QList<Phase> getSetpointPhases() const;
+
 	MultiPhaseData *meanData();
 
 	MultiPhaseData *l1Data();
@@ -83,7 +87,7 @@ public:
 
 	MultiPhaseData *l3Data();
 
-	MultiPhaseData *getPhaseData(Phase phase);
+	MultiPhaseData *getPhaseData(Phase phase) const;
 
 signals:
 	void dcVoltageChanged();

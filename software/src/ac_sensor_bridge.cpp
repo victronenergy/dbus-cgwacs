@@ -74,7 +74,7 @@ bool AcSensorBridge::toDBus(const QString &path, QVariant &value)
 	} else if (path == "/Position") {
 		value = QVariant(static_cast<int>(value.value<Position>()));
 	}
-	if (value.type() == QVariant::Double && !std::isfinite(value.toDouble()))
+	if (value.type() == QVariant::Double && !qIsFinite(value.toDouble()))
 		value = QVariant();
 	return true;
 }

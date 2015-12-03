@@ -5,11 +5,9 @@
 #include <QList>
 
 class AcSensor;
-class AcSensorBridge;
-class AcSensorUpdater;
+class AcSensorSettings;
 class ControlLoop;
 class DbusServiceMonitor;
-class Hub4ManagerBridge;
 class MaintenanceControl;
 class ModbusRtu;
 class Multi;
@@ -56,6 +54,8 @@ private slots:
 
 	void onHub4ModeChanged();
 
+	void onHub4StateChanged();
+
 	void onMultiPhaseChanged();
 
 	void onIsSetPointAvailableChanged();
@@ -66,6 +66,9 @@ private:
 	void updateControlLoop();
 
 	void updateMultiBridge();
+
+	void publishSensor(AcSensor *sensor, AcSensor *pvSensor,
+					   AcSensorSettings *sensorSettings);
 
 	DbusServiceMonitor *mServiceMonitor;
 	ModbusRtu *mModbus;

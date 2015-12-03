@@ -1,5 +1,5 @@
-#ifndef MAINTENANCECONTROL_H
-#define MAINTENANCECONTROL_H
+#ifndef MAINTENANCE_CONTROL_H
+#define MAINTENANCE_CONTROL_H
 
 #include <QDateTime>
 #include <QObject>
@@ -37,6 +37,8 @@ public:
 private slots:
 	void onTimer();
 
+	void onIntervalChanged();
+
 private:
 	bool isMultiCharged() const;
 
@@ -51,4 +53,4 @@ private:
 	QScopedPointer<Clock> mClock;
 };
 
-#endif // MAINTENANCECONTROL_H
+#endif // MAINTENANCE_CONTROL_H

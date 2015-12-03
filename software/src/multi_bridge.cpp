@@ -10,12 +10,8 @@ MultiBridge::MultiBridge(Multi *multi, const QString &service,
 {
 	Q_ASSERT(mMulti != 0);
 	consumePhase(service, "L1", multi->l1Data());
-	// /Ac/ActiveIn/L2 tree is invalid for single phase system, which means that
-	// the initialized signal will never fire.
 	consumePhase(service, "L2", multi->l2Data());
 	consumePhase(service, "L3", multi->l3Data());
-	// Order matters here. Retrieve acPowerSetPoint as last item, so we know all
-	// items are synced once IsSetPointAvailable is set.
 	consume(service, multi->meanData(), "acPowerIn", "/Ac/ActiveIn/P");
 	consume(service, multi, "dcVoltage", "/Dc/0/Voltage");
 	consume(service, multi, "maxChargeCurrent", "/Dc/0/MaxChargeCurrent");
