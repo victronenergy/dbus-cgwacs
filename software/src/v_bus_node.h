@@ -71,6 +71,8 @@ public:
 public slots:
 	QDBusVariant GetValue();
 
+	QDBusVariant GetText();
+
 signals:
 	void PropertiesChanged(const QVariantMap &changes);
 
@@ -80,7 +82,7 @@ private slots:
 	void onNodeDeleted();
 
 private:
-	void addToMap(const QString &prefix, QVariantMap &map);
+	void addToMap(const QString &prefix, QVariantMap &map, bool useText);
 
 	void addChild(const QString &nodePath, const QString &subPath,
 				  VBusItem *item);

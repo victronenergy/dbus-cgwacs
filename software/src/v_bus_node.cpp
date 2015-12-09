@@ -111,7 +111,14 @@ QStringList VBusNode::enumeratePaths() const
 QDBusVariant VBusNode::GetValue()
 {
 	QVariantMap result;
-	addToMap(QString(), result);
+	addToMap(QString(), result, false);
+	return QDBusVariant(result);
+}
+
+QDBusVariant VBusNode::GetText()
+{
+	QVariantMap result;
+	addToMap(QString(), result, true);
 	return QDBusVariant(result);
 }
 
@@ -139,20 +146,25 @@ void VBusNode::onNodeDeleted()
 		deleteLater();
 }
 
-void VBusNode::addToMap(const QString &prefix, QVariantMap &map)
+void VBusNode::addToMap(const QString &prefix, QVariantMap &map, bool useText)
 {
 	for (QMap<QString, VBusItem *>::iterator it = mLeafs.begin();
 		 it != mLeafs.end();
 		 ++it) {
-		QVariant v = it.value()->getValue();
-		if (!v.isValid())
-			v = QVariant::fromValue(QList<int>());
+		QVariant v;
+		if (useText) {
+			v = it.value()->getText();
+		} else {
+			v = it.value()->getValue();
+			if (!v.isValid())
+				v = QVariant::fromValue(QList<int>());
+		}
 		map[combine(prefix, it.key())] = v;
 	}
 	for (QMap<QString, VBusNode *>::iterator it = mNodes.begin();
 		 it != mNodes.end();
 		 ++it) {
-		it.value()->addToMap(combine(prefix, it.key()), map);
+		it.value()->addToMap(combine(prefix, it.key()), map, useText);
 	}
 }
 
