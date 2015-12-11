@@ -1,4 +1,5 @@
 #include <QsLog.h>
+#include <velib/qt/v_busitem.h>
 #include "ac_sensor.h"
 #include "ac_sensor_bridge.h"
 #include "ac_sensor_settings.h"
@@ -16,13 +17,17 @@
 DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 	QObject(parent),
 	mServiceMonitor(new DbusServiceMonitor("com.victronenergy.vebus", this)),
-	mModbus(new ModbusRtu(portName, 9600, isZigbee ? 2000 : 250, this))
+	mModbus(new ModbusRtu(portName, 9600, isZigbee ? 2000 : 250, this)),
+	mTimeZone(new VBusItem(this))
 {
 	qRegisterMetaType<ConnectionState>();
 	qRegisterMetaType<Position>();
 	qRegisterMetaType<MultiMode>();
 	qRegisterMetaType<Hub4State>();
 	qRegisterMetaType<QList<quint16> >();
+
+	mTimeZone->consume("com.victronenergy.settings", "/Settings/System/TimeZone");
+	mTimeZone->getValue();
 
 	for (int i=1; i<=2; ++i) {
 		AcSensor *m = new AcSensor(portName, i, this);
@@ -42,6 +47,9 @@ DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 			this, SLOT(onSerialEvent(const char *)));
 	connect(mServiceMonitor, SIGNAL(servicesChanged()),
 			this, SLOT(onServicesChanged()));
+	connect(mSettings, SIGNAL(stateChanged()),
+			this, SLOT(onHub4StateChanged()));
+	connect(mTimeZone, SIGNAL(valueChanged()), this, SLOT(onTimeZoneChanged()));
 	updateMultiBridge();
 }
 
@@ -159,6 +167,15 @@ void DBusCGwacs::onMultiPhaseChanged()
 void DBusCGwacs::onIsSetPointAvailableChanged()
 {
 	updateControlLoop();
+}
+
+void DBusCGwacs::onTimeZoneChanged()
+{
+	QString timeZone = mTimeZone->getValue().toString();
+	setenv("TZ", timeZone.toLatin1(), 1);
+	QDateTime time = QDateTime::currentDateTime();
+	QLOG_INFO() << "Changed time zone to:" << timeZone
+				<< "current local time is:" << time.toString();
 }
 
 void DBusCGwacs::onConnectionLost()

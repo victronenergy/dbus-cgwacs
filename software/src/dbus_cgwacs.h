@@ -13,6 +13,7 @@ class Hub4ManagerBridge;
 class ModbusRtu;
 class Multi;
 class Settings;
+class VBusItem;
 
 /*!
  * Main object which ties everything together.
@@ -58,6 +59,8 @@ private slots:
 
 	void onIsSetPointAvailableChanged();
 
+	void onTimeZoneChanged();
+
 private:
 	void updateControlLoop();
 
@@ -69,6 +72,7 @@ private:
 	Settings *mSettings;
 	Multi *mMulti;
 	QList<ControlLoop *> mControlLoops;
+	VBusItem *mTimeZone;
 };
 
 #endif // DBUS_CGWACS_H
