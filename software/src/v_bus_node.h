@@ -24,7 +24,7 @@ class VBusItem;
 class VBusNode : public QDBusAbstractAdaptor
 {
 	Q_OBJECT
-	Q_CLASSINFO("D-Bus Interface", "com.victronenergy.BusNode")
+	Q_CLASSINFO("D-Bus Interface", "com.victronenergy.BusItem")
 public:
 	VBusNode(QDBusConnection &connection, const QString &path, QObject *parent);
 
