@@ -46,6 +46,10 @@ double PowerInfo::power() const
 
 void PowerInfo::setPower(double p)
 {
+	const double Fc = 0.5;
+	const double Dt = 0.5;
+	const double Alpha = Fc/(Fc + 1/(2 * M_PI * Dt));
+	p = qIsNaN(mPower) ? p : (1 - Alpha) * mPower + Alpha * p;
 	if (valuesEqual(mPower, p))
 		return;
 	mPower = p;
