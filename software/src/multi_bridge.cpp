@@ -30,12 +30,15 @@ bool MultiBridge::toDBus(const QString &path, QVariant &v)
 {
 	if (path == "/Mode") {
 		v = QVariant(static_cast<int>(v.value<MultiMode>()));
-	} else if (path == "/State") {
-		return false;
+		return true;
+	} else if (path.endsWith("/AcPowerSetpoint")) {
+		v = QVariant::fromValue(static_cast<int>(v.toDouble()));
+		return true;
 	} else if (path == "/Hub4/DisableCharge" || path == "/Hub4/DisableFeedback") {
 		v = v.toBool() ? 1 : 0;
+		return true;
 	}
-	return true;
+	return false;
 }
 
 bool MultiBridge::fromDBus(const QString &path, QVariant &v)
@@ -46,6 +49,8 @@ bool MultiBridge::fromDBus(const QString &path, QVariant &v)
 		v = QVariant::fromValue(static_cast<MultiMode>(v.toInt()));
 	} else if (path == "/State") {
 		v = QVariant::fromValue(static_cast<MultiState>(v.toInt()));
+	} else if (path.endsWith("/DisableCharge") || path.endsWith("/DisableFeedback")) {
+		v = v.toInt() != 0;
 	}
 	return true;
 }
