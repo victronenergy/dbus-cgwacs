@@ -221,10 +221,21 @@ void DBusCGwacs::updateControlLoop()
 			mControlLoops.append(new ControlLoop(mMulti, PhaseL2, gridMeter, mSettings, 0, this));
 			mControlLoops.append(new ControlLoop(mMulti, PhaseL3, gridMeter, mSettings, 0, this));
 			break;
+		case Hub4Disabled:
+		default:
+			QLOG_INFO() << "Control loop: disabled";
+			break;
 		}
 	} else {
-		QLOG_INFO() << "Control loop: single phase";
-		mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, 0, this));
+		switch (settings->hub4Mode()) {
+		case Hub4Disabled:
+			QLOG_INFO() << "Control loop: disabled";
+			break;
+		default:
+			QLOG_INFO() << "Control loop: single phase";
+			mControlLoops.append(new ControlLoop(mMulti, PhaseL1, gridMeter, mSettings, 0, this));
+			break;
+		}
 	}
 }
 
