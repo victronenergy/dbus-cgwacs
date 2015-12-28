@@ -15,7 +15,7 @@ ModbusRtu::ModbusRtu(const QString &portName, int baudrate,
 	// The pointer returned by mPortName.data() will remain valid as long as
 	// mPortName exists and is not changed.
 	mSerialPort.dev = mPortName.data();
-	mSerialPort.baudrate = baudrate;
+	mSerialPort.baudrate = static_cast<un32>(baudrate);
 	mSerialPort.intLevel = 2;
 	mSerialPort.rxCallback = onDataRead;
 	mSerialPort.eventCallback = onSerialEvent;
@@ -70,7 +70,7 @@ void ModbusRtu::onTimeout()
 	QMutexLocker lock(&mMutex);
 	if (mState == Idle || mState == Process)
 		return;
-	int cs = mCurrentSlave;
+	quint8 cs = mCurrentSlave;
 	resetStateEngine();
 	processPending();
 	mMutex.unlockInline();
@@ -80,7 +80,7 @@ void ModbusRtu::onTimeout()
 void ModbusRtu::processPacket()
 {
 	QMutexLocker lock(&mMutex);
-	int cs = mCurrentSlave;
+	quint8 cs = mCurrentSlave;
 	if (mCrc != mCrcBuilder.getValue()) {
 		resetStateEngine();
 		processPending();
@@ -89,7 +89,7 @@ void ModbusRtu::processPacket()
 		return;
 	}
 	if ((mFunction & 0x80) != 0) {
-		quint8 errorCode = mData[0];
+		quint8 errorCode = static_cast<quint8>(mData[0]);
 		resetStateEngine();
 		processPending();
 		mMutex.unlockInline();
@@ -111,7 +111,7 @@ void ModbusRtu::processPacket()
 	{
 		QList<quint16> registers;
 		for (int i=0; i<mData.length(); i+=2) {
-			registers.append(toUInt16(mData[i], mData[i + 1]));
+			registers.append(toUInt16(mData, i));
 		}
 		resetStateEngine();
 		processPending();
@@ -121,7 +121,7 @@ void ModbusRtu::processPacket()
 	}
 	case WriteSingleRegister:
 	{
-		quint16 value = toUInt16(mData[0], mData[1]);
+		quint16 value = toUInt16(mData, 0);
 		quint16 startAddress = mStartAddress;
 		resetStateEngine();
 		processPending();
@@ -178,7 +178,7 @@ void ModbusRtu::handleByteRead(quint8 b)
 		}
 		break;
 	case StartAddressMsb:
-		mStartAddress = b << 8;
+		mStartAddress = static_cast<quint16>(b << 8);
 		mState = StartAddressLsb;
 		break;
 	case StartAddressLsb:
@@ -188,7 +188,7 @@ void ModbusRtu::handleByteRead(quint8 b)
 		break;
 	case Data:
 		if (mCount > 0) {
-			mData.append(b);
+			mData.append(static_cast<char>(b));
 			--mCount;
 		}
 		if (mCount == 0) {
@@ -197,7 +197,7 @@ void ModbusRtu::handleByteRead(quint8 b)
 		}
 		break;
 	case CrcMsb:
-		mCrc = b << 8;
+		mCrc = static_cast<quint16>(b << 8);
 		mState = CrcLsb;
 		break;
 	case CrcLsb:
@@ -244,12 +244,12 @@ void ModbusRtu::_readRegisters(ModbusRtu::FunctionCode function,
 	Q_ASSERT(mState == Idle);
 	QByteArray frame;
 	frame.reserve(8);
-	frame.append(slaveAddress);
-	frame.append(function);
-	frame.append(msb(startReg));
-	frame.append(lsb(startReg));
-	frame.append(msb(count));
-	frame.append(lsb(count));
+	frame.append(static_cast<char>(slaveAddress));
+	frame.append(static_cast<char>(function));
+	frame.append(static_cast<char>(msb(startReg)));
+	frame.append(static_cast<char>(lsb(startReg)));
+	frame.append(static_cast<char>(msb(count)));
+	frame.append(static_cast<char>(lsb(count)));
 	send(frame);
 }
 
@@ -259,12 +259,12 @@ void ModbusRtu::_writeRegister(ModbusRtu::FunctionCode function,
 	Q_ASSERT(mState == Idle);
 	QByteArray frame;
 	frame.reserve(8);
-	frame.append(slaveAddress);
-	frame.append(function);
-	frame.append(msb(reg));
-	frame.append(lsb(reg));
-	frame.append(msb(value));
-	frame.append(lsb(value));
+	frame.append(static_cast<char>(slaveAddress));
+	frame.append(static_cast<char>(function));
+	frame.append(static_cast<char>(msb(reg)));
+	frame.append(static_cast<char>(lsb(reg)));
+	frame.append(static_cast<char>(msb(value)));
+	frame.append(static_cast<char>(lsb(value)));
 	send(frame);
 }
 
@@ -272,8 +272,8 @@ void ModbusRtu::send(QByteArray &data)
 {
 	Q_ASSERT(mState == Idle);
 	quint16 crc = Crc16::getValue(data);
-	data.append(msb(crc));
-	data.append(lsb(crc));
+	data.append(static_cast<char>(msb(crc)));
+	data.append(static_cast<char>(lsb(crc)));
 	// Modbus requires a pause between sending of 3.5 times the interval needed
 	// to send a character. We use 4 characters here, just in case...
 	// We also assume 10 bits per caracter (8 data bits, 1 stop bit and 1 parity
@@ -283,10 +283,11 @@ void ModbusRtu::send(QByteArray &data)
 	// us the time in seconds. usleep wants time in microseconds, so we have to
 	// multiply by 1 million.
 	usleep((4 * 10 * 1000 * 1000) / mSerialPort.baudrate);
-	veSerialPutBuf(&mSerialPort, (quint8 *)data.data(), data.size());
+	veSerialPutBuf(&mSerialPort, reinterpret_cast<un8 *>(data.data()),
+				   static_cast<un32>(data.size()));
 	mTimer->start();
 	mState = Address;
-	mCurrentSlave = static_cast<int>(data[0]);
+	mCurrentSlave = static_cast<quint8>(data[0]);
 }
 
 void ModbusRtu::onDataRead(VeSerialPortS *port, const quint8 *buffer,
