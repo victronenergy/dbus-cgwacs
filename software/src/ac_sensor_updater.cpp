@@ -20,7 +20,8 @@ static const int NoError = 0;
 static const int ErrorFronSelectorLocked = 1;
 
 static const int FrontSelectorWaitInterval = 5 * 1000; // 5 seconds in ms
-static const int ConnectionLostWaitInterval = 60 * 1000;  // 60 seconds in ms
+static const int ReconnectInterval = 15 * 1000;  // 15 seconds in ms
+static const int ZigbeeReconnectInterval = 30 * 1000;  // 30 seconds in ms
 static const int UpdateSettingsInterval = 10 * 60 * 1000; // 10 minutes in ms
 
 enum ParameterType {
@@ -121,7 +122,8 @@ int getMaxOffset(const CompositeCommand &cmd) {
 	return maxOffset;
 }
 
-AcSensorUpdater::AcSensorUpdater(AcSensor *acSensor, AcSensor *acPvSensor, ModbusRtu *modbus, QObject *parent):
+AcSensorUpdater::AcSensorUpdater(AcSensor *acSensor, AcSensor *acPvSensor, ModbusRtu *modbus,
+								 bool isZigbee, QObject *parent):
 	QObject(parent),
 	mDataProcessor(0),
 	mPvDataProcessor(0),
@@ -134,6 +136,7 @@ AcSensorUpdater::AcSensorUpdater(AcSensor *acSensor, AcSensor *acPvSensor, Modbu
 	mTimeoutCount(0),
 	mMeasuringSystem(0),
 	mDesiredMeasuringSystem(0),
+	mIsZigbee(isZigbee),
 	mSetupRequested(false),
 	mApplication(0),
 	mState(DeviceId),
@@ -224,7 +227,7 @@ void AcSensorUpdater::onErrorReceived(int errorType, quint8 addr, int exception)
 			mDataProcessor = 0;
 			delete mPvDataProcessor;
 			mPvDataProcessor = 0;
-			mTimeoutCount = MaxTimeoutCount - 1;
+			mTimeoutCount = MaxTimeoutCount;
 			mAcSensor->setSerial(QString());
 			mAcSensor->resetValues();
 			mAcSensor->setConnectionState(Disconnected);
@@ -538,7 +541,7 @@ void AcSensorUpdater::startNextAction()
 		break;
 	}
 	case WaitOnConnectionLost:
-		mAcquisitionTimer->setInterval(ConnectionLostWaitInterval);
+		mAcquisitionTimer->setInterval(mIsZigbee ? ZigbeeReconnectInterval : ReconnectInterval);
 		mAcquisitionTimer->start();
 		break;
 	case SetAddress:

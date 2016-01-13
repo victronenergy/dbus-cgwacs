@@ -27,7 +27,7 @@ DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 	for (int i=1; i<=2; ++i) {
 		AcSensor *m = new AcSensor(portName, i, this);
 		AcSensor *pv = new AcSensor(portName, i, this);
-		new AcSensorUpdater(m, pv, mModbus, m);
+		new AcSensorUpdater(m, pv, mModbus, isZigbee, m);
 		mAcSensors.append(m);
 		connect(m, SIGNAL(connectionStateChanged()),
 				this, SLOT(onConnectionStateChanged()));

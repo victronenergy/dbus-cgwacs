@@ -40,7 +40,8 @@ public:
 	 * between multiple `AcSensorUpdater` objects. The `modbus` object will not
 	 * be deleted in the destructor.
 	 */
-	AcSensorUpdater(AcSensor *acSensor, AcSensor *acPvSensor, ModbusRtu *modbus, QObject *parent = 0);
+	AcSensorUpdater(AcSensor *acSensor, AcSensor *acPvSensor, ModbusRtu *modbus, bool isZigbee,
+					QObject *parent = 0);
 
 	/*!
 	 * Returns the storage object.
@@ -141,6 +142,7 @@ private:
 	int mTimeoutCount;
 	int mMeasuringSystem;
 	int mDesiredMeasuringSystem;
+	bool mIsZigbee;
 	bool mSetupRequested;
 	int mApplication;
 	QElapsedTimer mStopwatch;
