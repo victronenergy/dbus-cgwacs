@@ -4,8 +4,7 @@
 #include "defines.h"
 #include "modbus_rtu.h"
 
-ModbusRtu::ModbusRtu(const QString &portName, int baudrate,
-					 QObject *parent):
+ModbusRtu::ModbusRtu(const QString &portName, int baudrate, int timeout, QObject *parent):
 	QObject(parent),
 	mPortName(portName.toLatin1()),
 	mTimer(new QTimer(this)),
@@ -24,7 +23,7 @@ ModbusRtu::ModbusRtu(const QString &portName, int baudrate,
 	mData.reserve(16);
 
 	resetStateEngine();
-	mTimer->setInterval(250);
+	mTimer->setInterval(timeout);
 	connect(mTimer, SIGNAL(timeout()), this, SLOT(onTimeout()));
 }
 

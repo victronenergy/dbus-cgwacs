@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
 
 	bool expectVerbosity = false;
 	bool expectDBusAddress = false;
+	bool isZigbee = false;
 	QString portName;
 	QString dbusAddress = "system";
 	QStringList args = app.arguments();
@@ -97,6 +98,8 @@ int main(int argc, char *argv[])
 			logger.setIncludeTimestamp(true);
 		} else if (arg == "-b" || arg == "--dbus") {
 			expectDBusAddress = true;
+		} else if (arg == "-z" || arg == "--zigbee") {
+			isZigbee = true;
 		} else if (!arg.startsWith('-')) {
 			portName = arg;
 		}
@@ -111,7 +114,7 @@ int main(int argc, char *argv[])
 
 	initDBus(dbusAddress);
 
-	DBusCGwacs a(portName);
+	DBusCGwacs a(portName, isZigbee);
 
 	app.connect(&a, SIGNAL(connectionLost()), &app, SLOT(quit()));
 

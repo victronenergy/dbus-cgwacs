@@ -13,10 +13,10 @@
 #include "settings.h"
 #include "settings_bridge.h"
 
-DBusCGwacs::DBusCGwacs(const QString &portName, QObject *parent):
+DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 	QObject(parent),
 	mServiceMonitor(new DbusServiceMonitor("com.victronenergy.vebus", this)),
-	mModbus(new ModbusRtu(portName, 9600, this))
+	mModbus(new ModbusRtu(portName, 9600, isZigbee ? 2000 : 250, this))
 {
 	qRegisterMetaType<ConnectionState>();
 	qRegisterMetaType<Position>();

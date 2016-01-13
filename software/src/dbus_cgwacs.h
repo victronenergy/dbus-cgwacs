@@ -30,7 +30,7 @@ class DBusCGwacs : public QObject
 {
 	Q_OBJECT
 public:
-	DBusCGwacs(const QString &portName, QObject *parent = 0);
+	DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent = 0);
 
 signals:
 	void connectionLost();

@@ -68,7 +68,7 @@ public:
 		Unsupported
 	};
 
-	ModbusRtu(const QString &portName, int baudrate, QObject *parent = 0);
+	ModbusRtu(const QString &portName, int baudrate, int timeout, QObject *parent = 0);
 
 	~ModbusRtu();
 
