@@ -12,6 +12,7 @@ Hub4ControlBridge::Hub4ControlBridge(Settings *settings, QObject *parent):
 	produce(settings, "state", "/State");
 	produce(settings, "maintenanceInterval", "/Maintenance/Interval");
 	produce(settings, "maintenanceDate", "/Maintenance/Date");
+	produce("/DeviceInstance", 0);
 	registerService();
 }
 
