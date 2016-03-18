@@ -1,16 +1,15 @@
 #include <QTimer>
 #include "ac_sensor.h"
+#include "battery_info.h"
 #include "charge_phase_control.h"
 #include "defines.h"
 #include "multi.h"
+#include "multi_phase_data.h"
 
-ChargePhaseControl::ChargePhaseControl(Multi *multi, AcSensor *acSensor,
-									   Settings *settings, Phase phase,
+ChargePhaseControl::ChargePhaseControl(Multi *multi, AcSensor *acSensor, Settings *settings,
 									   QObject *parent):
 	ControlLoop(multi, settings, parent),
-	mMultiTargetPhase(multi->getPhaseData(phase)),
-	mAcSensorPhase(acSensor->getPowerInfo(phase)),
-	mPhase(phase)
+	mAcSensor(acSensor)
 {
 	QTimer *timer = new QTimer(this);
 	timer->setInterval(5000);
@@ -20,5 +19,13 @@ ChargePhaseControl::ChargePhaseControl(Multi *multi, AcSensor *acSensor,
 
 void ChargePhaseControl::onTimer()
 {
-	adjustSetpoint(mAcSensorPhase, mPhase, mMultiTargetPhase, MaxMultiPower);
+	int spcount = qMax(1, multi()->getSetpointCount());
+	double power = batteryInfo()->maxChargePower() / spcount;
+	for (int p=0; p<3; ++p) {
+		Phase phase = static_cast<Phase>(PhaseL1 + p);
+		PowerInfo *pi = mAcSensor->getPowerInfo(phase);
+		MultiPhaseData *mpd = multi()->getPhaseData(phase);
+		if (mpd->isSetPointAvailable())
+			adjustSetpoint(pi, phase, mpd, power);
+	}
 }

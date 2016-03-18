@@ -3,12 +3,13 @@
 
 #include "dbus_bridge.h"
 
+class BatteryInfo;
 class Settings;
 
 class Hub4ControlBridge : public DBusBridge
 {
 public:
-	explicit Hub4ControlBridge(Settings *settings, QObject *parent = 0);
+	Hub4ControlBridge(BatteryInfo *batteryInfo, Settings *settings, QObject *parent = 0);
 
 protected:
 	virtual bool toDBus(const QString &path, QVariant &value);

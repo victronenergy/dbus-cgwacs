@@ -87,7 +87,12 @@ SOURCES += \
     src/maintenance_control.cpp \
     src/phase_compensation_control.cpp \
     src/single_phase_control.cpp \
-    src/charge_phase_control.cpp
+    src/charge_phase_control.cpp \
+    src/battery.cpp \
+    src/battery_bridge.cpp \
+    src/multi_phase_control.cpp \
+    src/split_phase_control.cpp \
+    src/battery_info.cpp
 
 HEADERS += \
     ext/velib/src/qt/v_busitem_adaptor.h \
@@ -124,4 +129,9 @@ HEADERS += \
     src/maintenance_control.h \
     src/phase_compensation_control.h \
     src/single_phase_control.h \
-    src/charge_phase_control.h
+    src/charge_phase_control.h \
+    src/battery.h \
+    src/battery_bridge.h \
+    src/multi_phase_control.h \
+    src/split_phase_control.h \
+    src/battery_info.h

@@ -1,5 +1,6 @@
 #include <QsLog.h>
 #include <QTimer>
+#include "battery_info.h"
 #include "control_loop.h"
 #include "defines.h"
 #include "multi.h"
@@ -10,10 +11,16 @@
 ControlLoop::ControlLoop(Multi *multi, Settings *settings, QObject *parent):
 	QObject(parent),
 	mMulti(multi),
-	mSettings(settings)
+	mSettings(settings),
+	mBatteryInfo(0)
 {
 	Q_ASSERT(multi != 0);
 	Q_ASSERT(settings != 0);
+}
+
+void ControlLoop::setBatteryInfo(BatteryInfo *c)
+{
+	mBatteryInfo = c;
 }
 
 void ControlLoop::adjustSetpoint(PowerInfo *source, Phase targetPhase, MultiPhaseData *target,
@@ -28,29 +35,16 @@ void ControlLoop::adjustSetpoint(PowerInfo *source, Phase targetPhase, MultiPhas
 		// Old code was: setpoint = 0.8 * change + acPowerIn. with change = setpoint - acPowerIn
 		setpoint = 0.2 * target->acPowerIn() + 0.8 * setpoint;
 	}
-	double maxChargePct = qMax(0.0, qMin(100.0, mSettings->maxChargePercentage()));
-	double maxDischargePct = qMax(0.0, qMin(100.0, mSettings->maxDischargePercentage()));
-	// Compute the maximum charge power of the battery. We use it here to limit
-	// the setpoint. Obviously, this will only work when a single ContolLoop
-	// instance is active. This means a single multi with hub-4 assistant.
-	double maxPower = maxChargePct <= 99 ?
-			maxChargePct *
-			mMulti->maxChargeCurrent() *
-			mMulti->dcVoltage() / 100:
-			MaxMultiPower;
 
-	bool feedbackDisabled = maxDischargePct < 50;
-	// It seems that enabling the the ChargeDisabled flag disables both charge
-	// and discharge. So we're only setting the flags when we are not
-	// discharging.
-	bool chargeDisabled = maxChargePct <= 0 && (
+	bool feedbackDisabled = mBatteryInfo->maxDischargePower() <= 0;
+	// It seems that enabling the the ChargeDisabled flag disables both charge and discharge. So
+	// we're only setting the flags when we are not discharging.
+	bool chargeDisabled = mBatteryInfo->maxChargePower() <= 0 && (
 		feedbackDisabled || (
 			qIsFinite(setpoint) &&
 			setpoint > 30));
 	if (qIsFinite(setpoint)) {
-		// Make sure we do not send illegal values and honor the max power
-		// derived from the max charge percentage.
-		setpoint = qBound(MinMultiPower, setpoint, maxPower);
+		setpoint = qBound(MinMultiPower, setpoint, MaxMultiPower);
 
 		// Ugly workaround: the value of pMultiNew must always be sent over the
 		// D-Bus, even when it does not change, because the multi will reset its

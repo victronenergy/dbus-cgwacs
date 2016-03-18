@@ -6,6 +6,7 @@
 
 class AcSensor;
 class AcSensorSettings;
+class BatteryInfo;
 class ControlLoop;
 class DbusServiceMonitor;
 class MaintenanceControl;
@@ -48,7 +49,9 @@ private slots:
 
 	void onSerialEvent(const char *description);
 
-	void onServicesChanged();
+	void onServiceAdded(QString service);
+
+	void onServiceRemoved(QString service);
 
 	void onServiceTypeChanged();
 
@@ -65,19 +68,19 @@ private slots:
 private:
 	void updateControlLoop();
 
-	void updateMultiBridge();
+	void updateBatteryLimits();
 
-	void publishSensor(AcSensor *sensor, AcSensor *pvSensor,
-					   AcSensorSettings *sensorSettings);
+	void publishSensor(AcSensor *sensor, AcSensor *pvSensor, AcSensorSettings *sensorSettings);
 
 	DbusServiceMonitor *mServiceMonitor;
 	ModbusRtu *mModbus;
-	QList<AcSensor *> mAcSensors;
 	Settings *mSettings;
 	Multi *mMulti;
 	MaintenanceControl *mMaintenanceControl;
-	QList<ControlLoop *> mControlLoops;
+	ControlLoop *mControlLoop;
+	BatteryInfo *mBatteryInfo;
 	VBusItem *mTimeZone;
+	QList<AcSensor *> mAcSensors;
 };
 
 #endif // DBUS_CGWACS_H

@@ -5,6 +5,7 @@
 #include "ac_sensor_settings.h"
 #include "ac_sensor_settings_bridge.h"
 #include "ac_sensor_updater.h"
+#include "battery_info.h"
 #include "charge_phase_control.h"
 #include "dbus_cgwacs.h"
 #include "dbus_service_monitor.h"
@@ -17,12 +18,17 @@
 #include "settings.h"
 #include "settings_bridge.h"
 #include "single_phase_control.h"
+#include "split_phase_control.h"
 
 DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 	QObject(parent),
-	mServiceMonitor(new DbusServiceMonitor("com.victronenergy.vebus", this)),
+	mServiceMonitor(new DbusServiceMonitor(this)),
 	mModbus(new ModbusRtu(portName, 9600, isZigbee ? 2000 : 250, this)),
+	mSettings(new Settings(this)),
+	mMulti(new Multi(this)),
 	mMaintenanceControl(0),
+	mControlLoop(0),
+	mBatteryInfo(new BatteryInfo(mServiceMonitor, mMulti, mSettings)),
 	mTimeZone(new VBusItem(this))
 {
 	qRegisterMetaType<ConnectionState>();
@@ -31,9 +37,11 @@ DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 	qRegisterMetaType<Hub4State>();
 	qRegisterMetaType<QList<quint16> >();
 
+	connect(mTimeZone, SIGNAL(valueChanged()), this, SLOT(onTimeZoneChanged()));
 	mTimeZone->consume("com.victronenergy.settings", "/Settings/System/TimeZone");
 	mTimeZone->getValue();
 
+	connect(mModbus, SIGNAL(serialEvent(const char *)), this, SLOT(onSerialEvent(const char *)));
 	for (int i=1; i<=2; ++i) {
 		AcSensor *m = new AcSensor(portName, i, this);
 		AcSensor *pv = new AcSensor(portName, i, this);
@@ -42,23 +50,19 @@ DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 		connect(m, SIGNAL(connectionStateChanged()),
 				this, SLOT(onConnectionStateChanged()));
 	}
-	mSettings = new Settings(this);
+
+	connect(mSettings, SIGNAL(stateChanged()), this, SLOT(onHub4StateChanged()));
 	new SettingsBridge(mSettings, this);
 
-	mMulti = new Multi(this);
 	for (int i=0; i<3; ++i) {
 		Phase phase = static_cast<Phase>(PhaseL1 + i);
 		connect(mMulti->getPhaseData(phase), SIGNAL(isSetPointAvailableChanged()),
 				this, SLOT(onIsSetPointAvailableChanged()));
 	}
-	connect(mModbus, SIGNAL(serialEvent(const char *)),
-			this, SLOT(onSerialEvent(const char *)));
-	connect(mServiceMonitor, SIGNAL(servicesChanged()),
-			this, SLOT(onServicesChanged()));
-	connect(mSettings, SIGNAL(stateChanged()),
-			this, SLOT(onHub4StateChanged()));
-	connect(mTimeZone, SIGNAL(valueChanged()), this, SLOT(onTimeZoneChanged()));
-	updateMultiBridge();
+
+	connect(mServiceMonitor, SIGNAL(serviceAdded(QString)), this, SLOT(onServiceAdded(QString)));
+	connect(mServiceMonitor, SIGNAL(serviceRemoved(QString)), this, SLOT(onServiceRemoved(QString)));
+	mServiceMonitor->start();
 }
 
 void DBusCGwacs::onConnectionStateChanged()
@@ -201,16 +205,33 @@ void DBusCGwacs::onSerialEvent(const char *description)
 	exit(1);
 }
 
-void DBusCGwacs::onServicesChanged()
+void DBusCGwacs::onServiceAdded(QString service)
 {
-	updateMultiBridge();
+	if (service.startsWith("com.victronenergy.vebus.")) {
+		MultiBridge *bridge = mMulti->findChild<MultiBridge *>();
+		if (bridge == 0) {
+			QLOG_INFO() << "Multi found @" << service;
+			new MultiBridge(mMulti, service, mMulti);
+		}
+	}
+}
+
+void DBusCGwacs::onServiceRemoved(QString service)
+{
+	if (service.startsWith("com.victronenergy.vebus.")) {
+		MultiBridge *bridge = mMulti->findChild<MultiBridge *>();
+		if (bridge != 0 && bridge->serviceName() == service) {
+			QLOG_INFO() << "Multi @" << bridge->serviceName() << "disappeared.";
+			delete bridge;
+			bridge = 0;
+		}
+	}
 }
 
 void DBusCGwacs::updateControlLoop()
 {
-	foreach (ControlLoop *c, mControlLoops)
-		delete c;
-	mControlLoops.clear();
+	delete mControlLoop;
+	mControlLoop = 0;
 	AcSensor *gridMeter = 0;
 	AcSensorSettings *settings = 0;
 	foreach (AcSensor *em, mAcSensors) {
@@ -250,15 +271,7 @@ void DBusCGwacs::updateControlLoop()
 	// setpoint. Of cource, the ControlLoop classes should check for the
 	// presence of the setpoint regularly.
 	if (charge) {
-		if (settings->isMultiPhase()) {
-			for (int i=0; i<3; ++i) {
-				Phase phase = static_cast<Phase>(PhaseL1 + i);
-				QLOG_INFO() << QString("Control loop: charging phase L%1").arg(phase);
-				mControlLoops.append(new ChargePhaseControl(mMulti, gridMeter, mSettings, phase));
-			}
-		} else {
-			mControlLoops.append(new ChargePhaseControl(mMulti, gridMeter, mSettings, PhaseL1));
-		}
+		mControlLoop = new ChargePhaseControl(mMulti, gridMeter, mSettings);
 	} else if (settings->isMultiPhase()) {
 		switch (settings->hub4Mode()) {
 		case Hub4SinglePhaseCompensation:
@@ -266,20 +279,17 @@ void DBusCGwacs::updateControlLoop()
 			QList<Phase> setpointPhases = mMulti->getSetpointPhases();
 			Phase phase = setpointPhases.isEmpty() ? PhaseL1 : setpointPhases.first();
 			QLOG_INFO() << QString("Control loop: multi phase, phase L%1").arg(phase);
-			mControlLoops.append(new SinglePhaseControl(mMulti, gridMeter, mSettings,
-														phase, Hub4PhaseCompensation, this));
+			mControlLoop = new SinglePhaseControl(mMulti, gridMeter, mSettings, phase,
+												  Hub4PhaseCompensation, this);
 			break;
 		}
 		case Hub4PhaseCompensation:
 			QLOG_INFO() << "Control loop: multi phase, phase compensation";
-			mControlLoops.append(new PhaseCompensationControl(mMulti, gridMeter, mSettings, this));
+			mControlLoop = new PhaseCompensationControl(mMulti, gridMeter, mSettings, this);
 			break;
 		case Hub4PhaseSplit:
-			for (int i=0; i<3; ++i) {
-				Phase phase = static_cast<Phase>(PhaseL1 + i);
-				QLOG_INFO() << QString("Control loop: phase split, phase L%1").arg(phase);
-				mControlLoops.append(new SinglePhaseControl(mMulti, gridMeter, mSettings, phase, Hub4PhaseSplit, this));
-			}
+			QLOG_INFO() << "Control loop: split phase control";
+			mControlLoop = new SplitPhaseControl(mMulti, gridMeter, mSettings, this);
 			break;
 		case Hub4PhaseL1:
 		case Hub4Disabled:
@@ -294,33 +304,20 @@ void DBusCGwacs::updateControlLoop()
 			break;
 		default:
 			QLOG_INFO() << "Control loop: single phase";
-			mControlLoops.append(new SinglePhaseControl(mMulti, gridMeter, mSettings, PhaseL1, Hub4PhaseL1, this));
+			mControlLoop = new SinglePhaseControl(mMulti, gridMeter, mSettings, PhaseL1,
+												  Hub4PhaseL1, this);
 			break;
 		}
 	}
+	mControlLoop->setBatteryInfo(mBatteryInfo);
 }
 
-void DBusCGwacs::updateMultiBridge()
-{
-	QList<QString> services = mServiceMonitor->services();
-	MultiBridge *bridge = mMulti->findChild<MultiBridge *>();
-	if (bridge != 0 && !services.contains(bridge->serviceName())) {
-		QLOG_INFO() << "Multi @" << bridge->serviceName() << "disappeared.";
-		delete bridge;
-		bridge = 0;
-	}
-	if (bridge == 0 && !services.isEmpty()) {
-		QLOG_INFO() << "Multi found @" << services.first();
-		new MultiBridge(mMulti, services.first(), mMulti);
-	}
-}
-
-void DBusCGwacs::publishSensor(AcSensor *acSensor, AcSensor *pvSensor, AcSensorSettings *acSensorSettings)
+void DBusCGwacs::publishSensor(AcSensor *acSensor, AcSensor *pvSensor,
+							   AcSensorSettings *acSensorSettings)
 {
 	AcSensorBridge *bridge = new AcSensorBridge(acSensor, acSensorSettings, false, acSensor);
-	if (acSensorSettings->serviceType() == "grid") {
-		new Hub4ControlBridge(mSettings, bridge);
-	}
+	if (acSensorSettings->serviceType() == "grid")
+		new Hub4ControlBridge(mBatteryInfo, mSettings, bridge);
 	if (!acSensorSettings->l2ServiceType().isEmpty())
 		new AcSensorBridge(pvSensor, acSensorSettings, true, pvSensor);
 }

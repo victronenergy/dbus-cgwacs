@@ -35,8 +35,6 @@ private:
 
 	double computeSetpoint() const;
 
-	Multi *mMulti;
-	Settings *mSettings;
 	QTimer *mTimer;
 	Phase mPhase;
 	MultiPhaseData *mMultiTargetPhase;

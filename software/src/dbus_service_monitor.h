@@ -12,14 +12,15 @@
 class DbusServiceMonitor : public QObject
 {
 	Q_OBJECT
-	Q_PROPERTY(QList<QString> services READ services NOTIFY servicesChanged)
 public:
-	explicit DbusServiceMonitor(const QString &prefix, QObject *parent = 0);
+	explicit DbusServiceMonitor(QObject *parent = 0);
 
-	QList<QString> services() const;
+	void start();
 
 signals:
-	void servicesChanged();
+	void serviceAdded(QString service);
+
+	void serviceRemoved(QString service);
 
 private slots:
 	void onServiceOwnerChanged(const QString &name, const QString &oldOwner,
@@ -30,8 +31,7 @@ private:
 
 	void processOldService(const QString &name);
 
-	QString mPrefix;
-	QList<QString> mServices;
+	static bool isVictronService(const QString &name);
 };
 
 #endif // DBUS_SERVICE_MONITOR_H

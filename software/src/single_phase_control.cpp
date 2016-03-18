@@ -1,6 +1,7 @@
 #include <QsLog.h>
 #include <QTimer>
 #include "ac_sensor.h"
+#include "battery_info.h"
 #include "defines.h"
 #include "multi.h"
 #include "multi_phase_data.h"
@@ -8,12 +9,9 @@
 #include "settings.h"
 #include "single_phase_control.h"
 
-SinglePhaseControl::SinglePhaseControl(Multi *multi, AcSensor *acSensor,
-									   Settings *settings, Phase phase,
-									   Hub4Mode hub4Mode, QObject *parent):
+SinglePhaseControl::SinglePhaseControl(Multi *multi, AcSensor *acSensor, Settings *settings,
+									   Phase phase, Hub4Mode hub4Mode, QObject *parent):
 	ControlLoop(multi, settings, parent),
-	mMulti(multi),
-	mSettings(settings),
 	mTimer(new QTimer(this)),
 	mPhase(phase),
 	mMultiTargetPhase(multi->getPhaseData(phase)),
@@ -28,7 +26,6 @@ SinglePhaseControl::SinglePhaseControl(Multi *multi, AcSensor *acSensor,
 	Q_ASSERT(settings != 0);
 	mTimer->setInterval(5000);
 	mTimer->start();
-	connect(mMulti, SIGNAL(destroyed()), this, SLOT(deleteLater()));
 	connect(mMultiTargetPhase, SIGNAL(acPowerInChanged()),
 			this, SLOT(onPowerFromMulti()));
 	connect(acSensor, SIGNAL(destroyed()), this, SLOT(deleteLater()));
@@ -70,12 +67,10 @@ void SinglePhaseControl::checkStep()
 void SinglePhaseControl::performStep()
 {
 	double pNet = mAcSensorPhase->power();
-	double gridSetpoint = mSettings->acPowerSetPoint();
-	if (mHub4Mode == Hub4PhaseSplit && qAbs(gridSetpoint) > 1) {
-		int phaseCount = mMulti->getSetpointCount();
-		if (phaseCount > 0)
-			gridSetpoint /= phaseCount;
-	}
+	double gridSetpoint = settings()->acPowerSetPoint();
 	double setpoint = mMultiTargetPhase->acPowerIn() + gridSetpoint - pNet;
+	BatteryInfo *bi = batteryInfo();
+	if (bi != 0)
+		setpoint = bi->applyLimits(setpoint);
 	adjustSetpoint(mAcSensorPhase, mPhase, mMultiTargetPhase, setpoint);
 }

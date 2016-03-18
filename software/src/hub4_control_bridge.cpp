@@ -1,8 +1,9 @@
 #include <cmath>
+#include "battery_info.h"
 #include "hub4_control_bridge.h"
 #include "settings.h"
 
-Hub4ControlBridge::Hub4ControlBridge(Settings *settings, QObject *parent):
+Hub4ControlBridge::Hub4ControlBridge(BatteryInfo *batteryInfo, Settings *settings, QObject *parent):
 	DBusBridge("com.victronenergy.hub4", parent)
 {
 	Q_ASSERT(settings != 0);
@@ -12,6 +13,8 @@ Hub4ControlBridge::Hub4ControlBridge(Settings *settings, QObject *parent):
 	produce(settings, "state", "/State");
 	produce(settings, "maintenanceInterval", "/Maintenance/Interval");
 	produce(settings, "maintenanceDate", "/Maintenance/Date");
+	produce(batteryInfo, "maxChargePower", "/MaxChargePower", "W", 0);
+	produce(batteryInfo, "maxDischargePower", "/MaxDischargePower", "W", 0);
 	produce("/DeviceInstance", 0);
 	registerService();
 }
@@ -24,6 +27,8 @@ bool Hub4ControlBridge::toDBus(const QString &path, QVariant &value)
 		QDateTime t = value.value<QDateTime>();
 		value = t.isValid() ? t.toTime_t() : 0;
 	}
+	if (value.type() == QVariant::Double && !qIsFinite(value.toDouble()))
+		value = QVariant();
 	return true;
 }
 
