@@ -19,6 +19,7 @@ MultiBridge::MultiBridge(Multi *multi, const QString &service,
 	consume(service, multi, "state", "/State");
 	consume(service, multi, "isChargeDisabled", "/Hub4/DisableCharge");
 	consume(service, multi, "isFeedbackDisabled", "/Hub4/DisableFeedback");
+	consume(service, multi, "firmwareVersion", "/FirmwareVersion");
 }
 
 bool MultiBridge::toDBus(const QString &path, QVariant &v)

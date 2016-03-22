@@ -21,6 +21,13 @@ void ControlLoop::adjustSetpoint(PowerInfo *source, Phase targetPhase, MultiPhas
 {
 	if (!qIsFinite(target->acPowerSetPoint()))
 		return;
+	if (mMulti->firmwareVersion() < 0x405) {
+		// Older vebus firmware versions had a faster control loop on the AC-In power setpoint.
+		// In order to prevent overshoot we reduce the difference between the new setpoint and the
+		// current AC-In power.
+		// Old code was: setpoint = 0.8 * change + acPowerIn. with change = setpoint - acPowerIn
+		setpoint = 0.2 * target->acPowerIn() + 0.8 * setpoint;
+	}
 	double maxChargePct = qMax(0.0, qMin(100.0, mSettings->maxChargePercentage()));
 	double maxDischargePct = qMax(0.0, qMin(100.0, mSettings->maxDischargePercentage()));
 	// Compute the maximum charge power of the battery. We use it here to limit

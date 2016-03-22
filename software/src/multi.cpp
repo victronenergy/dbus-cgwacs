@@ -12,7 +12,8 @@ Multi::Multi(QObject *parent) :
 	mMaxChargeCurrent(NaN),
 	mChargeDisabled(false),
 	mFeedbackDisabled(false),
-	mMode(MultiOff)
+	mMode(MultiOff),
+	mFirmwareVersion(0)
 {
 }
 
@@ -114,6 +115,19 @@ QList<Phase> Multi::getSetpointPhases() const
 			phases.append(phase);
 	}
 	return phases;
+}
+
+int Multi::firmwareVersion() const
+{
+	return mFirmwareVersion;
+}
+
+void Multi::setFirmwareVersion(int v)
+{
+	if (mFirmwareVersion == v)
+		return;
+	mFirmwareVersion = v;
+	emit firmwareVersionChanged();
 }
 
 MultiPhaseData *Multi::meanData()

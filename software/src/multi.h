@@ -48,6 +48,7 @@ class Multi : public QObject
 	Q_PROPERTY(bool isFeedbackDisabled READ isFeedbackDisabled WRITE setIsFeedbackDisabled NOTIFY isFeedbackDisabledChanged)
 	Q_PROPERTY(MultiMode mode READ mode WRITE setMode NOTIFY modeChanged)
 	Q_PROPERTY(MultiState state READ state WRITE setState NOTIFY stateChanged)
+	Q_PROPERTY(int firmwareVersion READ firmwareVersion WRITE setFirmwareVersion NOTIFY firmwareVersionChanged)
 public:
 	explicit Multi(QObject *parent = 0);
 
@@ -79,6 +80,10 @@ public:
 
 	QList<Phase> getSetpointPhases() const;
 
+	int firmwareVersion() const;
+
+	void setFirmwareVersion(int v);
+
 	MultiPhaseData *meanData();
 
 	MultiPhaseData *l1Data();
@@ -102,6 +107,8 @@ signals:
 
 	void isFeedbackDisabledChanged();
 
+	void firmwareVersionChanged();
+
 private:
 	MultiPhaseData *mMeanData;
 	MultiPhaseData *mL1Data;
@@ -113,6 +120,7 @@ private:
 	bool mFeedbackDisabled;
 	MultiMode mMode;
 	MultiState mState;
+	int mFirmwareVersion;
 };
 
 #endif // MULTI_H
