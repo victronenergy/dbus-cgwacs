@@ -15,7 +15,8 @@ class ControlLoop : public QObject
 protected:
 	ControlLoop(Multi *multi, Settings *settings, QObject *parent = 0);
 
-	void setTarget(PowerInfo *source, Phase targetPhase, MultiPhaseData *target, double power);
+	void adjustSetpoint(PowerInfo *source, Phase targetPhase, MultiPhaseData *target,
+						double setpoint);
 
 	bool hasSetpoint(Phase phase) const;
 

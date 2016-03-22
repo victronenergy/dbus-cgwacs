@@ -141,7 +141,7 @@ void PhaseCompensationControl::performStep()
 				pTarget = qMin(pNetLeft, pNetp);
 				pNetLeft -= pTarget;
 			}
-			setTarget(pi, phase, mMulti->getPhaseData(phase), - mpd->acPowerIn() - pTarget);
+			adjustSetpoint(pi, phase, mMulti->getPhaseData(phase), -pTarget);
 		}
 	}
 }

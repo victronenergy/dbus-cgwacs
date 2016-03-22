@@ -16,7 +16,8 @@ ControlLoop::ControlLoop(Multi *multi, Settings *settings, QObject *parent):
 	Q_ASSERT(settings != 0);
 }
 
-void ControlLoop::setTarget(PowerInfo *source, Phase targetPhase, MultiPhaseData *target, double power)
+void ControlLoop::adjustSetpoint(PowerInfo *source, Phase targetPhase, MultiPhaseData *target,
+								 double setpoint)
 {
 	if (!qIsFinite(target->acPowerSetPoint()))
 		return;
@@ -31,31 +32,25 @@ void ControlLoop::setTarget(PowerInfo *source, Phase targetPhase, MultiPhaseData
 			mMulti->dcVoltage() / 100:
 			MaxMultiPower;
 
-	// EV: EM340 seems to work better with Alpha = 0.6. Possibly due to lower
-	// update rate.
-	const double Alpha = 1.0;
-	// pMultiNew < 0: battery is discharging
-	// pMultiNew > 0: battery is charging
-	double pMultiNew = target->acPowerIn() + Alpha * power;
 	bool feedbackDisabled = maxDischargePct < 50;
 	// It seems that enabling the the ChargeDisabled flag disables both charge
 	// and discharge. So we're only setting the flags when we are not
 	// discharging.
 	bool chargeDisabled = maxChargePct <= 0 && (
 		feedbackDisabled || (
-			qIsFinite(pMultiNew) &&
-			pMultiNew > 30));
-	if (qIsFinite(pMultiNew)) {
+			qIsFinite(setpoint) &&
+			setpoint > 30));
+	if (qIsFinite(setpoint)) {
+		// Make sure we do not send illegal values and honor the max power
+		// derived from the max charge percentage.
+		setpoint = qBound(MinMultiPower, setpoint, maxPower);
+
 		// Ugly workaround: the value of pMultiNew must always be sent over the
 		// D-Bus, even when it does not change, because the multi will reset its
 		// power setpoint if no value has been set during the last 10 seconds.
-		pMultiNew = qRound(pMultiNew);
-		if (target->acPowerSetPoint() == pMultiNew)
-			pMultiNew -= 1;
-
-		// Make sure we do not send illegal values and honor the max power
-		// derived from the max charge percentage.
-		pMultiNew = qBound(MinMultiPower, pMultiNew, maxPower);
+		setpoint = qRound(setpoint);
+		if (qRound(target->acPowerSetPoint()) == setpoint)
+			setpoint -= 1;
 	}
 
 	mMulti->setIsChargeDisabled(chargeDisabled);
@@ -69,11 +64,11 @@ void ControlLoop::setTarget(PowerInfo *source, Phase targetPhase, MultiPhaseData
 				 << source->power()
 				 << '\t' << target->acPowerIn()
 				 << '\t' << target->acPowerSetPoint()
-				 << '\t' << pMultiNew
+				 << '\t' << setpoint
 				 << '\t' << chargeDisabled
 				 << '\t' << feedbackDisabled;
-	if (qIsFinite(pMultiNew))
-		target->setAcPowerSetPoint(pMultiNew);
+	if (qIsFinite(setpoint))
+		target->setAcPowerSetPoint(setpoint);
 }
 
 bool ControlLoop::hasSetpoint(Phase phase) const

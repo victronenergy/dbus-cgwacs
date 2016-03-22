@@ -20,5 +20,5 @@ ChargePhaseControl::ChargePhaseControl(Multi *multi, AcSensor *acSensor,
 
 void ChargePhaseControl::onTimer()
 {
-	setTarget(mAcSensorPhase, mPhase, mMultiTargetPhase, MaxMultiPower);
+	adjustSetpoint(mAcSensorPhase, mPhase, mMultiTargetPhase, MaxMultiPower);
 }

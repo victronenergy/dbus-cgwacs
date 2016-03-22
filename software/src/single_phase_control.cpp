@@ -71,11 +71,11 @@ void SinglePhaseControl::performStep()
 {
 	double pNet = mAcSensorPhase->power();
 	double gridSetpoint = mSettings->acPowerSetPoint();
-	if (mHub4Mode == Hub4PhaseSplit && gridSetpoint != 0) {
+	if (mHub4Mode == Hub4PhaseSplit && qAbs(gridSetpoint) > 1) {
 		int phaseCount = mMulti->getSetpointCount();
 		if (phaseCount > 0)
 			gridSetpoint /= phaseCount;
 	}
-	double pTarget = gridSetpoint - pNet;
-	setTarget(mAcSensorPhase, mPhase, mMultiTargetPhase, pTarget);
+	double setpoint = mMultiTargetPhase->acPowerIn() + gridSetpoint - pNet;
+	adjustSetpoint(mAcSensorPhase, mPhase, mMultiTargetPhase, setpoint);
 }
