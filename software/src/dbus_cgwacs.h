@@ -5,10 +5,11 @@
 #include <QList>
 
 class AcSensor;
-class AcSensorSettings;
+class AcSensorMediator;
 class BatteryInfo;
 class ControlLoop;
 class DbusServiceMonitor;
+class Hub4ControlBridge;
 class MaintenanceControl;
 class ModbusRtu;
 class Multi;
@@ -37,23 +38,13 @@ signals:
 	void connectionLost();
 
 private slots:
-	void onDeviceFound();
-
-	void onDeviceSettingsInitialized();
-
-	void onDeviceInitialized();
-
-	void onConnectionLost();
-
-	void onConnectionStateChanged();
+	void onGridMeterChanged();
 
 	void onSerialEvent(const char *description);
 
 	void onServiceAdded(QString service);
 
 	void onServiceRemoved(QString service);
-
-	void onServiceTypeChanged();
 
 	void onHub4ModeChanged();
 
@@ -68,19 +59,15 @@ private slots:
 private:
 	void updateControlLoop();
 
-	void updateBatteryLimits();
-
-	void publishSensor(AcSensor *sensor, AcSensor *pvSensor, AcSensorSettings *sensorSettings);
-
 	DbusServiceMonitor *mServiceMonitor;
-	ModbusRtu *mModbus;
 	Settings *mSettings;
+	AcSensorMediator *mAcSensorMediator;
 	Multi *mMulti;
 	MaintenanceControl *mMaintenanceControl;
 	ControlLoop *mControlLoop;
 	BatteryInfo *mBatteryInfo;
+	Hub4ControlBridge *mHub4ControlBridge;
 	VBusItem *mTimeZone;
-	QList<AcSensor *> mAcSensors;
 };
 
 #endif // DBUS_CGWACS_H

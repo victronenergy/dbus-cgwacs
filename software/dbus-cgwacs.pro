@@ -92,7 +92,8 @@ SOURCES += \
     src/battery_bridge.cpp \
     src/multi_phase_control.cpp \
     src/split_phase_control.cpp \
-    src/battery_info.cpp
+    src/battery_info.cpp \
+    src/ac_sensor_mediator.cpp
 
 HEADERS += \
     ext/velib/src/qt/v_busitem_adaptor.h \
@@ -134,4 +135,5 @@ HEADERS += \
     src/battery_bridge.h \
     src/multi_phase_control.h \
     src/split_phase_control.h \
-    src/battery_info.h
+    src/battery_info.h \
+    src/ac_sensor_mediator.h
