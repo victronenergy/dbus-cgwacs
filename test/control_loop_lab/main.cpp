@@ -1,5 +1,7 @@
 #include <ac_sensor.h>
 #include <ac_sensor_settings.h>
+#include <battery_info.h>
+#include <dbus_service_monitor.h>
 #include <multi.h>
 #include <multi_phase_data.h>
 #include <phase_compensation_control.h>
@@ -18,10 +20,12 @@ void run_test()
 {
 	AcSensor sensor("", 0);
 	AcSensorSettings sensorSettings(71, "");
-	sensorSettings.setHub4Mode(Hub4PhaseL1);
+	sensorSettings.setHub4Mode(Hub4PhaseCompensation);
 	sensorSettings.setIsMultiPhase(true);
 	Multi multi;
 	Settings settings;
+	DbusServiceMonitor serviceMonitor;
+	BatteryInfo bi(&serviceMonitor, &multi, &settings);
 	double pLoadL1 = 200;
 	double pLoadL2 = -100;
 	double pLoadL3 = 400;
@@ -34,6 +38,7 @@ void run_test()
 //	SinglePhaseControl controlLoopL2(&multi, &sensor, &settings, PhaseL2, false);
 //	SinglePhaseControl controlLoopL3(&multi, &sensor, &settings, PhaseL3, false);
 	PhaseCompensationControl controlLoop(&multi, &sensor, &settings);
+	controlLoop.setBatteryInfo(&bi);
 	double pLoad = 0;
 	if (qIsFinite(pLoadL1))
 		pLoad += pLoadL1;
