@@ -6,10 +6,7 @@
 #include <QScopedPointer>
 #include "settings.h"
 
-class DbusServiceMonitor;
 class Multi;
-class QTimer;
-class VBusItem;
 
 class Clock
 {
@@ -32,35 +29,28 @@ class MaintenanceControl : public QObject
 {
 	Q_OBJECT
 public:
-	MaintenanceControl(DbusServiceMonitor *serviceMonitor, Multi *multi, Settings *settings,
-					   Clock *clock = 0, QObject *parent = 0);
+	MaintenanceControl(Multi *multi, Settings *settings, Clock *clock = 0,
+					   QObject *parent = 0);
 
-public slots:
-	void onChargeTimer();
-
-private slots:
 	void update();
 
-	void onServiceAdded(QString service);
+private slots:
+	void onTimer();
+
+	void onIntervalChanged();
 
 private:
-	void onDischarged(bool adjustLimit);
+	bool isMultiCharged() const;
 
-	void onAbsorption(bool adjustSocLimit);
+	void updateMaintenanceDate();
 
-	void onFloat(bool adjustLimit);
+	void setHub4State(Hub4State state);
 
-	void adjustSocLimit(double delta);
-
-	void setState(MaintenanceState state);
-
-	static const char *getStateName(MaintenanceState state);
+	static const char *getStateName(int state);
 
 	Multi *mMulti;
 	Settings *mSettings;
-	VBusItem *mSystemSoc;
 	QScopedPointer<Clock> mClock;
-	bool mUpdateBusy;
 };
 
 #endif // MAINTENANCE_CONTROL_H

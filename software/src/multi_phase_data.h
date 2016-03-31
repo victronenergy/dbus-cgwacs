@@ -11,7 +11,6 @@ class MultiPhaseData : public QObject
 {
 	Q_OBJECT
 	Q_PROPERTY(double acPowerIn READ acPowerIn WRITE setAcPowerIn NOTIFY acPowerInChanged)
-	Q_PROPERTY(double acPowerOut READ acPowerOut WRITE setAcPowerOut NOTIFY acPowerOutChanged)
 	Q_PROPERTY(double acPowerSetPoint READ acPowerSetPoint WRITE setAcPowerSetPoint NOTIFY acPowerSetPointChanged)
 	Q_PROPERTY(bool isSetPointAvailable READ isSetPointAvailable NOTIFY isSetPointAvailableChanged)
 public:
@@ -20,10 +19,6 @@ public:
 	double acPowerIn() const;
 
 	void setAcPowerIn(double o);
-
-	double acPowerOut() const;
-
-	void setAcPowerOut(double o);
 
 	double acPowerSetPoint() const;
 
@@ -34,15 +29,12 @@ public:
 signals:
 	void acPowerInChanged();
 
-	void acPowerOutChanged();
-
 	void acPowerSetPointChanged();
 
 	void isSetPointAvailableChanged();
 
 private:
 	double mAcPowerIn;
-	double mAcPowerOut;
 	double mAcPowerSetPoint;
 	bool mIsSetPointAvailable;
 };

@@ -3,7 +3,8 @@
 #include "multi_bridge.h"
 #include "multi_phase_data.h"
 
-MultiBridge::MultiBridge(Multi *multi, const QString &service, QObject *parent) :
+MultiBridge::MultiBridge(Multi *multi, const QString &service,
+						 QObject *parent) :
 	DBusBridge(service, parent),
 	mMulti(multi)
 {
@@ -13,9 +14,7 @@ MultiBridge::MultiBridge(Multi *multi, const QString &service, QObject *parent) 
 	consumePhase(service, "L3", multi->l3Data());
 	consume(service, multi->meanData(), "acPowerIn", "/Ac/ActiveIn/P");
 	consume(service, multi, "dcVoltage", "/Dc/0/Voltage");
-	consume(service, multi, "dcCurrent", "/Dc/0/Current");
 	consume(service, multi, "maxChargeCurrent", "/Dc/0/MaxChargeCurrent");
-	consume(service, multi, "isSustainActive", "/Hub4/Sustain");
 	consume(service, multi, "mode", "/Mode");
 	consume(service, multi, "state", "/State");
 	consume(service, multi, "isChargeDisabled", "/Hub4/DisableCharge");
@@ -56,6 +55,5 @@ void MultiBridge::consumePhase(const QString &service, const QString &phase,
 							   MultiPhaseData *phaseData)
 {
 	consume(service, phaseData, "acPowerIn", "/Ac/ActiveIn/" + phase + "/P");
-	consume(service, phaseData, "acPowerOut", "/Ac/Out/" + phase + "/P");
 	consume(service, phaseData, "acPowerSetPoint", "/Hub4/" + phase + "/AcPowerSetpoint");
 }

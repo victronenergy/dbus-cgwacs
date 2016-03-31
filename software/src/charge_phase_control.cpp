@@ -1,6 +1,3 @@
-#include <QtGlobal>
-#include <qmath.h>
-#include <QsLog.h>
 #include <QTimer>
 #include "ac_sensor.h"
 #include "battery_info.h"
@@ -15,7 +12,7 @@ ChargePhaseControl::ChargePhaseControl(Multi *multi, AcSensor *acSensor, Setting
 	mAcSensor(acSensor)
 {
 	QTimer *timer = new QTimer(this);
-	timer->setInterval(2500);
+	timer->setInterval(5000);
 	timer->start();
 	connect(timer, SIGNAL(timeout()), this, SLOT(onTimer()));
 }

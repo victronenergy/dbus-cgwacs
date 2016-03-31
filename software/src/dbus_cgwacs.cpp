@@ -3,8 +3,6 @@
 #include "ac_sensor.h"
 #include "ac_sensor_mediator.h"
 #include "ac_sensor_settings.h"
-#include "ac_sensor_settings_bridge.h"
-#include "ac_sensor_updater.h"
 #include "battery_info.h"
 #include "charge_phase_control.h"
 #include "dbus_cgwacs.h"
@@ -34,9 +32,9 @@ DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 	mTimeZone(new VBusItem(this))
 {
 	qRegisterMetaType<ConnectionState>();
-	qRegisterMetaType<MaintenanceState>();
-	qRegisterMetaType<MultiMode>();
 	qRegisterMetaType<Position>();
+	qRegisterMetaType<MultiMode>();
+	qRegisterMetaType<Hub4State>();
 	qRegisterMetaType<QList<quint16> >();
 
 	connect(mTimeZone, SIGNAL(valueChanged()), this, SLOT(onTimeZoneChanged()));
@@ -54,6 +52,7 @@ DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 	connect(mAcSensorMediator, SIGNAL(connectionLost()),
 			this, SIGNAL(connectionLost()));
 
+	connect(mSettings, SIGNAL(stateChanged()), this, SLOT(onHub4StateChanged()));
 	new SettingsBridge(mSettings, this);
 
 	for (int i=0; i<3; ++i) {
@@ -79,6 +78,11 @@ void DBusCGwacs::onGridMeterChanged()
 }
 
 void DBusCGwacs::onHub4ModeChanged()
+{
+	updateControlLoop();
+}
+
+void DBusCGwacs::onHub4StateChanged()
 {
 	updateControlLoop();
 }
@@ -144,8 +148,29 @@ void DBusCGwacs::updateControlLoop()
 		return;
 	}
 	if (mMaintenanceControl == 0)
-		mMaintenanceControl = new MaintenanceControl(mServiceMonitor, mMulti, mSettings, 0, mMulti);
-	if (mAcSensorMediator->isMultiPhase()) {
+		mMaintenanceControl = new MaintenanceControl(mMulti, mSettings, 0, mMulti);
+	bool charge = false;
+	switch (mSettings->state()) {
+	case Hub4ChargeFromGrid:
+	case Hub4Storage:
+		charge = true;
+		break;
+	default:
+		charge = false;
+		break;
+	}
+	// Keep in mind that:
+	// 1) It may take some time for the vebus service to report all setpoint, so
+	//    at this moment, there may be some missing setpoints.
+	// 2) If a control loop is started on a phase without setpoint, it won't do
+	//    anything until the setpoint is reported.
+	// So it is safer to create a control loop on a phase the may not have a
+	// setpoint. Of cource, the ControlLoop classes should check for the
+	// presence of the setpoint regularly.
+	if (charge) {
+		mControlLoop = new ChargePhaseControl(mMulti, gridMeter, mSettings);
+		QLOG_INFO() << "Control loop: force charge (maintenance)";
+	} else if (mAcSensorMediator->isMultiPhase()) {
 		switch (mAcSensorMediator->hub4Mode()) {
 		case Hub4SinglePhaseCompensation:
 		{

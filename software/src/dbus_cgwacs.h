@@ -48,6 +48,8 @@ private slots:
 
 	void onHub4ModeChanged();
 
+	void onHub4StateChanged();
+
 	void onMultiPhaseChanged();
 
 	void onIsSetPointAvailableChanged();
