@@ -20,7 +20,11 @@ ChargePhaseControl::ChargePhaseControl(Multi *multi, AcSensor *acSensor, Setting
 void ChargePhaseControl::onTimer()
 {
 	int spcount = qMax(1, multi()->getSetpointCount());
-	double power = batteryInfo()->maxChargePower() / spcount;
+	double power = MaxMultiPower;
+	BatteryInfo *bi = batteryInfo();
+	if (bi != 0)
+		power = bi->applyLimits(power);
+	power /= spcount;
 	for (int p=0; p<3; ++p) {
 		Phase phase = static_cast<Phase>(PhaseL1 + p);
 		PowerInfo *pi = mAcSensor->getPowerInfo(phase);
