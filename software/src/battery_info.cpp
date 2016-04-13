@@ -18,11 +18,13 @@ BatteryInfo::BatteryInfo(DbusServiceMonitor *serviceMonitor, Multi *multi, Setti
 	mMaxChargePower(qQNaN()),
 	mMaxDischargePower(qQNaN())
 {
-	Q_ASSERT(serviceMonitor != 0);
+	// Q_ASSERT(serviceMonitor != 0);
 	Q_ASSERT(multi != 0);
 	Q_ASSERT(settings != 0);
-	connect(serviceMonitor, SIGNAL(serviceAdded(QString)), this, SLOT(onServiceAdded(QString)));
-	connect(serviceMonitor, SIGNAL(serviceRemoved(QString)), this, SLOT(onServiceRemoved(QString)));
+	if (serviceMonitor != 0) {
+		connect(serviceMonitor, SIGNAL(serviceAdded(QString)), this, SLOT(onServiceAdded(QString)));
+		connect(serviceMonitor, SIGNAL(serviceRemoved(QString)), this, SLOT(onServiceRemoved(QString)));
+	}
 	connect(multi, SIGNAL(dcVoltageChanged()), this, SLOT(updateBatteryLimits()));
 	connect(settings, SIGNAL(maxChargePercentageChanged()), this, SLOT(updateBatteryLimits()));
 	connect(settings, SIGNAL(maxDischargePercentageChanged()), this, SLOT(updateBatteryLimits()));
