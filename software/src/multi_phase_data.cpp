@@ -5,8 +5,8 @@
 
 MultiPhaseData::MultiPhaseData(QObject *parent) :
 	QObject(parent),
-	mAcPowerIn(NaN),
-	mAcPowerSetPoint(NaN),
+	mAcPowerIn(qQNaN()),
+	mAcPowerSetPoint(qQNaN()),
 	mIsSetPointAvailable(false)
 {
 }

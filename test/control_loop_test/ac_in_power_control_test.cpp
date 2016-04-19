@@ -16,7 +16,7 @@ TEST_F(AcInPowerControlTest, singlePhaseInit)
 	mMulti->l1Data()->setAcPowerSetPoint(0);
 	SinglePhaseControl cl(mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL1, Hub4PhaseL1);
 	cl.setBatteryInfo(new BatteryInfo(0, mMulti.data(), mSettings.data(), &cl));
-	double load[3] = { 100.0, NaN, NaN };
+	double load[3] = { 100.0, qQNaN(), qQNaN() };
 	runControlLoop(load);
 	EXPECT_NEAR(mAcSensor->l1PowerInfo()->power(), 0, 1);
 }
@@ -27,9 +27,9 @@ TEST_F(AcInPowerControlTest, singlePhaseStep)
 	mMulti->l1Data()->setAcPowerSetPoint(0);
 	SinglePhaseControl cl(mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL1, Hub4PhaseL1);
 	cl.setBatteryInfo(new BatteryInfo(0, mMulti.data(), mSettings.data(), &cl));
-	double load[3] = { 100.0, NaN, NaN };
+	double load[3] = { 100.0, qQNaN(), qQNaN() };
 	runControlLoop(load);
-	double load2[3] = { 200.0, NaN, NaN };
+	double load2[3] = { 200.0, qQNaN(), qQNaN() };
 	runControlLoop(load2);
 	EXPECT_NEAR(mAcSensor->l1PowerInfo()->power(), 0, 1);
 }
@@ -85,7 +85,7 @@ TEST_F(AcInPowerControlTest, splitPhase2Init)
 		mAcSensorSettings->setHub4Mode(Hub4PhaseSplit);
 		for (int j=0; j<3; ++j) {
 			Phase phase = static_cast<Phase>(PhaseL1 + j);
-			mMulti->getPhaseData(phase)->setAcPowerSetPoint(i == j ? NaN : 0);
+			mMulti->getPhaseData(phase)->setAcPowerSetPoint(i == j ? qQNaN() : 0);
 		}
 		SinglePhaseControl cl1(mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL1, Hub4PhaseSplit);
 		SinglePhaseControl cl2(mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL2, Hub4PhaseSplit);

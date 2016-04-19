@@ -58,8 +58,6 @@ inline quint16 toUInt16(const QByteArray &a, int offset)
 	return toUInt16(static_cast<quint8>(a[offset]), static_cast<quint8>(a[offset + 1]));
 }
 
-const double NaN = qQNaN();
-
 /// This value is used to indicate that the correct device instance has not
 /// been set yet.
 const int InvalidDeviceInstance = -1;

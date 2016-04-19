@@ -4,10 +4,10 @@
 
 PowerInfo::PowerInfo(QObject *parent) :
 	QObject(parent),
-	mCurrent(NaN),
-	mVoltage(NaN),
-	mPower(NaN),
-	mEnergyForward(NaN)
+	mCurrent(qQNaN()),
+	mVoltage(qQNaN()),
+	mPower(qQNaN()),
+	mEnergyForward(qQNaN())
 {
 }
 
@@ -78,11 +78,11 @@ void PowerInfo::setEnergyReverse(double e)
 
 void PowerInfo::resetValues()
 {
-	setCurrent(NaN);
-	setPower(NaN);
-	setVoltage(NaN);
-	setEnergyForward(NaN);
-	setEnergyReverse(NaN);
+	setCurrent(qQNaN());
+	setPower(qQNaN());
+	setVoltage(qQNaN());
+	setEnergyForward(qQNaN());
+	setEnergyReverse(qQNaN());
 }
 
 bool PowerInfo::valuesEqual(double v1, double v2)
