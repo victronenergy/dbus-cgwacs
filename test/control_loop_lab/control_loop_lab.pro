@@ -7,6 +7,13 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
+# suppress the mangling of va_arg has changed for gcc 4.4
+QMAKE_CXXFLAGS += -Wno-psabi
+
+# these warnings appear when compiling with QT4.8.3-debug. Problem appears to be
+# solved in newer QT versions.
+QMAKE_CXXFLAGS += -Wno-unused-local-typedefs
+
 include(../../software/ext/qslog/QsLog.pri)
 
 SRCDIR = ../../software/src
