@@ -14,6 +14,7 @@ class BatteryLife;
 class ModbusRtu;
 class Multi;
 class Settings;
+class SystemCalc;
 class VBusItem;
 
 /*!
@@ -61,6 +62,7 @@ private:
 	Settings *mSettings;
 	AcSensorMediator *mAcSensorMediator;
 	Multi *mMulti;
+	SystemCalc *mSystemCalc;
 	BatteryLife *mMaintenanceControl;
 	ControlLoop *mControlLoop;
 	BatteryInfo *mBatteryInfo;

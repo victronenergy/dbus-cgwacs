@@ -7,6 +7,7 @@
 #include "battery_life.h"
 #include "multi.h"
 #include "settings.h"
+#include "system_calc.h"
 
 class Guard
 {
@@ -32,27 +33,23 @@ static const double FloatLevel = 95;
 static const QString SystemCalcService = "com.victronenergy.system";
 static const QString SocPath = "/Dc/Battery/Soc";
 
-BatteryLife::BatteryLife(DbusServiceMonitor *serviceMonitor, Multi *multi,
+BatteryLife::BatteryLife(SystemCalc *systemCalc, Multi *multi,
 						 Settings *settings, Clock *clock, QObject *parent):
 	QObject(parent),
+	mSystemCalc(systemCalc),
 	mMulti(multi),
 	mSettings(settings),
-	mSystemSoc(new VBusItem(this)),
 	mClock(clock == 0 ? new DefaultClock() : clock),
 	mUpdateBusy(false)
 {
-	Q_ASSERT(serviceMonitor != 0);
+	Q_ASSERT(systemCalc != 0);
 	Q_ASSERT(multi != 0);
 	Q_ASSERT(settings != 0);
-	connect(serviceMonitor, SIGNAL(serviceAdded(QString)), this, SLOT(onServiceAdded(QString)));
+	connect(mSystemCalc, SIGNAL(socChanged()), this, SLOT(update()));
 	connect(mMulti, SIGNAL(isSustainActiveChanged()), this, SLOT(update()));
 	connect(mSettings, SIGNAL(socLimitChanged()), this, SLOT(update()));
 	connect(mSettings, SIGNAL(stateChanged()), this, SLOT(update()));
 	connect(mSettings, SIGNAL(minSocLimitChanged()), this, SLOT(update()));
-
-	mSystemSoc->consume(SystemCalcService, SocPath);
-	mSystemSoc->getValue();
-	connect(mSystemSoc, SIGNAL(valueChanged()), this, SLOT(update()));
 
 	QTimer *chargeTimer = new QTimer(this);
 	chargeTimer->setInterval(SocInterval);
@@ -88,12 +85,11 @@ void BatteryLife::update()
 	if (mUpdateBusy)
 		return;
 	Guard guard(&mUpdateBusy);
-	QVariant v = mSystemSoc->getValue();
-	if (!v.isValid()) {
+	double soc = mSystemCalc->soc();
+	if (!qIsFinite(soc)) {
 		QLOG_TRACE() << "[Battery life] No active battery or no valid SoC";
 		return;
 	}
-	double soc = v.toDouble();
 	double socLimit = mSettings->socLimit();
 	double minSocLimit = mSettings->minSocLimit();
 	if (socLimit < minSocLimit) {
@@ -147,12 +143,6 @@ void BatteryLife::update()
 		setState(BatteryLifeStateDefault);
 		break;
 	}
-}
-
-void BatteryLife::onServiceAdded(QString service)
-{
-	if (service == SystemCalcService)
-		mSystemSoc->consume(SystemCalcService, SocPath);
 }
 
 void BatteryLife::onDischarged(bool adjustLimit)

@@ -6,10 +6,9 @@
 #include <QScopedPointer>
 #include "settings.h"
 
-class DbusServiceMonitor;
+class SystemCalc;
 class Multi;
 class QTimer;
-class VBusItem;
 
 class Clock
 {
@@ -32,7 +31,7 @@ class BatteryLife : public QObject
 {
 	Q_OBJECT
 public:
-	BatteryLife(DbusServiceMonitor *serviceMonitor, Multi *multi, Settings *settings,
+	BatteryLife(SystemCalc *systemCalc, Multi *multi, Settings *settings,
 				Clock *clock = 0, QObject *parent = 0);
 
 public slots:
@@ -40,8 +39,6 @@ public slots:
 
 private slots:
 	void update();
-
-	void onServiceAdded(QString service);
 
 private:
 	void onDischarged(bool adjustLimit);
@@ -56,9 +53,9 @@ private:
 
 	static const char *getStateName(BatteryLifeState state);
 
+	SystemCalc *mSystemCalc;
 	Multi *mMulti;
 	Settings *mSettings;
-	VBusItem *mSystemSoc;
 	QScopedPointer<Clock> mClock;
 	bool mUpdateBusy;
 };

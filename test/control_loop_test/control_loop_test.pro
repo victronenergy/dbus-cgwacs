@@ -7,6 +7,13 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
+# suppress the mangling of va_arg has changed for gcc 4.4
+QMAKE_CXXFLAGS += -Wno-psabi
+
+# these warnings appear when compiling with QT4.8.3-debug. Problem appears to be
+# solved in newer QT versions.
+QMAKE_CXXFLAGS += -Wno-unused-local-typedefs
+
 include(../../software/ext/qslog/QsLog.pri)
 
 SRCDIR = ../../software/src
@@ -43,9 +50,9 @@ SOURCES += \
     $$SRCDIR/single_phase_control.cpp \
     $$SRCDIR/multi_phase_control.cpp \
     $$SRCDIR/v_bus_node.cpp \
+    $$SRCDIR/system_calc.cpp \
     main.cpp \
     ac_in_power_control_test.cpp \
-    # control_loop_test.cpp \
     maintenance_control_test.cpp
 
 HEADERS += \
@@ -72,6 +79,6 @@ HEADERS += \
     $$SRCDIR/single_phase_control.h \
     $$SRCDIR/multi_phase_control.h \
     $$SRCDIR/v_bus_node.h \
+    $$SRCDIR/system_calc.h \
     ac_in_power_control_test.h \
-    # control_loop_test.h \
     maintenance_control_test.h

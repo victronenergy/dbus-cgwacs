@@ -20,6 +20,7 @@
 #include "settings_bridge.h"
 #include "single_phase_control.h"
 #include "split_phase_control.h"
+#include "system_calc.h"
 
 DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 	QObject(parent),
@@ -27,6 +28,7 @@ DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 	mSettings(new Settings(this)),
 	mAcSensorMediator(new AcSensorMediator(portName, isZigbee, mSettings, this)),
 	mMulti(new Multi(this)),
+	mSystemCalc(new VBusItemSystemCalc(mServiceMonitor, this)),
 	mMaintenanceControl(0),
 	mControlLoop(0),
 	mBatteryInfo(new BatteryInfo(mServiceMonitor, mMulti, mSettings)),
@@ -144,7 +146,7 @@ void DBusCGwacs::updateControlLoop()
 		return;
 	}
 	if (mMaintenanceControl == 0)
-		mMaintenanceControl = new BatteryLife(mServiceMonitor, mMulti, mSettings, 0, mMulti);
+		mMaintenanceControl = new BatteryLife(mSystemCalc, mMulti, mSettings, 0, mMulti);
 	if (mAcSensorMediator->isMultiPhase()) {
 		switch (mAcSensorMediator->hub4Mode()) {
 		case Hub4SinglePhaseCompensation:
