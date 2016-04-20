@@ -7,7 +7,7 @@
 #include "multi.h"
 #include "settings.h"
 
-const double ChargeEfficiency = 0.90;
+const double ChargeEfficiency = 0.95;
 const double DischargeEfficiency = 0.70;
 
 BatteryInfo::BatteryInfo(DbusServiceMonitor *serviceMonitor, Multi *multi, Settings *settings,
