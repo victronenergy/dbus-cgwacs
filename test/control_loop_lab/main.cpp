@@ -24,7 +24,7 @@ void run_test()
 	sensorSettings.setIsMultiPhase(true);
 	Multi multi;
 	Settings settings;
-	BatteryInfo bi(0, &multi, &settings);
+	BatteryInfo bi(&multi, &settings);
 	double pLoadL1 = 200;
 	double pLoadL2 = -100;
 	double pLoadL3 = 400;
