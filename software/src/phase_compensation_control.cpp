@@ -7,7 +7,8 @@
 
 PhaseCompensationControl::PhaseCompensationControl(Multi *multi, AcSensor *acSensor,
 												   Settings *settings, QObject *parent):
-	MultiPhaseControl (multi, acSensor, settings, parent)
+	MultiPhaseControl(multi, acSensor, settings, parent),
+	mSetpoints(3)
 {
 }
 
@@ -37,7 +38,6 @@ void PhaseCompensationControl::performStep()
 	pNet -= settings->acPowerSetPoint();
 	double extraPhasePower = (pNet - powerOnSetpointPhases) / multiPhaseCount;
 	double pNetLeft = pNet;
-	double setpoints[3];
 	for (int p=0; p<3; ++p) {
 		Phase phase = static_cast<Phase>(PhaseL1 + p);
 		PowerInfo *pi = acSensor->getPowerInfo(phase);
@@ -52,8 +52,10 @@ void PhaseCompensationControl::performStep()
 				pTarget = qMin(pNetLeft, pNetp);
 				pNetLeft -= pTarget;
 			}
-			setpoints[p] = -pTarget;
+			mSetpoints[p] = -pTarget;
+		} else {
+			mSetpoints[p] = qQNaN();
 		}
 	}
-	adjustSetpoints(setpoints);
+	adjustSetpoints(mSetpoints);
 }

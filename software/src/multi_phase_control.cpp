@@ -39,7 +39,7 @@ MultiPhaseControl::MultiPhaseControl(Multi *multi, AcSensor *acSensor, Settings 
 	connect(mTimer, SIGNAL(timeout()), this, SLOT(onTimer()));
 }
 
-void MultiPhaseControl::adjustSetpoints(double setpoints[])
+void MultiPhaseControl::adjustSetpoints(const QVector<double> &setpoints)
 {
 	double setpointTotal = 0;
 	for (int p=0; p<3; ++p) {

@@ -7,7 +7,8 @@
 
 SplitPhaseControl::SplitPhaseControl(Multi *multi, AcSensor *acSensor, Settings *settings,
 									 QObject *parent):
-	MultiPhaseControl(multi, acSensor, settings, parent)
+	MultiPhaseControl(multi, acSensor, settings, parent),
+	mSetpoints(3)
 {
 }
 
@@ -22,13 +23,12 @@ void SplitPhaseControl::performStep()
 	if (phaseCount > 0)
 		gridSetpoint /= phaseCount;
 
-	double setpoints[3];
 	for (int p=0; p<3; ++p) {
 		Phase phase = static_cast<Phase>(PhaseL1 + p);
 		MultiPhaseData *mpd = multi->getPhaseData(phase);
 		PowerInfo *pi = acSensor->getPowerInfo(phase);
 		double pNet = pi->power();
-		setpoints[p] = mpd->acPowerIn() + gridSetpoint - pNet;
+		mSetpoints[p] = mpd->acPowerIn() + gridSetpoint - pNet;
 	}
-	adjustSetpoints(setpoints);
+	adjustSetpoints(mSetpoints);
 }

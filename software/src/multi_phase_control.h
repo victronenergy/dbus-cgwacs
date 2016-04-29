@@ -20,7 +20,7 @@ protected:
 
 	virtual void performStep() = 0;
 
-	void adjustSetpoints(double setpoints[3]);
+	void adjustSetpoints(const QVector<double> &setpoints);
 
 private slots:
 	void onTimer();

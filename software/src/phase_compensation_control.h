@@ -1,6 +1,7 @@
 #ifndef PHASE_COMPENSATION_CONTROL_H
 #define PHASE_COMPENSATION_CONTROL_H
 
+#include <QVector>
 #include "defines.h"
 #include "multi_phase_control.h"
 #include "settings.h"
@@ -26,6 +27,9 @@ public:
 
 protected:
 	virtual void performStep();
+
+private:
+	QVector<double> mSetpoints;
 };
 
 #endif // PHASE_COMPENSATION_CONTROL_H
