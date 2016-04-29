@@ -36,7 +36,7 @@ void ControlLoop::adjustSetpoint(PowerInfo *source, Phase targetPhase, MultiPhas
 		setpoint = 0.2 * target->acPowerIn() + 0.8 * setpoint;
 	}
 
-	bool feedbackDisabled = mBatteryInfo->maxDischargePower() <= 0;
+	bool feedbackDisabled = !mBatteryInfo->canDischarge();
 
 	switch (mSettings->state()) {
 	case BatteryLifeStateForceCharge:
@@ -64,7 +64,7 @@ void ControlLoop::adjustSetpoint(PowerInfo *source, Phase targetPhase, MultiPhas
 				minAcPower *= qBound(1.0, acPower / dcPower, 2.0);
 			minAcPower += acPhaseOut;
 			setpoint = qMax(minAcPower, setpoint);
-			setpoint = qMin(setpoint, mBatteryInfo->maxChargePower());
+			setpoint = mBatteryInfo->applyLimits(setpoint);
 		}
 		// Fall through
 	}
@@ -77,7 +77,7 @@ void ControlLoop::adjustSetpoint(PowerInfo *source, Phase targetPhase, MultiPhas
 
 	// It seems that enabling the the ChargeDisabled flag disables both charge and discharge. So
 	// we're only setting the flags when we are not discharging.
-	bool chargeDisabled = mBatteryInfo->maxChargePower() <= 0 && (
+	bool chargeDisabled = !mBatteryInfo->canCharge() && (
 		feedbackDisabled || (
 			qIsFinite(setpoint) &&
 			setpoint > 30));

@@ -30,6 +30,16 @@ BatteryInfo::BatteryInfo(DbusServiceMonitor *serviceMonitor, Multi *multi, Setti
 	connect(settings, SIGNAL(maxDischargePercentageChanged()), this, SLOT(updateBatteryLimits()));
 }
 
+bool BatteryInfo::canCharge() const
+{
+	return !qIsFinite(mMaxChargePower) || mMaxChargePower > 0;
+}
+
+bool BatteryInfo::canDischarge() const
+{
+	return !qIsFinite(mMaxDischargePower) || mMaxDischargePower > 0;
+}
+
 double BatteryInfo::applyLimits(double power) const
 {
 	if (qIsFinite(mMaxDischargePower) && -mMaxDischargePower > power)
