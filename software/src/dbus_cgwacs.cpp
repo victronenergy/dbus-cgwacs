@@ -182,5 +182,6 @@ void DBusCGwacs::updateControlLoop()
 			break;
 		}
 	}
-	mControlLoop->setBatteryInfo(mBatteryInfo);
+	if (mControlLoop != 0)
+		mControlLoop->setBatteryInfo(mBatteryInfo);
 }
