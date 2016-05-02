@@ -20,7 +20,7 @@
 #include "settings_bridge.h"
 #include "single_phase_control.h"
 #include "split_phase_control.h"
-#include "system_calc.h"
+#include "vbus_item_system_calc.h"
 
 DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 	QObject(parent),

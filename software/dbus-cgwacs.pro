@@ -79,7 +79,8 @@ SOURCES += \
     src/battery_info.cpp \
     src/ac_sensor_mediator.cpp \
     src/battery_life.cpp \
-    src/system_calc.cpp
+    src/system_calc.cpp \
+    src/vbus_item_system_calc.cpp
 
 HEADERS += \
     ext/velib/src/qt/v_busitem_adaptor.h \
@@ -123,7 +124,8 @@ HEADERS += \
     src/battery_info.h \
     src/ac_sensor_mediator.h \
     src/battery_life.h \
-    src/system_calc.h
+    src/system_calc.h \
+    src/vbus_item_system_calc.h
 
 DISTFILES += \
     ../documents/battery_life.dot
