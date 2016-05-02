@@ -5,7 +5,6 @@
 #include <velib/qt/v_busitem.h>
 #include <velib/qt/v_busitems.h>
 #include "dbus_cgwacs.h"
-#include "version.h"
 
 void initLogger(QsLogging::Level logLevel)
 {
@@ -15,7 +14,7 @@ void initLogger(QsLogging::Level logLevel)
 	logger.addDestination(debugDestination);
 	logger.setIncludeTimestamp(false);
 
-	QLOG_INFO() << "dbus-cgwacs" << "v"VERSION << "started" << "("REVISION")";
+	QLOG_INFO() << "dbus-cgwacs" << "v"VERSION << "started";
 	QLOG_INFO() << "Built with Qt" << QT_VERSION_STR << "running on" << qVersion();
 	QLOG_INFO() << "Built on" << __DATE__ << "at" << __TIME__;
 	logger.setLoggingLevel(logLevel);
@@ -89,7 +88,7 @@ int main(int argc, char *argv[])
 			QLOG_INFO() << "\t Name of communication port (eg. /dev/ttyUSB0)";
 			exit(1);
 		} else if (arg == "-V" || arg == "--version") {
-			QLOG_INFO() << VERSION << "(" REVISION ")";
+			QLOG_INFO() << VERSION;
 			exit(0);
 		} else if (arg == "-d" || arg == "--debug") {
 			expectVerbosity = true;
