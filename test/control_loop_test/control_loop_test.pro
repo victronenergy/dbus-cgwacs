@@ -18,13 +18,15 @@ include(../../software/ext/qslog/QsLog.pri)
 
 SRCDIR = ../../software/src
 EXTDIR = ../../software/ext
+TESTDIR = ../src
 
 INCLUDEPATH += \
-    ../../software/ext/velib/inc \
-    ../../software/ext/velib/lib/Qvelib \
-    ../../software/ext/googletest/googletest/include \
-    ../../software/ext/googletest/googletest \
-    ../../software/src
+    $$EXTDIR/velib/inc \
+    $$EXTDIR/velib/lib/Qvelib \
+    $$EXTDIR/googletest/googletest/include \
+    $$EXTDIR/googletest/googletest \
+    $$SRCDIR \
+    $$TESTDIR
 
 SOURCES += \
     $$EXTDIR/velib/src/qt/v_busitem.cpp \
@@ -51,6 +53,7 @@ SOURCES += \
     $$SRCDIR/multi_phase_control.cpp \
     $$SRCDIR/v_bus_node.cpp \
     $$SRCDIR/system_calc.cpp \
+    $$TESTDIR/mock_system_calc.cpp \
     main.cpp \
     ac_in_power_control_test.cpp \
     maintenance_control_test.cpp
@@ -80,5 +83,6 @@ HEADERS += \
     $$SRCDIR/multi_phase_control.h \
     $$SRCDIR/v_bus_node.h \
     $$SRCDIR/system_calc.h \
+    $$TESTDIR/mock_system_calc.h \
     ac_in_power_control_test.h \
     maintenance_control_test.h

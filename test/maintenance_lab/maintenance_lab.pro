@@ -11,24 +11,30 @@ include(../../software/ext/qslog/QsLog.pri)
 
 SRCDIR = ../../software/src
 EXTDIR = ../../software/ext
+TESTDIR = ../src
 
 INCLUDEPATH += \
-    ../../software/ext/velib/inc \
-    ../../software/ext/velib/lib/Qvelib \
-    ../../software/src
+    $$EXTDIR/velib/inc \
+    $$EXTDIR/velib/lib/Qvelib \
+    $$SRCDIR \
+    $$TESTDIR
 
 SOURCES += \
-    $$SRCDIR/maintenance_control.cpp \
+    $$SRCDIR/battery_life.cpp \
     $$SRCDIR/multi.cpp \
     $$SRCDIR/multi_phase_data.cpp \
     $$SRCDIR/settings.cpp \
+    $$SRCDIR/system_calc.cpp \
+    $$TESTDIR/mock_system_calc.cpp \
     main.cpp
 
 HEADERS += \
-    $$SRCDIR/maintenance_control.h \
+    $$SRCDIR/battery_life.h \
     $$SRCDIR/multi.h \
     $$SRCDIR/multi_phase_data.h \
-    $$SRCDIR/settings.h
+    $$SRCDIR/settings.h \
+    $$SRCDIR/system_calc.h \
+    $$TESTDIR/mock_system_calc.h
 
 DISTFILES += \
     plot.py

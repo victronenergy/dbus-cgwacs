@@ -1,7 +1,6 @@
 #include <QsLog.h>
 #include <QTimer>
 #include <qmath.h>
-#include <velib/qt/v_busitem.h>
 #include "dbus_service_monitor.h"
 #include "defines.h"
 #include "battery_life.h"

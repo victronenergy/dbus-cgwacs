@@ -1,7 +1,7 @@
 QT += core dbus
 QT -= gui
 
-TARGET = control_loop_test
+TARGET = control_loop_lab
 CONFIG += console
 CONFIG -= app_bundle
 
@@ -20,9 +20,9 @@ SRCDIR = ../../software/src
 EXTDIR = ../../software/ext
 
 INCLUDEPATH += \
-    ../../software/ext/velib/inc \
-    ../../software/ext/velib/lib/Qvelib \
-    ../../software/src
+    $$EXTDIR/velib/inc \
+    $$EXTDIR/velib/lib/Qvelib \
+    $$SRCDIR
 
 SOURCES += \
     $$EXTDIR/velib/src/qt/v_busitem.cpp \
@@ -31,10 +31,6 @@ SOURCES += \
     $$EXTDIR/velib/src/qt/v_busitem_private_cons.cpp \
     $$EXTDIR/velib/src/qt/v_busitem_private_prod.cpp \
     $$EXTDIR/velib/src/qt/v_busitem_proxy.cpp \
-    $$EXTDIR/velib/src/plt/serial.c \
-    $$EXTDIR/velib/src/plt/posix_serial.c \
-    $$EXTDIR/velib/src/plt/posix_ctx.c \
-    $$EXTDIR/velib/src/types/ve_variant.c \
     $$SRCDIR/ac_sensor.cpp \
     $$SRCDIR/ac_sensor_settings.cpp \
     $$SRCDIR/control_loop.cpp \
@@ -51,7 +47,6 @@ SOURCES += \
     $$SRCDIR/battery_bridge.cpp \
     $$SRCDIR/battery_info.cpp \
     $$SRCDIR/v_bus_node.cpp \
-    $$SRCDIR/dbus_service_monitor.cpp \
     $$SRCDIR/charge_phase_control.cpp \
     main.cpp
 
@@ -63,7 +58,6 @@ HEADERS += \
     $$EXTDIR/velib/src/qt/v_busitem_proxy.h \
     $$EXTDIR/velib/inc/velib/qt/v_busitem.h \
     $$EXTDIR/velib/inc/velib/qt/v_busitems.h \
-    $$EXTDIR/velib/inc/velib/platform/serial.h \
     $$SRCDIR/ac_sensor.h \
     $$SRCDIR/ac_sensor_settings.h \
     $$SRCDIR/control_loop.h \
@@ -80,5 +74,4 @@ HEADERS += \
     $$SRCDIR/battery_bridge.h \
     $$SRCDIR/battery_info.h \
     $$SRCDIR/v_bus_node.h \
-    $$SRCDIR/charge_phase_control.h \
-    $$SRCDIR/dbus_service_monitor.h
+    $$SRCDIR/charge_phase_control.h

@@ -9,6 +9,7 @@
 #include <settings.h>
 #include <single_phase_control.h>
 #include "ac_in_power_control_test.h"
+#include "mock_system_calc.h"
 
 TEST_F(AcInPowerControlTest, singlePhaseInit)
 {

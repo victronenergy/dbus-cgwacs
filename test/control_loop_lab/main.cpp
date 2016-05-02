@@ -1,7 +1,6 @@
 #include <ac_sensor.h>
 #include <ac_sensor_settings.h>
 #include <battery_info.h>
-#include <dbus_service_monitor.h>
 #include <charge_phase_control.h>
 #include <multi.h>
 #include <multi_phase_data.h>
@@ -25,8 +24,7 @@ void run_test()
 	sensorSettings.setIsMultiPhase(true);
 	Multi multi;
 	Settings settings;
-	DbusServiceMonitor serviceMonitor;
-	BatteryInfo bi(&serviceMonitor, &multi, &settings);
+	BatteryInfo bi(0, &multi, &settings);
 	double pLoadL1 = 200;
 	double pLoadL2 = -100;
 	double pLoadL3 = 400;

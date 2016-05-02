@@ -3,9 +3,10 @@
 #include <QDateTime>
 #include <QtDebug>
 #include <QtGlobal>
-#include "maintenance_control.h"
+#include "battery_life.h"
 #include "multi.h"
 #include "settings.h"
+#include "mock_system_calc.h"
 
 double rnd(double min, double max)
 {
@@ -36,7 +37,7 @@ private:
 
 const double FloatSoc = 99;
 const double AbsorptionSoc = 95;
-const double SustainSoc = 12;
+const double SustainSoc = 5;
 const double BatteryCapacity = 100;
 const double BatteryVoltage = 12;
 const double SocToWatt = BatteryCapacity * 3600 * BatteryVoltage / (SocInterval / 1000) / 100;
@@ -45,64 +46,67 @@ void run() {
 	Multi multi;
 	multi.setDcVoltage(BatteryVoltage);
 	multi.setMaxChargeCurrent(50);
+	MockSystemCalc systemCalc;
 	Settings settings;
-	settings.setState(MaintenanceStateRestart);
+	settings.setState(BatteryLifeStateRestart);
 	TestClock *clock = new TestClock();
 	QDateTime now = QDateTime::currentDateTime();
 	now.setTime(QTime(0, 0));
 	clock->setTime(now);
-	MaintenanceControl mc(&multi, &settings, clock);
+	BatteryLife mc(&systemCalc, &multi, &settings, clock);
 
 	double soc = 10;
 	settings.setSocLimit(10);
-	MaintenanceState prevState = settings.state();
+	BatteryLifeState prevState = settings.state();
 	for (int i=0; i<1000; ++i) {
 		double loadBase = 300;
 		loadBase *= rnd(0.5, 1.5);
-		double pvOffset = (1 + qSin(2 * M_PI * (i % 365)/365.0)) / 2;
+		double pvOffset = 0.9 * (1 + qSin(2 * M_PI * (i % 365)/365.0)) / 2;
 		double pvBase = 300;
 		pvBase *= rnd(0.5, 1.5);
 		double minSoc = 100;
 		double maxSoc = 0;
+		double minSocLimit = 100;
 		double totalPvPower = 0;
 		double totalLoad = 0;
 		double chargePower = 0;
 		for (int j=0; j<SocIntervalsPerDay; ++j) {
 			double pvPower = pvBase * qMax(0.0, qSin((2 * M_PI * j) / SocIntervalsPerDay) - pvOffset);
-			pvPower *= rnd(0, 2);
+			pvPower *= rnd(0.5, 1.5);
 			Q_ASSERT(pvPower >= 0);
 			double load = loadBase * qMax(0.1, qSin((4 * M_PI * j) / SocIntervalsPerDay));
 			load *= rnd(0.5, 1.5);
 			Q_ASSERT(load >= 0);
-			if (i % 7 < 2)
-				load *= 2;
+			if (j % 7 < 2)
+				load *= 1.5;
 			totalPvPower += pvPower;
 			totalLoad += load;
 			chargePower += qMax(0.0, pvPower - load);
 			double dp = (pvPower - load) / SocToWatt;
 			if (dp > 0 && (soc + dp) > AbsorptionSoc)
 				dp = qMax(0.0, AbsorptionSoc - soc) + qMax(0.0, soc + dp - AbsorptionSoc) / 8;
-			if (settings.state() == MaintenanceStateForceCharge)
+			if (settings.state() == BatteryLifeStateForceCharge)
 				dp = 5 * multi.dcVoltage() / SocToWatt;
-			if (settings.state() == MaintenanceStateDischarged || multi.isSustainActive())
+			if (settings.state() == BatteryLifeStateDischarged || multi.isSustainActive())
 				dp = qMax(0.0, dp);
 			soc += dp;
 			bool feedbackDisabled =
-				settings.state() == MaintenanceStateForceCharge ||
-				settings.state() == MaintenanceStateDischarged;
+				settings.state() == BatteryLifeStateForceCharge ||
+				settings.state() == BatteryLifeStateDischarged;
 			multi.setIsFeedbackDisabled(feedbackDisabled);
 			multi.setDcCurrent(dp * SocToWatt / multi.dcVoltage());
 			soc = qMin(soc, 100.0);
 			if (soc < SustainSoc) {
 				soc = SustainSoc;
-				multi.setSoc(soc);
+				systemCalc.setSoc(soc);
 				multi.setIsSustainActive(true);
 			} else {
-				multi.setSoc(soc);
+				systemCalc.setSoc(soc);
 				multi.setIsSustainActive(false);
 			}
 			minSoc = qMin(minSoc, soc);
 			maxSoc = qMax(maxSoc, soc);
+			minSocLimit = qMin(minSocLimit, settings.socLimit());
 			if (soc > FloatSoc)
 				multi.setState(MultiStateFloat);
 			else if (soc > AbsorptionSoc)
@@ -122,9 +126,9 @@ void run() {
 //				prevState = settings.state();
 //			}
 		}
-		minSoc = qMax(minSoc, settings.socLimit());
-		maxSoc = qMax(maxSoc, settings.socLimit());
-		qDebug() << i << '\t' << minSoc << '\t' << maxSoc << '\t'
+//		minSoc = qMax(minSoc, settings.socLimit());
+//		maxSoc = qMax(maxSoc, settings.socLimit());
+		qDebug() << i << '\t' << minSoc << '\t' << maxSoc << '\t' << minSocLimit
 				 << 0 << ((int)settings.state()) * 10 << '\t'
 				 // << mc.averageSolarYield() * 10 / multi.dcVoltage() * BatteryCapacity
 				 << '\t' << totalLoad * SocInterval  / (10 * (multi.dcVoltage() * BatteryCapacity * 3600))
