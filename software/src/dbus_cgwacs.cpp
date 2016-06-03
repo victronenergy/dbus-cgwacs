@@ -5,6 +5,8 @@
 #include "ac_sensor_settings.h"
 #include "ac_sensor_settings_bridge.h"
 #include "ac_sensor_updater.h"
+#include "battery.h"
+#include "battery_bridge.h"
 #include "battery_info.h"
 #include "charge_phase_control.h"
 #include "dbus_cgwacs.h"
@@ -31,7 +33,7 @@ DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 	mSystemCalc(new VBusItemSystemCalc(mServiceMonitor, this)),
 	mMaintenanceControl(0),
 	mControlLoop(0),
-	mBatteryInfo(new BatteryInfo(mServiceMonitor, mMulti, mSettings)),
+	mBatteryInfo(new BatteryInfo(mMulti, mSettings)),
 	mHub4ControlBridge(0),
 	mTimeZone(new VBusItem(this))
 {
@@ -119,6 +121,11 @@ void DBusCGwacs::onServiceAdded(QString service)
 			QLOG_INFO() << "Multi found @" << service;
 			new MultiBridge(mMulti, service, mMulti);
 		}
+	} else if (service.startsWith("com.victronenergy.battery.")) {
+		QLOG_INFO() << "Battery found @" << service;
+		Battery *battery = new Battery(this);
+		new BatteryBridge(service, battery, battery);
+		mBatteryInfo->addBattery(battery);
 	}
 }
 
@@ -130,6 +137,16 @@ void DBusCGwacs::onServiceRemoved(QString service)
 			QLOG_INFO() << "Multi @" << bridge->serviceName() << "disappeared.";
 			delete bridge;
 			bridge = 0;
+		}
+	} else if (service.startsWith("com.victronenergy.battery.")) {
+		QLOG_INFO() << "Battery @" << service << "disappeared.";
+		foreach (Battery *b, findChildren<Battery *>()) {
+			BatteryBridge *bridge = b->findChild<BatteryBridge *>();
+			if (bridge->serviceName() == service) {
+				mBatteryInfo->removeBattery(b);
+				delete b;
+				break;
+			}
 		}
 	}
 }

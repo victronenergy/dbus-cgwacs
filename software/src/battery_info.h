@@ -15,8 +15,7 @@ class BatteryInfo : public QObject
 	Q_PROPERTY(double maxChargePower READ maxChargePower NOTIFY maxChargePowerChanged)
 	Q_PROPERTY(double maxDischargePower READ maxDischargePower NOTIFY maxDischargePowerChanged)
 public:
-	BatteryInfo(DbusServiceMonitor *serviceManager, Multi *multi, Settings *settings,
-				QObject *parent = 0);
+	BatteryInfo(Multi *multi, Settings *settings, QObject *parent = 0);
 
 	/// Maximum charge power
 	/// Depends on the max charge current (if present on one of the batteries) and the
@@ -42,16 +41,16 @@ public:
 
 	double applyLimits(double p) const;
 
+	void addBattery(Battery *battery);
+
+	void removeBattery(Battery *battery);
+
 signals:
 	void maxChargePowerChanged();
 
 	void maxDischargePowerChanged();
 
 private slots:
-	void onServiceAdded(QString service);
-
-	void onServiceRemoved(QString service);
-
 	void updateBatteryLimits();
 
 private:
@@ -59,7 +58,7 @@ private:
 
 	void setMaxDischargePower(double p);
 
-	QHash<QString, Battery *> mBatteries;
+	QList<Battery *> mBatteries;
 	Multi *mMulti;
 	Settings *mSettings;
 	double mMaxChargePower;

@@ -10,21 +10,15 @@
 const double ChargeEfficiency = 0.95;
 const double DischargeEfficiency = 0.70;
 
-BatteryInfo::BatteryInfo(DbusServiceMonitor *serviceMonitor, Multi *multi, Settings *settings,
-						 QObject *parent) :
+BatteryInfo::BatteryInfo(Multi *multi, Settings *settings, QObject *parent) :
 	QObject(parent),
 	mMulti(multi),
 	mSettings(settings),
 	mMaxChargePower(qQNaN()),
 	mMaxDischargePower(qQNaN())
 {
-	// Q_ASSERT(serviceMonitor != 0);
 	Q_ASSERT(multi != 0);
 	Q_ASSERT(settings != 0);
-	if (serviceMonitor != 0) {
-		connect(serviceMonitor, SIGNAL(serviceAdded(QString)), this, SLOT(onServiceAdded(QString)));
-		connect(serviceMonitor, SIGNAL(serviceRemoved(QString)), this, SLOT(onServiceRemoved(QString)));
-	}
 	connect(multi, SIGNAL(dcVoltageChanged()), this, SLOT(updateBatteryLimits()));
 	connect(settings, SIGNAL(maxChargePercentageChanged()), this, SLOT(updateBatteryLimits()));
 	connect(settings, SIGNAL(maxDischargePercentageChanged()), this, SLOT(updateBatteryLimits()));
@@ -49,32 +43,20 @@ double BatteryInfo::applyLimits(double power) const
 	return power;
 }
 
-void BatteryInfo::onServiceAdded(QString service)
+void BatteryInfo::addBattery(Battery *battery)
 {
-	if (!service.startsWith("com.victronenergy.battery."))
+	if (mBatteries.contains(battery))
 		return;
-	if (mBatteries.contains(service))
-		return;
-	QLOG_INFO() << "Battery found @" << service;
-	Battery *battery = new Battery(this);
-	new BatteryBridge(service, battery, battery);
-	mBatteries.insert(service, battery);
-	connect(battery, SIGNAL(maxChargeCurrentChanged()),
-			this, SLOT(updateBatteryLimits()));
-	connect(battery, SIGNAL(maxDischargeCurrentChanged()),
-			this, SLOT(updateBatteryLimits()));
+	mBatteries.append(battery);
+	updateBatteryLimits();
+	connect(battery, SIGNAL(maxChargeCurrentChanged()), this, SLOT(updateBatteryLimits()));
+	connect(battery, SIGNAL(maxDischargeCurrentChanged()), this, SLOT(updateBatteryLimits()));
 }
 
-void BatteryInfo::onServiceRemoved(QString service)
+void BatteryInfo::removeBattery(Battery *battery)
 {
-	if (!service.startsWith("com.victronenergy.battery."))
-		return;
-	QHash<QString, Battery *>::Iterator it = mBatteries.find(service);
-	if (it == mBatteries.end())
-		return;
-	QLOG_INFO() << "Battery @" << service << "disappeared.";
-	it.value()->deleteLater();
-	mBatteries.erase(it);
+	disconnect(battery);
+	mBatteries.removeOne(battery);
 	updateBatteryLimits();
 }
 
@@ -100,7 +82,7 @@ void BatteryInfo::updateBatteryLimits()
 	double maxDischargeCurrent = 0;
 	bool hasChargeCurrent = false;
 	bool hasDischargeCurrent = false;
-	foreach (Battery *battery, mBatteries.values()) {
+	foreach (Battery *battery, mBatteries) {
 		if (qIsFinite(battery->maxChargeCurrent())) {
 			maxChargeCurrent += battery->maxChargeCurrent();
 			hasChargeCurrent = true;
