@@ -19,7 +19,7 @@ void Battery::setMaxChargeCurrent(double c)
 	if (mMaxChargeCurrent == c)
 		return;
 	mMaxChargeCurrent = c;
-	emit maxChargeCurrent();
+	emit maxChargeCurrentChanged();
 }
 
 double Battery::maxDischargeCurrent() const
