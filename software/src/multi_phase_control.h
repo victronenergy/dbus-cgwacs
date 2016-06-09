@@ -16,7 +16,8 @@ public:
 	}
 
 protected:
-	MultiPhaseControl(Multi *multi, AcSensor *acSensor, Settings *settings, QObject *parent = 0);
+	MultiPhaseControl(SystemCalc *systemCalc, Multi *multi, AcSensor *acSensor, Settings *settings,
+					  QObject *parent = 0);
 
 	virtual void performStep() = 0;
 

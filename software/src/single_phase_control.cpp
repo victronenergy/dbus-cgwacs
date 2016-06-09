@@ -9,9 +9,10 @@
 #include "settings.h"
 #include "single_phase_control.h"
 
-SinglePhaseControl::SinglePhaseControl(Multi *multi, AcSensor *acSensor, Settings *settings,
-									   Phase phase, Hub4Mode hub4Mode, QObject *parent):
-	ControlLoop(multi, settings, parent),
+SinglePhaseControl::SinglePhaseControl(SystemCalc *systemCalc, Multi *multi, AcSensor *acSensor,
+									   Settings *settings, Phase phase, Hub4Mode hub4Mode,
+									   QObject *parent):
+	ControlLoop(systemCalc, multi, settings, parent),
 	mTimer(new QTimer(this)),
 	mPhase(phase),
 	mMultiTargetPhase(multi->getPhaseData(phase)),

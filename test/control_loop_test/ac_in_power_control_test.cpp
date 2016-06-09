@@ -15,7 +15,7 @@ TEST_F(AcInPowerControlTest, singlePhaseInit)
 {
 	mAcSensorSettings->setIsMultiPhase(false);
 	mMulti->l1Data()->setAcPowerSetPoint(0);
-	SinglePhaseControl cl(mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL1, Hub4PhaseL1);
+	SinglePhaseControl cl(mSystemCalc.data(), mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL1, Hub4PhaseL1);
 	cl.setBatteryInfo(new BatteryInfo(mMulti.data(), mSettings.data(), &cl));
 	double load[3] = { 100.0, qQNaN(), qQNaN() };
 	runControlLoop(load);
@@ -26,7 +26,7 @@ TEST_F(AcInPowerControlTest, singlePhaseStep)
 {
 	mAcSensorSettings->setIsMultiPhase(false);
 	mMulti->l1Data()->setAcPowerSetPoint(0);
-	SinglePhaseControl cl(mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL1, Hub4PhaseL1);
+	SinglePhaseControl cl(mSystemCalc.data(), mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL1, Hub4PhaseL1);
 	cl.setBatteryInfo(new BatteryInfo(mMulti.data(), mSettings.data(), &cl));
 	double load[3] = { 100.0, qQNaN(), qQNaN() };
 	runControlLoop(load);
@@ -42,9 +42,9 @@ TEST_F(AcInPowerControlTest, splitPhase3Init)
 	mMulti->l1Data()->setAcPowerSetPoint(0);
 	mMulti->l2Data()->setAcPowerSetPoint(0);
 	mMulti->l3Data()->setAcPowerSetPoint(0);
-	SinglePhaseControl cl1(mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL1, Hub4PhaseSplit);
-	SinglePhaseControl cl2(mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL2, Hub4PhaseSplit);
-	SinglePhaseControl cl3(mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL3, Hub4PhaseSplit);
+	SinglePhaseControl cl1(mSystemCalc.data(), mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL1, Hub4PhaseSplit);
+	SinglePhaseControl cl2(mSystemCalc.data(), mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL2, Hub4PhaseSplit);
+	SinglePhaseControl cl3(mSystemCalc.data(), mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL3, Hub4PhaseSplit);
 	BatteryInfo *bi = new BatteryInfo(mMulti.data(), mSettings.data(), &cl1);
 	cl1.setBatteryInfo(bi);
 	cl2.setBatteryInfo(bi);
@@ -63,9 +63,9 @@ TEST_F(AcInPowerControlTest, splitPhase3Step)
 	mMulti->l1Data()->setAcPowerSetPoint(0);
 	mMulti->l2Data()->setAcPowerSetPoint(0);
 	mMulti->l3Data()->setAcPowerSetPoint(0);
-	SinglePhaseControl cl1(mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL1, Hub4PhaseSplit);
-	SinglePhaseControl cl2(mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL2, Hub4PhaseSplit);
-	SinglePhaseControl cl3(mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL3, Hub4PhaseSplit);
+	SinglePhaseControl cl1(mSystemCalc.data(), mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL1, Hub4PhaseSplit);
+	SinglePhaseControl cl2(mSystemCalc.data(), mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL2, Hub4PhaseSplit);
+	SinglePhaseControl cl3(mSystemCalc.data(), mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL3, Hub4PhaseSplit);
 	BatteryInfo *bi = new BatteryInfo(mMulti.data(), mSettings.data(), &cl1);
 	cl1.setBatteryInfo(bi);
 	cl2.setBatteryInfo(bi);
@@ -88,9 +88,9 @@ TEST_F(AcInPowerControlTest, splitPhase2Init)
 			Phase phase = static_cast<Phase>(PhaseL1 + j);
 			mMulti->getPhaseData(phase)->setAcPowerSetPoint(i == j ? qQNaN() : 0);
 		}
-		SinglePhaseControl cl1(mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL1, Hub4PhaseSplit);
-		SinglePhaseControl cl2(mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL2, Hub4PhaseSplit);
-		SinglePhaseControl cl3(mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL3, Hub4PhaseSplit);
+		SinglePhaseControl cl1(mSystemCalc.data(), mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL1, Hub4PhaseSplit);
+		SinglePhaseControl cl2(mSystemCalc.data(), mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL2, Hub4PhaseSplit);
+		SinglePhaseControl cl3(mSystemCalc.data(), mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL3, Hub4PhaseSplit);
 		BatteryInfo *bi = new BatteryInfo(mMulti.data(), mSettings.data(), &cl1);
 		cl1.setBatteryInfo(bi);
 		cl2.setBatteryInfo(bi);
@@ -111,7 +111,7 @@ TEST_F(AcInPowerControlTest, phaseCompensation1Phase)
 	mAcSensorSettings->setIsMultiPhase(true);
 	mAcSensorSettings->setHub4Mode(Hub4PhaseCompensation);
 	mMulti->l1Data()->setAcPowerSetPoint(0);
-	SinglePhaseControl cl1(mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL1, Hub4PhaseCompensation);
+	SinglePhaseControl cl1(mSystemCalc.data(), mMulti.data(), mAcSensor.data(), mSettings.data(), PhaseL1, Hub4PhaseCompensation);
 	cl1.setBatteryInfo(new BatteryInfo(mMulti.data(), mSettings.data(), &cl1));
 	double load[3] = { 100.0, -200, 150 };
 	runControlLoop(load);
@@ -124,7 +124,7 @@ TEST_F(AcInPowerControlTest, phaseCompensation2Phase)
 	mAcSensorSettings->setHub4Mode(Hub4PhaseCompensation);
 	mMulti->l1Data()->setAcPowerSetPoint(0);
 	mMulti->l2Data()->setAcPowerSetPoint(0);
-	PhaseCompensationControl cl(mMulti.data(), mAcSensor.data(), mSettings.data());
+	PhaseCompensationControl cl(mSystemCalc.data(), mMulti.data(), mAcSensor.data(), mSettings.data());
 	cl.setBatteryInfo(new BatteryInfo(mMulti.data(), mSettings.data(), &cl));
 	double load[3] = { -300, 750, 200 };
 	runControlLoop(load);
@@ -139,7 +139,7 @@ TEST_F(AcInPowerControlTest, phaseCompensation3Phase)
 	mMulti->l1Data()->setAcPowerSetPoint(0);
 	mMulti->l2Data()->setAcPowerSetPoint(0);
 	mMulti->l3Data()->setAcPowerSetPoint(0);
-	PhaseCompensationControl cl(mMulti.data(), mAcSensor.data(), mSettings.data());
+	PhaseCompensationControl cl(mSystemCalc.data(), mMulti.data(), mAcSensor.data(), mSettings.data());
 	cl.setBatteryInfo(new BatteryInfo(mMulti.data(), mSettings.data(), &cl));
 	double load[3] = { 600, -100, 200 };
 	runControlLoop(load);
@@ -155,7 +155,7 @@ TEST_F(AcInPowerControlTest, phaseCompensation3PhasePositive)
 	mMulti->l1Data()->setAcPowerSetPoint(0);
 	mMulti->l2Data()->setAcPowerSetPoint(0);
 	mMulti->l3Data()->setAcPowerSetPoint(0);
-	PhaseCompensationControl cl(mMulti.data(), mAcSensor.data(), mSettings.data());
+	PhaseCompensationControl cl(mSystemCalc.data(), mMulti.data(), mAcSensor.data(), mSettings.data());
 	cl.setBatteryInfo(new BatteryInfo(mMulti.data(), mSettings.data(), &cl));
 	double load[3] = { 300, 400, 200 };
 	runControlLoop(load);
@@ -170,6 +170,7 @@ void AcInPowerControlTest::SetUp()
 	mAcSensorSettings.reset(new AcSensorSettings(71, ""));
 	mMulti.reset(new Multi);
 	mSettings.reset(new Settings);
+	mSystemCalc.reset(new MockSystemCalc);
 }
 
 void AcInPowerControlTest::TearDown()
@@ -178,6 +179,7 @@ void AcInPowerControlTest::TearDown()
 	mAcSensorSettings.reset();
 	mMulti.reset();
 	mSettings.reset();
+	mSystemCalc.reset();
 }
 
 void AcInPowerControlTest::runControlLoop(double load[3], int stepCount)

@@ -9,6 +9,7 @@ class AcSensorSettings;
 class ControlLoop;
 class Multi;
 class Settings;
+class SystemCalc;
 
 class AcInPowerControlTest : public testing::Test
 {
@@ -24,6 +25,7 @@ protected:
 	QScopedPointer<ControlLoop> mControlLoop;
 	QScopedPointer<Multi> mMulti;
 	QScopedPointer<Settings> mSettings;
+	QScopedPointer<SystemCalc> mSystemCalc;
 };
 
 #endif // SINGLEPHASECONTROLTEST_H

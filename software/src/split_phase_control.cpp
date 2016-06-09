@@ -5,9 +5,9 @@
 #include "settings.h"
 #include "split_phase_control.h"
 
-SplitPhaseControl::SplitPhaseControl(Multi *multi, AcSensor *acSensor, Settings *settings,
-									 QObject *parent):
-	MultiPhaseControl(multi, acSensor, settings, parent),
+SplitPhaseControl::SplitPhaseControl(SystemCalc *systemCalc, Multi *multi, AcSensor *acSensor,
+									 Settings *settings, QObject *parent):
+	MultiPhaseControl(systemCalc, multi, acSensor, settings, parent),
 	mSetpoints(3)
 {
 }

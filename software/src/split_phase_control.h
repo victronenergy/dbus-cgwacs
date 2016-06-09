@@ -8,7 +8,8 @@ class SplitPhaseControl: public MultiPhaseControl
 {
 	Q_OBJECT
 public:
-	SplitPhaseControl(Multi *multi, AcSensor *acSensor, Settings *settings, QObject *parent = 0);
+	SplitPhaseControl(SystemCalc *systemCalc, Multi *multi, AcSensor *acSensor, Settings *settings,
+					  QObject *parent = 0);
 
 protected:
 	virtual void performStep();

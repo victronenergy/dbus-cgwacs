@@ -7,9 +7,9 @@
 #include "multi_phase_data.h"
 #include "power_info.h"
 
-MultiPhaseControl::MultiPhaseControl(Multi *multi, AcSensor *acSensor, Settings *settings,
-									 QObject *parent):
-	ControlLoop(multi, settings, parent),
+MultiPhaseControl::MultiPhaseControl(SystemCalc *systemCalc, Multi *multi, AcSensor *acSensor,
+									 Settings *settings, QObject *parent):
+	ControlLoop(systemCalc, multi, settings, parent),
 	mAcSensor(acSensor),
 	mTimer(new QTimer(this)),
 	mMultiL1Update(false),

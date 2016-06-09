@@ -18,11 +18,13 @@ include(../../software/ext/qslog/QsLog.pri)
 
 SRCDIR = ../../software/src
 EXTDIR = ../../software/ext
+TESTDIR = ../src
 
 INCLUDEPATH += \
     $$EXTDIR/velib/inc \
     $$EXTDIR/velib/lib/Qvelib \
-    $$SRCDIR
+    $$SRCDIR \
+    $$TESTDIR
 
 SOURCES += \
     $$SRCDIR/ac_sensor.cpp \
@@ -38,7 +40,9 @@ SOURCES += \
     $$SRCDIR/split_phase_control.cpp \
     $$SRCDIR/battery.cpp \
     $$SRCDIR/battery_info.cpp \
+    $$SRCDIR/system_calc.cpp \
     $$SRCDIR/charge_phase_control.cpp \
+    $$TESTDIR/mock_system_calc.cpp \
     main.cpp
 
 HEADERS += \
@@ -55,4 +59,6 @@ HEADERS += \
     $$SRCDIR/split_phase_control.h \
     $$SRCDIR/battery.h \
     $$SRCDIR/battery_info.h \
-    $$SRCDIR/charge_phase_control.h
+    $$SRCDIR/system_calc.h \
+    $$SRCDIR/charge_phase_control.h \
+    $$TESTDIR/mock_system_calc.h

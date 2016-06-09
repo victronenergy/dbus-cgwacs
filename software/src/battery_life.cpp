@@ -89,13 +89,7 @@ void BatteryLife::update()
 		QLOG_TRACE() << "[Battery life] No active battery or no valid SoC";
 		return;
 	}
-	double socLimit = mSettings->socLimit();
-	double minSocLimit = mSettings->minSocLimit();
-	if (socLimit < minSocLimit) {
-		socLimit = minSocLimit;
-		mSettings->setSocLimit(socLimit);
-		QLOG_INFO() << "[Battery life] Setting SoC limit to" << socLimit;
-	}
+	double socLimit = qBound(0.0, qMax(mSettings->socLimit(), mSettings->minSocLimit()), SocSwitchMax);
 	BatteryLifeState state = mSettings->state();
 	QLOG_TRACE() << "[Battery life]" << soc << socLimit << getStateName(state);
 	bool adjustLimit = true;
@@ -107,7 +101,7 @@ void BatteryLife::update()
 		// Fall through
 	case BatteryLifeStateDefault:
 		// Switch off check
-		if (mMulti->isSustainActive() || soc < socLimit) {
+		if (mMulti->isSustainActive() || soc <= socLimit) {
 			onDischarged(adjustLimit);
 		} else if (soc >= FloatLevel) {
 			onFloat(adjustLimit);
@@ -119,11 +113,11 @@ void BatteryLife::update()
 		break;
 	case BatteryLifeStateDischarged:
 		// Switch on check
-		if (!mMulti->isSustainActive() && soc > mSettings->socLimit() + SocSwitchOffset)
+		if (!mMulti->isSustainActive() && soc > socLimit + SocSwitchOffset)
 			setState(BatteryLifeStateDefault);
 		break;
 	case BatteryLifeStateForceCharge:
-		if (!mMulti->isSustainActive() && soc > mSettings->socLimit()) {
+		if (!mMulti->isSustainActive() && soc > socLimit) {
 			mSettings->setDischargedTime(mClock->now());
 			setState(BatteryLifeStateDischarged);
 		}
@@ -176,8 +170,8 @@ void BatteryLife::onFloat(bool adjustLimit)
 
 void BatteryLife::adjustSocLimit(double delta)
 {
-	double socLimit = mSettings->socLimit() + delta;
-	socLimit = qBound(mSettings->minSocLimit(), socLimit, SocSwitchMax);
+	double socLimit = qMax(mSettings->minSocLimit(), mSettings->socLimit()) + delta;
+	socLimit = qBound(0.0, socLimit, SocSwitchMax);
 	mSettings->setSocLimit(socLimit);
 	QLOG_INFO() << "[Battery life] Setting SoC limit to" << socLimit;
 }

@@ -5,9 +5,10 @@
 #include "power_info.h"
 #include "settings.h"
 
-PhaseCompensationControl::PhaseCompensationControl(Multi *multi, AcSensor *acSensor,
-												   Settings *settings, QObject *parent):
-	MultiPhaseControl(multi, acSensor, settings, parent),
+PhaseCompensationControl::PhaseCompensationControl(SystemCalc *systemCalc, Multi *multi,
+												   AcSensor *acSensor, Settings *settings,
+												   QObject *parent):
+	MultiPhaseControl(systemCalc, multi, acSensor, settings, parent),
 	mSetpoints(3)
 {
 }

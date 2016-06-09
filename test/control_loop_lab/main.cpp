@@ -11,6 +11,7 @@
 #include <QsLog.h>
 #include <settings.h>
 #include <single_phase_control.h>
+#include "mock_system_calc.h"
 
 double rnd(double min, double max) {
 	return ((max - min) * qrand()) / RAND_MAX + min;
@@ -24,6 +25,7 @@ void run_test()
 	sensorSettings.setIsMultiPhase(true);
 	Multi multi;
 	Settings settings;
+	MockSystemCalc systemCalc;
 	BatteryInfo bi(&multi, &settings);
 	double pLoadL1 = 200;
 	double pLoadL2 = -100;
@@ -37,7 +39,7 @@ void run_test()
 //	SinglePhaseControl controlLoopL1(&multi, &sensor, &settings, PhaseL1, Hub4PhaseSplit);
 //	SinglePhaseControl controlLoopL2(&multi, &sensor, &settings, PhaseL2, Hub4PhaseSplit);
 //	SinglePhaseControl controlLoopL3(&multi, &sensor, &settings, PhaseL3, Hub4PhaseSplit);
-	PhaseCompensationControl controlLoop(&multi, &sensor, &settings);
+	PhaseCompensationControl controlLoop(&systemCalc, &multi, &sensor, &settings);
 	controlLoop.setBatteryInfo(&bi);
 //	ChargePhaseControl controlLoop(&multi, &sensor, &settings, PhaseL1);
 	double pLoad = 0;

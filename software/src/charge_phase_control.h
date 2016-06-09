@@ -10,7 +10,8 @@ class ChargePhaseControl : public ControlLoop
 {
 	Q_OBJECT
 public:
-	ChargePhaseControl(Multi *multi, AcSensor *acSensor, Settings *settings, QObject *parent = 0);
+	ChargePhaseControl(SystemCalc *systemCalc, Multi *multi, AcSensor *acSensor, Settings *settings,
+					   QObject *parent = 0);
 
 public slots:
 	void onTimer();

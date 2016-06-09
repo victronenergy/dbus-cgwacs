@@ -9,9 +9,9 @@
 #include "multi.h"
 #include "multi_phase_data.h"
 
-ChargePhaseControl::ChargePhaseControl(Multi *multi, AcSensor *acSensor, Settings *settings,
-									   QObject *parent):
-	ControlLoop(multi, settings, parent),
+ChargePhaseControl::ChargePhaseControl(SystemCalc *systemCalc, Multi *multi, AcSensor *acSensor,
+									   Settings *settings, QObject *parent):
+	ControlLoop(systemCalc, multi, settings, parent),
 	mAcSensor(acSensor)
 {
 	QTimer *timer = new QTimer(this);

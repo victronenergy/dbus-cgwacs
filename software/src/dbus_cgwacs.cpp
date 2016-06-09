@@ -168,17 +168,17 @@ void DBusCGwacs::updateControlLoop()
 			QList<Phase> setpointPhases = mMulti->getSetpointPhases();
 			Phase phase = setpointPhases.isEmpty() ? PhaseL1 : setpointPhases.first();
 			QLOG_INFO() << QString("Control loop: multi phase, phase L%1").arg(phase);
-			mControlLoop = new SinglePhaseControl(mMulti, gridMeter, mSettings, phase,
+			mControlLoop = new SinglePhaseControl(mSystemCalc, mMulti, gridMeter, mSettings, phase,
 												  Hub4PhaseCompensation, this);
 			break;
 		}
 		case Hub4PhaseCompensation:
 			QLOG_INFO() << "Control loop: multi phase, phase compensation";
-			mControlLoop = new PhaseCompensationControl(mMulti, gridMeter, mSettings, this);
+			mControlLoop = new PhaseCompensationControl(mSystemCalc, mMulti, gridMeter, mSettings, this);
 			break;
 		case Hub4PhaseSplit:
 			QLOG_INFO() << "Control loop: split phase control";
-			mControlLoop = new SplitPhaseControl(mMulti, gridMeter, mSettings, this);
+			mControlLoop = new SplitPhaseControl(mSystemCalc, mMulti, gridMeter, mSettings, this);
 			break;
 		case Hub4PhaseL1:
 		case Hub4Disabled:
@@ -193,8 +193,8 @@ void DBusCGwacs::updateControlLoop()
 			break;
 		default:
 			QLOG_INFO() << "Control loop: single phase";
-			mControlLoop = new SinglePhaseControl(mMulti, gridMeter, mSettings, PhaseL1,
-												  Hub4PhaseL1, this);
+			mControlLoop = new SinglePhaseControl(mSystemCalc, mMulti, gridMeter, mSettings,
+												  PhaseL1, Hub4PhaseL1, this);
 			break;
 		}
 	}

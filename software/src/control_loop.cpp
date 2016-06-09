@@ -7,13 +7,16 @@
 #include "multi_phase_data.h"
 #include "power_info.h"
 #include "settings.h"
+#include "system_calc.h"
 
-ControlLoop::ControlLoop(Multi *multi, Settings *settings, QObject *parent):
+ControlLoop::ControlLoop(SystemCalc *systemCalc, Multi *multi, Settings *settings, QObject *parent):
 	QObject(parent),
+	mSystemCalc(systemCalc),
 	mMulti(multi),
 	mSettings(settings),
 	mBatteryInfo(0)
 {
+	Q_ASSERT(systemCalc != 0);
 	Q_ASSERT(multi != 0);
 	Q_ASSERT(settings != 0);
 }
@@ -36,7 +39,9 @@ void ControlLoop::adjustSetpoint(PowerInfo *source, Phase targetPhase, MultiPhas
 		setpoint = 0.2 * target->acPowerIn() + 0.8 * setpoint;
 	}
 
-	bool feedbackDisabled = !mBatteryInfo->canDischarge();
+	double systemSoc = mSystemCalc->soc();
+	double minSocLimit = qBound(0.0, mSettings->minSocLimit(), 100.0);
+	bool feedbackDisabled = !mBatteryInfo->canDischarge() || systemSoc <= minSocLimit;
 
 	switch (mSettings->state()) {
 	case BatteryLifeStateForceCharge:

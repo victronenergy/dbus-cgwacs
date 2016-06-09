@@ -22,8 +22,8 @@ class PhaseCompensationControl : public MultiPhaseControl
 {
 	Q_OBJECT
 public:
-	PhaseCompensationControl(Multi *multi, AcSensor *acSensor, Settings *settings,
-							 QObject *parent = 0);
+	PhaseCompensationControl(SystemCalc *systemCalc, Multi *multi, AcSensor *acSensor,
+							 Settings *settings, QObject *parent = 0);
 
 protected:
 	virtual void performStep();

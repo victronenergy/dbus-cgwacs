@@ -18,7 +18,7 @@ class SinglePhaseControl : public ControlLoop
 {
 	Q_OBJECT
 public:
-	SinglePhaseControl(Multi *multi, AcSensor *acSensor, Settings *settings,
+	SinglePhaseControl(SystemCalc *systemCalc, Multi *multi, AcSensor *acSensor, Settings *settings,
 					   Phase phase, Hub4Mode hub4Mode, QObject *parent = 0);
 
 private slots:

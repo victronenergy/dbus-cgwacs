@@ -9,6 +9,7 @@ class Multi;
 class MultiPhaseData;
 class PowerInfo;
 class Settings;
+class SystemCalc;
 
 class ControlLoop : public QObject
 {
@@ -32,7 +33,7 @@ public:
 	void setBatteryInfo(BatteryInfo *i);
 
 protected:
-	ControlLoop(Multi *multi, Settings *settings, QObject *parent = 0);
+	ControlLoop(SystemCalc *systemCalc, Multi *multi, Settings *settings, QObject *parent = 0);
 
 	void adjustSetpoint(PowerInfo *source, Phase targetPhase, MultiPhaseData *target,
 						double setpoint);
@@ -46,6 +47,7 @@ private:
 
 	double computeSetpoint(double pTarget) const;
 
+	SystemCalc *mSystemCalc;
 	Multi *mMulti;
 	Settings *mSettings;
 	BatteryInfo *mBatteryInfo;
