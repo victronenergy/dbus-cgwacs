@@ -6,27 +6,49 @@
 class Battery : public QObject
 {
 	Q_OBJECT
-	Q_PROPERTY(double maxChargeCurrent READ maxChargeCurrent WRITE setMaxChargeCurrent NOTIFY maxChargeCurrentChanged)
-	Q_PROPERTY(double maxDischargeCurrent READ maxDischargeCurrent WRITE setMaxDischargeCurrent NOTIFY maxDischargeCurrentChanged)
 public:
 	explicit Battery(QObject *parent = 0);
 
-	double maxChargeCurrent() const;
+	virtual double maxChargeCurrent() const = 0;
 
-	void setMaxChargeCurrent(double c);
+	virtual double maxDischargeCurrent() const = 0;
 
-	double maxDischargeCurrent() const;
+	virtual int cellImbalanceAlarm() const = 0;
 
-	void setMaxDischargeCurrent(double c);
+	virtual int highChargeCurrentAlarm() const = 0;
+
+	virtual int highDischargeCurrentAlarm() const = 0;
+
+	virtual int highTemperatureAlarm() const = 0;
+
+	virtual int highVoltageAlarm() const = 0;
+
+	virtual int internalError() const = 0;
+
+	virtual int lowTemperatureAlarm() const = 0;
+
+	virtual int lowVoltageAlarm() const = 0;
 
 signals:
 	void maxChargeCurrentChanged();
 
 	void maxDischargeCurrentChanged();
 
-private:
-	double mMaxChargeCurrent;
-	double mMaxDischargeCurrent;
+	void cellImbalanceAlarmChanged();
+
+	void highChargeCurrentAlarmChanged();
+
+	void highDischargeCurrentAlarmChanged();
+
+	void highTemperatureAlarmChanged();
+
+	void highVoltageAlarmChanged();
+
+	void internalErrorChanged();
+
+	void lowTemperatureAlarmChanged();
+
+	void lowVoltageAlarmChanged();
 };
 
 #endif // BATTERY_H

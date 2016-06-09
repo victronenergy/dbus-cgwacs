@@ -73,14 +73,14 @@ SOURCES += \
     src/single_phase_control.cpp \
     src/charge_phase_control.cpp \
     src/battery.cpp \
-    src/battery_bridge.cpp \
     src/multi_phase_control.cpp \
     src/split_phase_control.cpp \
     src/battery_info.cpp \
     src/ac_sensor_mediator.cpp \
     src/battery_life.cpp \
     src/system_calc.cpp \
-    src/vbus_item_system_calc.cpp
+    src/vbus_item_system_calc.cpp \
+    src/vbus_item_battery.cpp
 
 HEADERS += \
     ext/velib/src/qt/v_busitem_adaptor.h \
@@ -118,14 +118,14 @@ HEADERS += \
     src/single_phase_control.h \
     src/charge_phase_control.h \
     src/battery.h \
-    src/battery_bridge.h \
     src/multi_phase_control.h \
     src/split_phase_control.h \
     src/battery_info.h \
     src/ac_sensor_mediator.h \
     src/battery_life.h \
     src/system_calc.h \
-    src/vbus_item_system_calc.h
+    src/vbus_item_system_calc.h \
+    src/vbus_item_battery.h
 
 DISTFILES += \
     ../documents/battery_life.dot

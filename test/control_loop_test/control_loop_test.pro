@@ -39,7 +39,6 @@ SOURCES += \
     $$SRCDIR/ac_sensor.cpp \
     $$SRCDIR/ac_sensor_settings.cpp \
     $$SRCDIR/battery.cpp \
-    $$SRCDIR/battery_bridge.cpp \
     $$SRCDIR/battery_info.cpp \
     $$SRCDIR/control_loop.cpp \
     $$SRCDIR/dbus_bridge.cpp \
@@ -69,7 +68,6 @@ HEADERS += \
     $$SRCDIR/ac_sensor.h \
     $$SRCDIR/ac_sensor_settings.h \
     $$SRCDIR/battery.h \
-    $$SRCDIR/battery_bridge.h \
     $$SRCDIR/battery_info.h \
     $$SRCDIR/control_loop.h \
     $$SRCDIR/dbus_bridge.h \

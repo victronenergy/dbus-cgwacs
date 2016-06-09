@@ -5,8 +5,7 @@
 #include "ac_sensor_settings.h"
 #include "ac_sensor_settings_bridge.h"
 #include "ac_sensor_updater.h"
-#include "battery.h"
-#include "battery_bridge.h"
+#include "vbus_item_battery.h"
 #include "battery_info.h"
 #include "charge_phase_control.h"
 #include "dbus_cgwacs.h"
@@ -123,8 +122,7 @@ void DBusCGwacs::onServiceAdded(QString service)
 		}
 	} else if (service.startsWith("com.victronenergy.battery.")) {
 		QLOG_INFO() << "Battery found @" << service;
-		Battery *battery = new Battery(this);
-		new BatteryBridge(service, battery, battery);
+		Battery *battery = new VbusItemBattery(service, this);
 		mBatteryInfo->addBattery(battery);
 	}
 }
@@ -140,9 +138,8 @@ void DBusCGwacs::onServiceRemoved(QString service)
 		}
 	} else if (service.startsWith("com.victronenergy.battery.")) {
 		QLOG_INFO() << "Battery @" << service << "disappeared.";
-		foreach (Battery *b, findChildren<Battery *>()) {
-			BatteryBridge *bridge = b->findChild<BatteryBridge *>();
-			if (bridge->serviceName() == service) {
+		foreach (VbusItemBattery *b, findChildren<VbusItemBattery *>()) {
+			if (b->serviceName() == service) {
 				mBatteryInfo->removeBattery(b);
 				delete b;
 				break;
