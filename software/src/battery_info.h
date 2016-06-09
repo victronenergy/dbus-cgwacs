@@ -58,11 +58,15 @@ private:
 
 	void setMaxDischargePower(double p);
 
+	bool isAlarmActive(const Battery *b);
+
 	QList<Battery *> mBatteries;
 	Multi *mMulti;
 	Settings *mSettings;
 	double mMaxChargePower;
 	double mMaxDischargePower;
+	bool mHasChargeCurrent;
+	bool mHasDischargeCurrent;
 };
 
 #endif // BATTERYINFO_H

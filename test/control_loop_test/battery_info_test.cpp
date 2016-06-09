@@ -38,7 +38,7 @@ TEST_F(BatteryInfoTest, batteryLimitsCharge)
 	mBattery->setMaxDischargeCurrent(50);
 	mBatteryInfo->addBattery(mBattery.data());
 	ASSERT_TRUE(qIsNaN(mBatteryInfo->maxChargePower()));
-	ASSERT_EQ(mBatteryInfo->maxDischargePower(), 12 * 50 * 0.7);
+	ASSERT_EQ(mBatteryInfo->maxDischargePower(), 12 * (50 - 7) * 0.9);
 }
 
 TEST_F(BatteryInfoTest, chargePct)
@@ -99,7 +99,7 @@ TEST_F(BatteryInfoTest, batteryChargeLimit1)
 	mBatteryInfo->addBattery(mBattery.data());
 	mBattery->setMaxChargeCurrent(30);
 	mSettings->setMaxChargePower(500);
-	ASSERT_EQ(mBatteryInfo->maxChargePower(), 30 * 12 / 0.95);
+	ASSERT_EQ(mBatteryInfo->maxChargePower(), 30 * 12 / 0.97);
 	ASSERT_TRUE(qIsNaN(mBatteryInfo->maxDischargePower()));
 }
 
@@ -117,7 +117,7 @@ TEST_F(BatteryInfoTest, batteryDischargeLimit1)
 	mBatteryInfo->addBattery(mBattery.data());
 	mBattery->setMaxDischargeCurrent(30);
 	mSettings->setMaxDischargePower(500);
-	ASSERT_EQ(mBatteryInfo->maxDischargePower(), 30 * 12 * 0.7);
+	ASSERT_EQ(mBatteryInfo->maxDischargePower(), (30 - 7) * 12 * 0.9);
 	ASSERT_TRUE(qIsNaN(mBatteryInfo->maxChargePower()));
 }
 
@@ -142,8 +142,8 @@ TEST_F(BatteryInfoTest, alltogether)
 	mSettings->setMaxDischargePower(250);
 	mSettings->setMaxDischargePercentage(75);
 
-	ASSERT_EQ(mBatteryInfo->maxChargePower(), qMin(200.0, 0.25 * 55 * 12 / 0.95));
-	ASSERT_EQ(mBatteryInfo->maxDischargePower(), qMin(250.0, 0.75 * 35 * 12 * 0.7));
+	ASSERT_EQ(mBatteryInfo->maxChargePower(), qMin(200.0, 0.25 * 55 * 12 / 0.97));
+	ASSERT_EQ(mBatteryInfo->maxDischargePower(), qMin(250.0, 0.75 * (35-7) * 12 * 0.9));
 }
 
 TEST_F(BatteryInfoTest, bmsDisappears)
@@ -152,21 +152,38 @@ TEST_F(BatteryInfoTest, bmsDisappears)
 	mBattery->setMaxChargeCurrent(55);
 	mBattery->setMaxDischargeCurrent(35);
 
-	ASSERT_EQ(mBatteryInfo->maxChargePower(), 55 * 12 / 0.95);
-	ASSERT_EQ(mBatteryInfo->maxDischargePower(), 35 * 12 * 0.7);
+	ASSERT_EQ(mBatteryInfo->maxChargePower(), 55 * 12 / 0.97);
+	ASSERT_EQ(mBatteryInfo->maxDischargePower(), (35 - 7) * 12 * 0.9);
 
 	mBatteryInfo->removeBattery(mBattery.data());
 
-	/// @todo EV According to LG requirements this should be 0 instead.
-	ASSERT_TRUE(qIsNaN(mBatteryInfo->maxChargePower()));
-	ASSERT_TRUE(qIsNaN(mBatteryInfo->maxDischargePower()));
+	ASSERT_EQ(mBatteryInfo->maxChargePower(), 0);
+	ASSERT_EQ(mBatteryInfo->maxDischargePower(), 0);
 
 	mBattery->setMaxChargeCurrent(65);
 	mBattery->setMaxDischargeCurrent(40);
 	mBatteryInfo->addBattery(mBattery.data());
 
-	ASSERT_EQ(mBatteryInfo->maxChargePower(), 65 * 12 / 0.95);
-	ASSERT_EQ(mBatteryInfo->maxDischargePower(), 40 * 12 * 0.7);
+	ASSERT_EQ(mBatteryInfo->maxChargePower(), 65 * 12 / 0.97);
+	ASSERT_EQ(mBatteryInfo->maxDischargePower(), (40 - 7) * 12 * 0.9);
+}
+
+TEST_F(BatteryInfoTest, noBmsBatteryDisappears)
+{
+	mBatteryInfo->addBattery(mBattery.data());
+
+	ASSERT_TRUE(qIsNaN(mBatteryInfo->maxChargePower()));
+	ASSERT_TRUE(qIsNaN(mBatteryInfo->maxDischargePower()));
+
+	mBatteryInfo->removeBattery(mBattery.data());
+
+	ASSERT_TRUE(qIsNaN(mBatteryInfo->maxChargePower()));
+	ASSERT_TRUE(qIsNaN(mBatteryInfo->maxDischargePower()));
+
+	mBatteryInfo->addBattery(mBattery.data());
+
+	ASSERT_TRUE(qIsNaN(mBatteryInfo->maxChargePower()));
+	ASSERT_TRUE(qIsNaN(mBatteryInfo->maxDischargePower()));
 }
 
 void BatteryInfoTest::SetUp()
