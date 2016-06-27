@@ -19,6 +19,9 @@ unix {
     target.path = $${DESTDIR}$${bindir}
 }
 
+MOC_DIR=.moc
+OBJECTS_DIR=.obj
+
 QT += core dbus
 QT -= gui
 
