@@ -1,4 +1,5 @@
 #include <QsLog.h>
+#include <qnumeric.h>
 #include "defines.h"
 #include "settings.h"
 
@@ -10,7 +11,9 @@ Settings::Settings(QObject *parent) :
 	mState(BatteryLifeStateDisabled),
 	mFlags(0),
 	mSocLimit(SocSwitchDefaultMin),
-	mMinSocLimit(SocSwitchDefaultMin)
+	mMinSocLimit(SocSwitchDefaultMin),
+	mMaxChargePower(qQNaN()),
+	mMaxDischargePower(qQNaN())
 {
 }
 
@@ -118,6 +121,32 @@ void Settings::setMinSocLimit(double l)
 		return;
 	mMinSocLimit = l;
 	emit minSocLimitChanged();
+}
+
+double Settings::maxChargePower() const
+{
+	return mMaxChargePower;
+}
+
+void Settings::setMaxChargePower(double p)
+{
+	if (mMaxChargePower == p)
+		return;
+	mMaxChargePower = p;
+	emit maxChargePowerChanged();
+}
+
+double Settings::maxDischargePower() const
+{
+	return mMaxDischargePower;
+}
+
+void Settings::setMaxDischargePower(double p)
+{
+	if (mMaxDischargePower == p)
+		return;
+	mMaxDischargePower = p;
+	emit maxDischargePowerChanged();
 }
 
 QDateTime Settings::dischargedTime() const

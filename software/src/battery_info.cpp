@@ -22,6 +22,8 @@ BatteryInfo::BatteryInfo(Multi *multi, Settings *settings, QObject *parent) :
 	connect(multi, SIGNAL(dcVoltageChanged()), this, SLOT(updateBatteryLimits()));
 	connect(settings, SIGNAL(maxChargePercentageChanged()), this, SLOT(updateBatteryLimits()));
 	connect(settings, SIGNAL(maxDischargePercentageChanged()), this, SLOT(updateBatteryLimits()));
+	connect(settings, SIGNAL(maxChargePowerChanged()), this, SLOT(updateBatteryLimits()));
+	connect(settings, SIGNAL(maxDischargePowerChanged()), this, SLOT(updateBatteryLimits()));
 }
 
 bool BatteryInfo::canCharge() const
@@ -105,6 +107,11 @@ void BatteryInfo::updateBatteryLimits()
 		maxChargePower = mMulti->maxChargeCurrent() * mMulti->dcVoltage();
 	}
 	maxChargePower *= maxChargePct / 100;
+	double userMaxChargePower = mSettings->maxChargePower();
+	if (qIsFinite(userMaxChargePower) &&
+		(!qIsFinite(maxChargePower) || userMaxChargePower < maxChargePower)) {
+		maxChargePower = userMaxChargePower;
+	}
 	setMaxChargePower(maxChargePower);
 
 	double maxDischargePower = qQNaN();
@@ -118,6 +125,11 @@ void BatteryInfo::updateBatteryLimits()
 		// percentage as on/off switch. Again, we only change the maxDischargePower if
 		// maxDischargeCurrent has been changed in order to keep load on AC-Out running.
 		maxDischargePower = 0;
+	}
+	double userMaxDischargePower = mSettings->maxDischargePower();
+	if (qIsFinite(userMaxDischargePower) &&
+		(!qIsFinite(maxDischargePower) || userMaxDischargePower < maxDischargePower)) {
+		maxDischargePower = userMaxDischargePower;
 	}
 	setMaxDischargePower(maxDischargePower);
 }

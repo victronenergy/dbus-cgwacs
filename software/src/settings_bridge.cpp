@@ -1,3 +1,4 @@
+#include <qnumeric.h>
 #include <QStringList>
 #include <QsLog.h>
 #include <QVariant>
@@ -11,6 +12,8 @@ static const QString DeviceIdsPath = CGwacsPath + "/DeviceIds";
 static const QString AcPowerSetPointPath = CGwacsPath + "/AcPowerSetPoint";
 static const QString MaxChargePercentagePath = CGwacsPath + "/MaxChargePercentage";
 static const QString MaxDischargePercentagePath = CGwacsPath + "/MaxDischargePercentage";
+static const QString MaxChargePowerPath = CGwacsPath + "/MaxChargePower";
+static const QString MaxDischargePowerPath = CGwacsPath + "/MaxDischargePower";
 
 static const QString BatteryLifePath = CGwacsPath + "/BatteryLife";
 static const QString StatePath = BatteryLifePath + "/State";
@@ -30,6 +33,8 @@ SettingsBridge::SettingsBridge(Settings *settings, QObject *parent):
 	consume(Service, settings, "flags", 0, FlagsPath);
 	consume(Service, settings, "socLimit", SocSwitchDefaultMin, 0, 100, SocLimitPath);
 	consume(Service, settings, "minSocLimit", SocSwitchDefaultMin, 0, 100, MinSocLimitPath);
+	consume(Service, settings, "maxChargePower", -1.0, -1.0, 1e5, MaxChargePowerPath);
+	consume(Service, settings, "maxDischargePower", -1.0, -1.0, 1e5, MaxDischargePowerPath);
 	consume(Service, settings, "dischargedTime", QVariant(0), DischargedTimePath);
 }
 
@@ -42,6 +47,9 @@ bool SettingsBridge::toDBus(const QString &path, QVariant &value)
 	} else if (path == DischargedTimePath) {
 		QDateTime dt = qvariant_cast<QDateTime>(value);
 		value = dt.isValid() ? dt.toTime_t() : 0;
+	} else if (path == MaxChargePowerPath || path == MaxDischargePowerPath) {
+		if (!qIsFinite(value.toDouble()))
+			value = QVariant(-1.0);
 	}
 	return true;
 }
@@ -55,6 +63,9 @@ bool SettingsBridge::fromDBus(const QString &path, QVariant &value)
 	} else if (path == DischargedTimePath) {
 		unsigned int t = value.toUInt();
 		value = t == 0 ? QDateTime() : QVariant(QDateTime::fromTime_t(t));
+	} else if (path == MaxChargePowerPath || path == MaxDischargePowerPath) {
+		if (value.toDouble() == -1.0)
+			value = QVariant(qQNaN());
 	}
 	return true;
 }

@@ -55,7 +55,9 @@ SOURCES += \
     $$TESTDIR/mock_system_calc.cpp \
     main.cpp \
     ac_in_power_control_test.cpp \
-    maintenance_control_test.cpp
+    maintenance_control_test.cpp \
+    battery_info_test.cpp \
+    mock_battery.cpp
 
 HEADERS += \
     $$EXTDIR/velib/src/qt/v_busitem_adaptor.h \
@@ -83,4 +85,6 @@ HEADERS += \
     $$SRCDIR/system_calc.h \
     $$TESTDIR/mock_system_calc.h \
     ac_in_power_control_test.h \
-    maintenance_control_test.h
+    maintenance_control_test.h \
+    battery_info_test.h \
+    mock_battery.h
