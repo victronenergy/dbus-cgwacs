@@ -131,4 +131,5 @@ HEADERS += \
     src/vbus_item_battery.h
 
 DISTFILES += \
-    ../documents/battery_life.dot
+    ../documents/battery_life.dot \
+    ../.gitlab-ci.yml
