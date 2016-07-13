@@ -10,6 +10,3 @@
 	path = software/ext/qtserialport
 	url = git://code.qt.io/qt/qtserialport.git
 	branch = qt4-dev
-[submodule "software/ext/googletest"]
-	path = software/ext/googletest
-	url = https://github.com/google/googletest

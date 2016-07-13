@@ -3,18 +3,10 @@ before_script:
 
 stages:
   - build
-  - test
 
 run_build:
   stage: build
   script:
     - './build.sh'
-  tags:
-    - venus,linux
-
-run_tests:
-  stage: test
-  script:
-    - './test.sh'
   tags:
     - venus,linux

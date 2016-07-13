@@ -1,23 +1,20 @@
 #include <cmath>
 #include <QCoreApplication>
 #include <QsLog.h>
-#include <QStringList>
 #include <velib/vecan/products.h>
 #include "ac_sensor.h"
 #include "ac_sensor_bridge.h"
 #include "ac_sensor_settings.h"
 #include "power_info.h"
-#include "settings.h"
 
-AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
+AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 							   bool isSecundary, QObject *parent) :
-	DBusBridge(getServiceName(acSensor, emSettings, isSecundary), true, parent),
-	mAcSensor(acSensor)
+	DBusBridge(getServiceName(acSensor, settings, isSecundary), true, parent)
 {
 	Q_ASSERT(acSensor != 0);
-	Q_ASSERT(emSettings != 0);
+	Q_ASSERT(settings != 0);
 	connect(acSensor, SIGNAL(destroyed()), this, SLOT(deleteLater()));
-	connect(emSettings, SIGNAL(destroyed()), this, SLOT(deleteLater()));
+	connect(settings, SIGNAL(destroyed()), this, SLOT(deleteLater()));
 	// Changes in QT properties will not be propagated to the D-Bus at once, but
 	// in 2500ms invervals.
 	setUpdateInterval(1000);
@@ -26,20 +23,19 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 	produce(acSensor, "errorCode", "/ErrorCode");
 
 	bool isGridmeter =
-		(isSecundary ? emSettings->l2ServiceType() : emSettings->serviceType()) ==
-		"grid";
+		(isSecundary ? settings->l2ServiceType() : settings->serviceType()) == "grid";
 
 	producePowerInfo(acSensor->meanPowerInfo(), "/Ac", isGridmeter);
 	producePowerInfo(acSensor->l1PowerInfo(), "/Ac/L1", isGridmeter);
 	producePowerInfo(acSensor->l2PowerInfo(), "/Ac/L2", isGridmeter);
 	producePowerInfo(acSensor->l3PowerInfo(), "/Ac/L3", isGridmeter);
 
-	if (isSecundary || emSettings->serviceType() == "pvinverter")
-		produce(emSettings, isSecundary ? "l2Position" : "position", "/Position");
-	produce(emSettings, isSecundary ? "l2ProductName" : "productName", "/ProductName");
-	produce(emSettings, isSecundary ? "l2EffectiveCustomName" : "effectiveCustomName", "/CustomName");
+	if (isSecundary || settings->serviceType() == "pvinverter")
+		produce(settings, isSecundary ? "l2Position" : "position", "/Position");
+	produce(settings, isSecundary ? "l2ProductName" : "productName", "/ProductName");
+	produce(settings, isSecundary ? "l2EffectiveCustomName" : "effectiveCustomName", "/CustomName");
 
-	QString processName = QCoreApplication::arguments()[0];
+	QString processName = QCoreApplication::applicationName();
 	// The values of the items below will not change after creation, so we don't
 	// need an update mechanism.
 	produce("/Mgmt/ProcessName", processName);
@@ -51,8 +47,8 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 	produce("/Mgmt/Connection", acSensor->portName());
 
 	int deviceInstance = isSecundary ?
-		emSettings->l2DeviceInstance() :
-		emSettings->deviceInstance();
+		settings->l2DeviceInstance() :
+		settings->deviceInstance();
 	produce("/DeviceInstance", deviceInstance);
 	produce("/Serial", acSensor->serial());
 
@@ -87,18 +83,18 @@ QString AcSensorBridge::toText(const QString &path, const QVariant &value, const
 	return DBusBridge::toText(path, value, unit, precision);
 }
 
-QString AcSensorBridge::getServiceName(AcSensor *acSensor, AcSensorSettings *emSettings,
+QString AcSensorBridge::getServiceName(AcSensor *acSensor, AcSensorSettings *settings,
 									   bool isSecundary)
 {
 	QString serviceType = isSecundary ?
-		emSettings->l2ServiceType() :
-		emSettings->serviceType();
+		settings->l2ServiceType() :
+		settings->serviceType();
 	QString portId = acSensor->portName().
 			replace("/dev/", "").
 			replace("/", "_");
 	int deviceInstance = isSecundary ?
-		emSettings->l2DeviceInstance() :
-		emSettings->deviceInstance();
+		settings->l2DeviceInstance() :
+		settings->deviceInstance();
 	QString serviceName = QString("pub/com.victronenergy.%1.cgwacs_%2_di%3_mb%4").
 			arg(serviceType).
 			arg(portId).

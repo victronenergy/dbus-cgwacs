@@ -1,21 +1,27 @@
 #include <QsLog.h>
+#include <QStringList>
+#include <velib/qt/ve_qitem.hpp>
 #include "ac_sensor.h"
 #include "ac_sensor_bridge.h"
 #include "ac_sensor_mediator.h"
 #include "ac_sensor_settings.h"
 #include "ac_sensor_settings_bridge.h"
 #include "ac_sensor_updater.h"
-#include "settings.h"
+#include "dbus_bridge.h"
 
-AcSensorMediator::AcSensorMediator(const QString &portName, bool isZigbee, Settings *settings,
+static const QString DeviceIdsPath = "Settings/CGwacs/DeviceIds";
+
+AcSensorMediator::AcSensorMediator(const QString &portName, bool isZigbee, VeQItem *settingsRoot,
 								   QObject *parent) :
 	QObject(parent),
 	mModbus(new ModbusRtu(portName, 9600, isZigbee ? 2000 : 250, this)),
-	mGridMeter(0),
-	mSettings(settings),
-	mHub4Mode(Hub4Disabled),
-	mIsMultiPhase(false)
+	mDeviceIds(settingsRoot->itemGetOrCreate(DeviceIdsPath))
 {
+	DBusBridge settingsBridge(settingsRoot, false);
+	settingsBridge.addSetting(DeviceIdsPath, "", 0, 0);
+
+	/// @todo EV We assume that this setting is initialized before an AC sensor has been found
+	mDeviceIds->getValue();
 	connect(mModbus, SIGNAL(serialEvent(const char *)), this, SIGNAL(serialEvent(const char *)));
 	for (int i=1; i<=2; ++i) {
 		AcSensor *m = new AcSensor(portName, i, this);
@@ -47,7 +53,7 @@ void AcSensorMediator::onDeviceFound()
 			new AcSensorSettingsBridge(settings, settings);
 	connect(b, SIGNAL(initialized()),
 			this, SLOT(onDeviceSettingsInitialized()));
-	mSettings->registerDevice(m->serial());
+	registerDevice(m->serial());
 }
 
 void AcSensorMediator::onDeviceSettingsInitialized()
@@ -55,17 +61,12 @@ void AcSensorMediator::onDeviceSettingsInitialized()
 	AcSensorSettingsBridge *b = static_cast<AcSensorSettingsBridge *>(sender());
 	AcSensorSettings *s = static_cast<AcSensorSettings *>(b->parent());
 	if (s->deviceInstance() == -1)
-		s->setDeviceInstance(mSettings->getDeviceInstance(s->serial(), false));
+		s->setDeviceInstance(getDeviceInstance(s->serial(), false));
 	if (s->l2DeviceInstance() == -1)
-		s->setL2DeviceInstance(mSettings->getDeviceInstance(s->serial(), true));
-	// Conversion from v1.0.8 to v1.0.9: Compensating over Phase 1 is no longer used for multi
-	// phase systems.
-	if (s->isMultiPhase() && s->hub4Mode() == Hub4PhaseL1)
-		s->setHub4Mode(Hub4PhaseCompensation);
+		s->setL2DeviceInstance(getDeviceInstance(s->serial(), true));
 	AcSensor *m = static_cast<AcSensor *>(s->parent());
 	AcSensorUpdater *mu = m->findChild<AcSensorUpdater *>();
 	mu->startMeasurements();
-	updateGridMeter();
 }
 
 void AcSensorMediator::onDeviceInitialized()
@@ -74,7 +75,6 @@ void AcSensorMediator::onDeviceInitialized()
 	AcSensorUpdater *mu = acSensor->findChild<AcSensorUpdater *>();
 	AcSensorSettings *sensorSettings = mu->settings();
 	publishSensor(acSensor, mu->pvSensor(), sensorSettings);
-	updateGridMeter();
 }
 
 void AcSensorMediator::onConnectionLost()
@@ -83,7 +83,6 @@ void AcSensorMediator::onConnectionLost()
 	AcSensorBridge *bridge = acSensor->findChild<AcSensorBridge *>();
 	delete bridge;
 
-	updateGridMeter();
 	foreach (AcSensor *sensor, mAcSensors) {
 		if (sensor->connectionState() != Disconnected)
 			return;
@@ -128,65 +127,6 @@ void AcSensorMediator::onServiceTypeChanged()
 	// objects.
 	delete pvSensor->findChild<AcSensorBridge *>();
 	publishSensor(acSensor, pvSensor, sensorSettings);
-	updateGridMeter();
-}
-
-void AcSensorMediator::onHub4ModeChanged()
-{
-	Hub4Mode m = Hub4Disabled;
-	if (mGridMeter != 0) {
-		AcSensorSettings *settings = mGridMeter->findChild<AcSensorSettings *>();
-		m = settings->hub4Mode();
-	}
-	if (mHub4Mode == m)
-		return;
-	mHub4Mode = m;
-	emit hub4ModeChanged();
-}
-
-void AcSensorMediator::onIsMultiPhaseChanged()
-{
-	bool isMultiPhase = false;
-	if (mGridMeter != 0) {
-		AcSensorSettings *settings = mGridMeter->findChild<AcSensorSettings *>();
-		isMultiPhase = settings->isMultiPhase();
-	}
-	if (mIsMultiPhase == isMultiPhase)
-		return;
-	mIsMultiPhase = isMultiPhase;
-	emit isMultiPhaseChanged();
-}
-
-void AcSensorMediator::updateGridMeter()
-{
-	AcSensor *gridMeter = 0;
-	AcSensorSettings *settings = 0;
-	foreach (AcSensor *em, mAcSensors) {
-		if (em->connectionState() == Connected) {
-			AcSensorSettings *s = em->findChild<AcSensorSettings *>();
-			if (s != 0 && s->serviceType() == "grid") {
-				gridMeter = em;
-				settings = s;
-				break;
-			}
-		}
-	}
-	if (mGridMeter == gridMeter)
-		return;
-	if (mGridMeter != 0) {
-		mGridMeter->disconnect(this, SIGNAL(hub4ModeChanged()));
-		mGridMeter->disconnect(this, SIGNAL(isMultiPhaseChanged()));
-	}
-	mGridMeter = gridMeter;
-	if (settings != 0) {
-		connect(settings, SIGNAL(hub4ModeChanged()),
-				this, SLOT(onHub4ModeChanged()));
-		connect(settings, SIGNAL(isMultiPhaseChanged()),
-				this, SLOT(onIsMultiPhaseChanged()));
-	}
-	onHub4ModeChanged();
-	onIsMultiPhaseChanged();
-	emit gridMeterChanged();
 }
 
 void AcSensorMediator::publishSensor(AcSensor *acSensor, AcSensor *pvSensor,
@@ -195,4 +135,26 @@ void AcSensorMediator::publishSensor(AcSensor *acSensor, AcSensor *pvSensor,
 	new AcSensorBridge(acSensor, acSensorSettings, false, acSensor);
 	if (!acSensorSettings->l2ServiceType().isEmpty())
 		new AcSensorBridge(pvSensor, acSensorSettings, true, pvSensor);
+}
+
+void AcSensorMediator::registerDevice(const QString &serial)
+{
+	Q_ASSERT(mDeviceIds->getValue().isValid());
+	QString ids = mDeviceIds->getValue().toString();
+	QStringList deviceIds = ids.split(',');
+	if (deviceIds.contains(serial))
+		return;
+	deviceIds.append(serial);
+	mDeviceIds->setValue(deviceIds.join(","));
+}
+
+int AcSensorMediator::getDeviceInstance(const QString &serial, bool isSecundary) const
+{
+	Q_ASSERT(mDeviceIds->getValue().isValid());
+	QString ids = mDeviceIds->getValue().toString();
+	QStringList deviceIds = ids.split(',');
+	int i = deviceIds.indexOf(serial);
+	if (i == -1)
+		return InvalidDeviceInstance;
+	return MinDeviceInstance + (2 * i + (isSecundary ? 1 : 0)) % (MaxDeviceInstance - MinDeviceInstance + 1);
 }

@@ -5,7 +5,6 @@
 #include <QObject>
 #include "defines.h"
 
-Q_DECLARE_METATYPE(Hub4Mode)
 Q_DECLARE_METATYPE(Phase)
 Q_DECLARE_METATYPE(Position)
 
@@ -19,7 +18,6 @@ class AcSensorSettings : public QObject
 	Q_PROPERTY(QString productName READ productName NOTIFY productNameChanged)
 	Q_PROPERTY(QString serviceType READ serviceType WRITE setServiceType NOTIFY serviceTypeChanged)
 	Q_PROPERTY(bool isMultiPhase READ isMultiPhase WRITE setIsMultiPhase NOTIFY isMultiPhaseChanged)
-	Q_PROPERTY(Hub4Mode hub4Mode READ hub4Mode WRITE setHub4Mode NOTIFY hub4ModeChanged)
 	Q_PROPERTY(Position position READ position WRITE setPosition NOTIFY positionChanged)
 	Q_PROPERTY(int deviceInstance READ deviceInstance WRITE setDeviceInstance NOTIFY deviceInstanceChanged)
 	Q_PROPERTY(double l1ReverseEnergy READ l1ReverseEnergy WRITE setL1ReverseEnergy NOTIFY l1ReverseEnergyChanged)
@@ -104,10 +102,6 @@ public:
 
 	void setL2Position(Position p);
 
-	Hub4Mode hub4Mode() const;
-
-	void setHub4Mode(Hub4Mode m);
-
 	Position position();
 
 	void setPosition(Position p);
@@ -179,7 +173,6 @@ private:
 	QString mCustomName;
 	QString mServiceType;
 	bool mIsMultiPhase;
-	Hub4Mode mHub4Mode;
 	Position mPosition;
 	int mDeviceInstance;
 	double mL1Energy;

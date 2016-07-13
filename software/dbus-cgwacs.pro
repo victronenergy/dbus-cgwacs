@@ -46,73 +46,35 @@ SOURCES += \
     ext/velib/src/plt/posix_serial.c \
     ext/velib/src/plt/posix_ctx.c \
     ext/velib/src/types/ve_variant.c \
-    src/main.cpp \
-    src/dbus_bridge.cpp \
-    src/power_info.cpp \
-    src/modbus_rtu.cpp \
-    src/crc16.cpp \
-    src/settings.cpp \
-    src/multi.cpp \
-    src/multi_phase_data.cpp \
-    src/control_loop.cpp \
-    src/settings_bridge.cpp \
-    src/multi_bridge.cpp \
-    src/data_processor.cpp \
-    src/dbus_service_monitor.cpp \
     src/ac_sensor.cpp \
     src/ac_sensor_bridge.cpp \
+    src/ac_sensor_mediator.cpp \
     src/ac_sensor_settings.cpp \
     src/ac_sensor_settings_bridge.cpp \
     src/ac_sensor_updater.cpp \
-    src/dbus_cgwacs.cpp \
-    src/hub4_control_bridge.cpp \
-    src/phase_compensation_control.cpp \
-    src/single_phase_control.cpp \
-    src/battery.cpp \
-    src/multi_phase_control.cpp \
-    src/split_phase_control.cpp \
-    src/battery_info.cpp \
-    src/ac_sensor_mediator.cpp \
-    src/battery_life.cpp \
-    src/system_calc.cpp \
-    src/vbus_item_system_calc.cpp \
-    src/vbus_item_battery.cpp
+    src/crc16.cpp \
+    src/data_processor.cpp \
+    src/dbus_bridge.cpp \
+    src/main.cpp \
+    src/modbus_rtu.cpp \
+    src/power_info.cpp
 
 HEADERS += \
     ext/velib/inc/velib/platform/serial.h \
-    src/dbus_bridge.h \
-    src/power_info.h \
-    src/defines.h \
-    src/settings.h \
-    src/modbus_rtu.h \
-    src/crc16.h \
-    src/multi.h \
-    src/multi_phase_data.h \
-    src/control_loop.h \
-    src/settings_bridge.h \
-    src/multi_bridge.h \
-    src/velib/velib_config_app.h \
-    src/data_processor.h \
-    src/dbus_service_monitor.h \
     src/ac_sensor.h \
     src/ac_sensor_bridge.h \
-    src/ac_sensor_settings.h \
-    src/ac_sensor_updater.h \
-    src/dbus_cgwacs.h \
-    src/ac_sensor_settings_bridge.h \
-    src/hub4_control_bridge.h \
-    src/phase_compensation_control.h \
-    src/single_phase_control.h \
-    src/battery.h \
-    src/multi_phase_control.h \
-    src/split_phase_control.h \
-    src/battery_info.h \
     src/ac_sensor_mediator.h \
-    src/battery_life.h \
-    src/system_calc.h \
-    src/vbus_item_system_calc.h \
-    src/vbus_item_battery.h
+    src/ac_sensor_settings.h \
+    src/ac_sensor_settings_bridge.h \
+    src/ac_sensor_updater.h \
+    src/crc16.h \
+    src/data_processor.h \
+    src/dbus_bridge.h \
+    src/defines.h \
+    src/power_info.h \
+    src/modbus_rtu.h \
+    src/velib/velib_config_app.h \
+    src/ac_sensor_phase.h
 
 DISTFILES += \
-    ../documents/battery_life.dot \
-    ../.gitlab-ci.yml
+    ../README.md

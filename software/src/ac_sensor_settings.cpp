@@ -7,7 +7,6 @@ AcSensorSettings::AcSensorSettings(int deviceType, const QString &serial,
 	mDeviceType(deviceType),
 	mSerial(serial),
 	mIsMultiPhase(false),
-	mHub4Mode(Hub4PhaseL1),
 	mPosition(Input1),
 	mDeviceInstance(-1),
 	mL1Energy(0),
@@ -130,19 +129,6 @@ void AcSensorSettings::setL2Position(Position v)
 	emit l2ProductNameChanged();
 	if (mL2CustomName.isEmpty())
 		emit l2EffectiveCustomNameChanged();
-}
-
-Hub4Mode AcSensorSettings::hub4Mode() const
-{
-	return mHub4Mode;
-}
-
-void AcSensorSettings::setHub4Mode(Hub4Mode m)
-{
-	if (mHub4Mode == m)
-		return;
-	mHub4Mode = m;
-	emit hub4ModeChanged();
 }
 
 Position AcSensorSettings::position()

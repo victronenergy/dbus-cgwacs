@@ -28,9 +28,9 @@ class DBusBridge : public QObject
 {
 	Q_OBJECT
 public:
-	DBusBridge(const QString &serviceName, bool isProducer, QObject *parent);
+	DBusBridge(const QString &serviceName, bool isProducer, QObject *parent = 0);
 
-	DBusBridge(VeQItem *serviceRoot, bool isProducer, QObject *parent);
+	DBusBridge(VeQItem *serviceRoot, bool isProducer, QObject *parent = 0);
 
 	~DBusBridge();
 

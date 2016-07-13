@@ -14,6 +14,7 @@ static const QString MaxChargePercentagePath = CGwacsPath + "/MaxChargePercentag
 static const QString MaxDischargePercentagePath = CGwacsPath + "/MaxDischargePercentage";
 static const QString MaxChargePowerPath = CGwacsPath + "/MaxChargePower";
 static const QString MaxDischargePowerPath = CGwacsPath + "/MaxDischargePower";
+static const QString PreventFeedbackPath = CGwacsPath + "/PreventFeedback";
 
 static const QString BatteryLifePath = CGwacsPath + "/BatteryLife";
 static const QString StatePath = BatteryLifePath + "/State";
@@ -35,6 +36,7 @@ SettingsBridge::SettingsBridge(Settings *settings, QObject *parent):
 	consume(settings, "minSocLimit", SocSwitchDefaultMin, 0, 100, MinSocLimitPath);
 	consume(settings, "maxChargePower", -1.0, -1.0, 1e5, MaxChargePowerPath);
 	consume(settings, "maxDischargePower", -1.0, -1.0, 1e5, MaxDischargePowerPath);
+	consume(settings, "preventFeedback", 0, PreventFeedbackPath);
 	consume(settings, "dischargedTime", QVariant(0), DischargedTimePath);
 }
 

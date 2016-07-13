@@ -6,7 +6,6 @@
 class AcSensor;
 class AcSensorSettings;
 class PowerInfo;
-class Settings;
 
 /*!
  * @brief Connects data from `AcSensor` to the DBus.
@@ -18,9 +17,7 @@ class AcSensorBridge : public DBusBridge
 {
 	Q_OBJECT
 public:
-	AcSensorBridge(AcSensor *acSensor,
-				   AcSensorSettings *emSettings,
-				   bool isSecundary,
+	AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings, bool isSecundary,
 				   QObject *parent = 0);
 
 protected:
@@ -34,10 +31,8 @@ protected:
 private:
 	void producePowerInfo(PowerInfo *pi, const QString &path, bool isGridmeter);
 
-	static QString getServiceName(AcSensor *acSensor, AcSensorSettings *emSettings,
+	static QString getServiceName(AcSensor *acSensor, AcSensorSettings *settings,
 								  bool isSecundary);
-
-	AcSensor *mAcSensor;
 };
 
 #endif // AC_SENSOR_BRIDGE_H

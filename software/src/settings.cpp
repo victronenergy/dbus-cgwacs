@@ -13,7 +13,8 @@ Settings::Settings(QObject *parent) :
 	mSocLimit(SocSwitchDefaultMin),
 	mMinSocLimit(SocSwitchDefaultMin),
 	mMaxChargePower(qQNaN()),
-	mMaxDischargePower(qQNaN())
+	mMaxDischargePower(qQNaN()),
+	mPreventFeedback(false)
 {
 }
 
@@ -147,6 +148,14 @@ void Settings::setMaxDischargePower(double p)
 		return;
 	mMaxDischargePower = p;
 	emit maxDischargePowerChanged();
+}
+
+void Settings::setPreventFeedback(bool b)
+{
+	if (mPreventFeedback == b)
+		return;
+	mPreventFeedback = b;
+	emit preventFeedbackChanged();
 }
 
 QDateTime Settings::dischargedTime() const

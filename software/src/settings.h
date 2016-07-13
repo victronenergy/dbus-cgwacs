@@ -25,6 +25,7 @@ class Settings : public QObject
 	Q_PROPERTY(double minSocLimit READ minSocLimit WRITE setMinSocLimit NOTIFY minSocLimitChanged)
 	Q_PROPERTY(double maxChargePower READ maxChargePower WRITE setMaxChargePower NOTIFY maxChargePowerChanged)
 	Q_PROPERTY(double maxDischargePower READ maxDischargePower WRITE setMaxDischargePower NOTIFY maxDischargePowerChanged)
+	Q_PROPERTY(bool preventFeedback READ preventFeedback WRITE setPreventFeedback NOTIFY preventFeedbackChanged)
 	Q_PROPERTY(QDateTime dischargedTime READ dischargedTime WRITE setDischargedTime NOTIFY dischargedTimeChanged)
 public:
 	explicit Settings(QObject *parent = 0);
@@ -70,6 +71,13 @@ public:
 
 	void setMaxDischargePower(double p);
 
+	bool preventFeedback() const
+	{
+		return mPreventFeedback;
+	}
+
+	void setPreventFeedback(bool b);
+
 	QDateTime dischargedTime() const;
 
 	void setDischargedTime(const QDateTime &t);
@@ -99,6 +107,8 @@ signals:
 
 	void maxDischargePowerChanged();
 
+	void preventFeedbackChanged();
+
 	void dischargedTimeChanged();
 
 	void isCloudyDayChanged();
@@ -124,6 +134,7 @@ private:
 	double mMinSocLimit;
 	double mMaxChargePower;
 	double mMaxDischargePower;
+	bool mPreventFeedback;
 	QDateTime mDischargedTime;
 };
 

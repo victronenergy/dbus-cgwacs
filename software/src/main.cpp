@@ -5,7 +5,8 @@
 #include <velib/qt/ve_qitems_dbus.hpp>
 #include <velib/qt/ve_qitem_dbus_publisher.hpp>
 #include "dbus_bridge.h"
-#include "dbus_cgwacs.h"
+#include "ac_sensor.h"
+#include "ac_sensor_mediator.h"
 
 void initLogger(QsLogging::Level logLevel)
 {
@@ -15,7 +16,7 @@ void initLogger(QsLogging::Level logLevel)
 	logger.addDestination(debugDestination);
 	logger.setIncludeTimestamp(false);
 
-	QLOG_INFO() << "dbus-cgwacs" << "v"VERSION << "started";
+	QLOG_INFO() << "dbus-cgwacs" << "v" VERSION << "started";
 	QLOG_INFO() << "Built with Qt" << QT_VERSION_STR << "running on" << qVersion();
 	QLOG_INFO() << "Built on" << __DATE__ << "at" << __TIME__;
 	logger.setLoggingLevel(logLevel);
@@ -35,6 +36,7 @@ int main(int argc, char *argv[])
 {
 	QCoreApplication app(argc, argv);
 	app.setApplicationVersion(VERSION);
+	app.setApplicationName(app.arguments()[0]);
 
 	initLogger(QsLogging::InfoLevel);
 
@@ -102,9 +104,12 @@ int main(int argc, char *argv[])
 	VeQItemDbusPublisher publisher(dbusExportProducer.services());
 	publisher.open(dbusAddress);
 
-	DBusCGwacs a(portName, isZigbee);
+	qRegisterMetaType<ConnectionState>();
 
-	app.connect(&a, SIGNAL(connectionLost()), &app, SLOT(quit()));
+	VeQItem *settingsRoot = VeQItems::getRoot()->itemGetOrCreate("sub/com.victronenergy.settings", false);
+	AcSensorMediator m(portName, isZigbee, settingsRoot);
+
+	app.connect(&m, SIGNAL(connectionLost()), &app, SLOT(quit()));
 
 	return app.exec();
 }

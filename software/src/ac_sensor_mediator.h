@@ -8,28 +8,14 @@ class AcSensor;
 class AcSensorSettings;
 class ModbusRtu;
 class Settings;
+class VeQItem;
 
 class AcSensorMediator : public QObject
 {
 	Q_OBJECT
 public:
-	explicit AcSensorMediator(const QString &portName, bool isZigbee, Settings *settings,
-							  QObject *parent = 0);
-
-	AcSensor *gridMeter() const
-	{
-		return mGridMeter;
-	}
-
-	Hub4Mode hub4Mode() const
-	{
-		return mHub4Mode;
-	}
-
-	bool isMultiPhase() const
-	{
-		return mIsMultiPhase;
-	}
+	AcSensorMediator(const QString &portName, bool isZigbee, VeQItem *settingsRoot,
+					 QObject *parent = 0);
 
 signals:
 	void gridMeterChanged();
@@ -37,10 +23,6 @@ signals:
 	void serialEvent(const char *);
 
 	void connectionLost();
-
-	void hub4ModeChanged();
-
-	void isMultiPhaseChanged();
 
 private slots:
 	void onDeviceFound();
@@ -55,21 +37,16 @@ private slots:
 
 	void onServiceTypeChanged();
 
-	void onHub4ModeChanged();
-
-	void onIsMultiPhaseChanged();
-
 private:
-	void updateGridMeter();
-
 	void publishSensor(AcSensor *acSensor, AcSensor *pvSensor, AcSensorSettings *acSensorSettings);
+
+	void registerDevice(const QString &serial);
+
+	int getDeviceInstance(const QString &serial, bool isSecundary) const;
 
 	QList<AcSensor *> mAcSensors;
 	ModbusRtu *mModbus;
-	AcSensor *mGridMeter;
-	Settings *mSettings;
-	Hub4Mode mHub4Mode;
-	bool mIsMultiPhase;
+	VeQItem *mDeviceIds;
 };
 
 #endif // ACSENSORMEDIATOR_H

@@ -1,14 +1,11 @@
 #include <QsLog.h>
-#include <QDBusConnection>
-#include <QDBusVariant>
 #include <velib/qt/v_busitems.h>
 #include "ac_sensor_settings.h"
 #include "ac_sensor_settings_bridge.h"
 
 static const QString Service = "sub/com.victronenergy.settings";
 
-AcSensorSettingsBridge::AcSensorSettingsBridge(
-	AcSensorSettings *settings, QObject *parent) :
+AcSensorSettingsBridge::AcSensorSettingsBridge(AcSensorSettings *settings, QObject *parent) :
 	DBusBridge(Service, false, parent)
 {
 	QString path = QString("/Settings/CGwacs/Devices/D%1").
@@ -22,8 +19,6 @@ AcSensorSettingsBridge::AcSensorSettingsBridge(
 	consume(settings, "isMultiPhase",
 			QVariant(static_cast<int>(settings->isMultiPhase())),
 			path + "/IsMultiPhase");
-	consume(settings, "hub4Mode", QVariant(0),
-			path + "/Hub4Mode");
 	consume(settings, "position", QVariant(0),
 			path + "/Position");
 	consume(settings, "deviceInstance", QVariant(-1),
@@ -49,8 +44,6 @@ bool AcSensorSettingsBridge::toDBus(const QString &path, QVariant &v)
 {
 	if (path.endsWith("/Position")) {
 		v = QVariant(static_cast<int>(v.value<Position>()));
-	} else if (path.endsWith("/Hub4Mode")) {
-		v = QVariant(static_cast<int>(v.value<Hub4Mode>()));
 	}
 	return true;
 }
@@ -59,8 +52,6 @@ bool AcSensorSettingsBridge::fromDBus(const QString &path, QVariant &v)
 {
 	if (path.endsWith("/Position")) {
 		v = qVariantFromValue(static_cast<Position>(v.toInt()));
-	} else if (path.endsWith("/Hub4Mode")) {
-		v = qVariantFromValue(static_cast<Hub4Mode>(v.toInt()));
 	}
 	return true;
 }

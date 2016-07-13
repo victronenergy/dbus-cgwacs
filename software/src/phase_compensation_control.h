@@ -4,12 +4,11 @@
 #include <QVector>
 #include "defines.h"
 #include "multi_phase_control.h"
-#include "settings.h"
 
-class AcSensor;
-class AcSensorSettings;
+class GridMeter;
 class Multi;
 class QTimer;
+class Settings;
 
 /*!
  * Implements the multi phase compensation control loop
@@ -22,7 +21,7 @@ class PhaseCompensationControl : public MultiPhaseControl
 {
 	Q_OBJECT
 public:
-	PhaseCompensationControl(SystemCalc *systemCalc, Multi *multi, AcSensor *acSensor,
+	PhaseCompensationControl(SystemCalc *systemCalc, Multi *multi, GridMeter *gridMeter,
 							 Settings *settings, QObject *parent = 0);
 
 protected:

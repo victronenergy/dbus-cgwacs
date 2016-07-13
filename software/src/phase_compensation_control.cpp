@@ -1,4 +1,4 @@
-#include "ac_sensor.h"
+#include "grid_meter.h"
 #include "multi.h"
 #include "multi_phase_data.h"
 #include "phase_compensation_control.h"
@@ -6,19 +6,18 @@
 #include "settings.h"
 
 PhaseCompensationControl::PhaseCompensationControl(SystemCalc *systemCalc, Multi *multi,
-												   AcSensor *acSensor, Settings *settings,
+												   GridMeter *gridMeter, Settings *settings,
 												   QObject *parent):
-	MultiPhaseControl(systemCalc, multi, acSensor, settings, parent),
+	MultiPhaseControl(systemCalc, multi, gridMeter, settings, parent),
 	mSetpoints(3)
 {
 }
 
 void PhaseCompensationControl::performStep()
 {
-	AcSensor *acSensor = this->acSensor();
+	GridMeter *acSensor = this->acSensor();
 	Multi *multi = this->multi();
-	PowerInfo *pi = acSensor->getPowerInfo(MultiPhase);
-	double pNet = pi->power() - multi->meanData()->acPowerIn();
+	double pNet = acSensor->getTotalPower() - multi->meanData()->acPowerIn();
 	if (!qIsFinite(pNet))
 		return;
 	int multiPhaseCount = 0;
@@ -28,7 +27,7 @@ void PhaseCompensationControl::performStep()
 		MultiPhaseData *mpd = multi->getPhaseData(phase);
 		if (mpd->isSetPointAvailable()) {
 			++multiPhaseCount;
-			double pNetp = acSensor->getPowerInfo(phase)->power() - mpd->acPowerIn();
+			double pNetp = acSensor->getPower(phase) - mpd->acPowerIn();
 			if (qIsFinite(pNetp))
 				powerOnSetpointPhases += pNetp;
 		}
@@ -36,14 +35,13 @@ void PhaseCompensationControl::performStep()
 	if (multiPhaseCount == 0)
 		return;
 	Settings *settings = this->settings();
-	pNet -= settings->acPowerSetPoint();
+	pNet -= pvPowerSetpointOffset() + settings->acPowerSetPoint();
 	double extraPhasePower = (pNet - powerOnSetpointPhases) / multiPhaseCount;
 	double pNetLeft = pNet;
 	for (int p=0; p<3; ++p) {
 		Phase phase = static_cast<Phase>(PhaseL1 + p);
-		PowerInfo *pi = acSensor->getPowerInfo(phase);
 		MultiPhaseData *mpd = multi->getPhaseData(phase);
-		double pNetp = pi->power() - mpd->acPowerIn() + extraPhasePower;
+		double pNetp = acSensor->getPower(phase) - mpd->acPowerIn() + extraPhasePower;
 		if (qIsFinite(pNetp) && qIsFinite(pNet) && mpd->isSetPointAvailable()) {
 			double pTarget = 0;
 			if (pNet < 0 && pNetp < 0) {
