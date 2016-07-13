@@ -21,7 +21,7 @@ VbusItemBattery::VbusItemBattery(const QString &service, QObject *parent):
 	mHighVoltageAlarm(
 		createItem("/Alarms/HighVoltage", SIGNAL(highVoltageAlarmChanged()))),
 	mInternalError(
-		createItem("/Alarms/InternalError", SIGNAL(internalErrorChanged()))),
+		createItem("/Alarms/InternalFailure", SIGNAL(internalErrorChanged()))),
 	mLowTemperatureAlarm(
 		createItem("/Alarms/LowTemperature", SIGNAL(lowTemperatureAlarmChanged()))),
 	mLowVoltageAlarm(
