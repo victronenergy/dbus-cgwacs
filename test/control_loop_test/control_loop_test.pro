@@ -1,4 +1,4 @@
-QT += core dbus
+QT += core
 QT -= gui
 
 TARGET = control_loop_test
@@ -29,19 +29,12 @@ INCLUDEPATH += \
     $$TESTDIR
 
 SOURCES += \
-    $$EXTDIR/velib/src/qt/v_busitem.cpp \
-    $$EXTDIR/velib/src/qt/v_busitems.cpp \
-    $$EXTDIR/velib/src/qt/v_busitem_adaptor.cpp \
-    $$EXTDIR/velib/src/qt/v_busitem_private_cons.cpp \
-    $$EXTDIR/velib/src/qt/v_busitem_private_prod.cpp \
-    $$EXTDIR/velib/src/qt/v_busitem_proxy.cpp \
     $$EXTDIR/googletest/googletest/src/gtest-all.cc \
     $$SRCDIR/ac_sensor.cpp \
     $$SRCDIR/ac_sensor_settings.cpp \
     $$SRCDIR/battery.cpp \
     $$SRCDIR/battery_info.cpp \
     $$SRCDIR/control_loop.cpp \
-    $$SRCDIR/dbus_bridge.cpp \
     $$SRCDIR/battery_life.cpp \
     $$SRCDIR/multi.cpp \
     $$SRCDIR/multi_phase_data.cpp \
@@ -50,7 +43,6 @@ SOURCES += \
     $$SRCDIR/settings.cpp \
     $$SRCDIR/single_phase_control.cpp \
     $$SRCDIR/multi_phase_control.cpp \
-    $$SRCDIR/v_bus_node.cpp \
     $$SRCDIR/system_calc.cpp \
     $$TESTDIR/mock_system_calc.cpp \
     main.cpp \
@@ -60,19 +52,11 @@ SOURCES += \
     mock_battery.cpp
 
 HEADERS += \
-    $$EXTDIR/velib/src/qt/v_busitem_adaptor.h \
-    $$EXTDIR/velib/src/qt/v_busitem_private_cons.h \
-    $$EXTDIR/velib/src/qt/v_busitem_private_prod.h \
-    $$EXTDIR/velib/src/qt/v_busitem_private.h \
-    $$EXTDIR/velib/src/qt/v_busitem_proxy.h \
-    $$EXTDIR/velib/inc/velib/qt/v_busitem.h \
-    $$EXTDIR/velib/inc/velib/qt/v_busitems.h \
     $$SRCDIR/ac_sensor.h \
     $$SRCDIR/ac_sensor_settings.h \
     $$SRCDIR/battery.h \
     $$SRCDIR/battery_info.h \
     $$SRCDIR/control_loop.h \
-    $$SRCDIR/dbus_bridge.h \
     $$SRCDIR/battery_life.h \
     $$SRCDIR/multi.h \
     $$SRCDIR/multi_phase_data.h \
@@ -81,7 +65,6 @@ HEADERS += \
     $$SRCDIR/settings.h \
     $$SRCDIR/single_phase_control.h \
     $$SRCDIR/multi_phase_control.h \
-    $$SRCDIR/v_bus_node.h \
     $$SRCDIR/system_calc.h \
     $$TESTDIR/mock_system_calc.h \
     ac_in_power_control_test.h \

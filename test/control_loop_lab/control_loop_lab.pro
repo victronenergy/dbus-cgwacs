@@ -1,4 +1,4 @@
-QT += core dbus
+QT += core
 QT -= gui
 
 TARGET = control_loop_lab
