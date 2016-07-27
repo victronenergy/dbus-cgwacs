@@ -14,22 +14,24 @@ QMAKE_CXXFLAGS += -Wno-psabi
 # solved in newer QT versions.
 QMAKE_CXXFLAGS += -Wno-unused-local-typedefs
 
-include(../../software/ext/qslog/QsLog.pri)
+# gcc complains about this while compiling google test
+QMAKE_CXXFLAGS += -Wno-missing-field-initializers
 
 SRCDIR = ../../software/src
 EXTDIR = ../../software/ext
 TESTDIR = ../src
 
+include($$EXTDIR/qslog/QsLog.pri)
+
 INCLUDEPATH += \
     $$EXTDIR/velib/inc \
-    $$EXTDIR/velib/lib/Qvelib \
-    $$EXTDIR/googletest/googletest/include \
-    $$EXTDIR/googletest/googletest \
+    $$EXTDIR/googletest/include \
+    $$EXTDIR/googletest \
     $$SRCDIR \
     $$TESTDIR
 
 SOURCES += \
-    $$EXTDIR/googletest/googletest/src/gtest-all.cc \
+    $$EXTDIR/googletest/src/gtest-all.cc \
     $$SRCDIR/ac_sensor.cpp \
     $$SRCDIR/ac_sensor_settings.cpp \
     $$SRCDIR/battery.cpp \
