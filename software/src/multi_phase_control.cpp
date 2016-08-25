@@ -47,7 +47,7 @@ void MultiPhaseControl::adjustSetpoints(const QVector<double> &setpoints)
 			setpointTotal += setpoints[p];
 	}
 	BatteryInfo *bi = batteryInfo();
-	double f = bi == 0 ? 1 : bi->applyLimits(setpointTotal) / setpointTotal;
+	double f = (bi == 0 || setpointTotal == 0) ? 1 : bi->applyLimits(setpointTotal) / setpointTotal;
 	AcSensor *acSensor = this->acSensor();
 	Multi *multi = this->multi();
 	for (int p=0; p<3; ++p) {
