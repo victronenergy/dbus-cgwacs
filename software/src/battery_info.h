@@ -39,7 +39,7 @@ public:
 
 	bool canDischarge() const;
 
-	double applyLimits(double p) const;
+	double applyLimits(double acInSetpoint) const;
 
 	void addBattery(Battery *battery);
 

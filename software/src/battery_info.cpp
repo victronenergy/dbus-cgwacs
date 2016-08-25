@@ -4,6 +4,7 @@
 #include "battery_bridge.h"
 #include "battery_info.h"
 #include "dbus_service_monitor.h"
+#include "multi_phase_data.h"
 #include "multi.h"
 #include "settings.h"
 
@@ -39,13 +40,22 @@ bool BatteryInfo::canDischarge() const
 	return !qIsFinite(mMaxDischargePower) || mMaxDischargePower > 0;
 }
 
-double BatteryInfo::applyLimits(double power) const
+double BatteryInfo::applyLimits(double acInSetpoint) const
 {
-	if (qIsFinite(mMaxDischargePower) && -mMaxDischargePower > power)
-		power = -mMaxDischargePower;
-	if (qIsFinite(mMaxChargePower) && mMaxChargePower < power)
-		power = mMaxChargePower;
-	return power;
+	double acOutPower = 0;
+	for (int p=0; p<3; ++p) {
+		Phase phase = static_cast<Phase>(PhaseL1 + p);
+		MultiPhaseData *mpd = mMulti->getPhaseData(phase);
+		double power = mpd->acPowerOut();
+		if (qIsFinite(power))
+			acOutPower += power;
+	}
+	acInSetpoint -= acOutPower;
+	if (qIsFinite(mMaxDischargePower) && -mMaxDischargePower > acInSetpoint)
+		acInSetpoint = -mMaxDischargePower;
+	if (qIsFinite(mMaxChargePower) && mMaxChargePower < acInSetpoint)
+		acInSetpoint = mMaxChargePower;
+	return acInSetpoint + acOutPower;
 }
 
 void BatteryInfo::addBattery(Battery *battery)
