@@ -78,6 +78,14 @@ bool AcSensorBridge::fromDBus(const QString &path, QVariant &value)
 	return false;
 }
 
+QString AcSensorBridge::toText(const QString &path, const QVariant &value, const QString &unit,
+							   int precision)
+{
+	if (path == "/ProductId")
+		return QString::number(value.toInt(), 16);
+	return DBusBridge::toText(path, value, unit, precision);
+}
+
 QString AcSensorBridge::getServiceName(AcSensor *acSensor, AcSensorSettings *emSettings,
 									   bool isSecundary)
 {

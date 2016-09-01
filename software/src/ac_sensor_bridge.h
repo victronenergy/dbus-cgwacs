@@ -28,6 +28,9 @@ protected:
 
 	virtual bool fromDBus(const QString &path, QVariant &value);
 
+	virtual QString toText(const QString &path, const QVariant &value, const QString &unit,
+						   int precision);
+
 private:
 	void producePowerInfo(PowerInfo *pi, const QString &path, bool isGridmeter);
 
