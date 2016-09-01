@@ -43,10 +43,14 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 	produce(acSensor, "connectionState", "/Connected");
 	produce(acSensor, "errorCode", "/ErrorCode");
 
-	producePowerInfo(acSensor->meanPowerInfo(), "/Ac");
-	producePowerInfo(acSensor->l1PowerInfo(), "/Ac/L1");
-	producePowerInfo(acSensor->l2PowerInfo(), "/Ac/L2");
-	producePowerInfo(acSensor->l3PowerInfo(), "/Ac/L3");
+	bool isGridmeter =
+		(isSecundary ? emSettings->l2ServiceType() : emSettings->serviceType()) ==
+		"grid";
+
+	producePowerInfo(acSensor->meanPowerInfo(), "/Ac", isGridmeter);
+	producePowerInfo(acSensor->l1PowerInfo(), "/Ac/L1", isGridmeter);
+	producePowerInfo(acSensor->l2PowerInfo(), "/Ac/L2", isGridmeter);
+	producePowerInfo(acSensor->l3PowerInfo(), "/Ac/L3", isGridmeter);
 
 	produce(emSettings, isSecundary ? "l2Position" : "position", "/Position");
 	produce(emSettings, isSecundary ? "l2ProductName" : "productName", "/ProductName");
@@ -58,7 +62,8 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 	produce("/Mgmt/ProcessName", processName);
 	produce("/Mgmt/ProcessVersion", QCoreApplication::applicationVersion());
 	produce("/FirmwareVersion", acSensor->firmwareVersion());
-	produce("/ProductId", VE_PROD_ID_CARLO_GAVAZZI_EM);
+	produce("/ProductId", isSecundary ? VE_PROD_ID_CARLO_GAVAZZI_PIGGY_BACK :
+										VE_PROD_ID_CARLO_GAVAZZI_EM);
 	produce("/DeviceType", acSensor->deviceType());
 	produce("/Mgmt/Connection", acSensor->portName());
 	produce("/DeviceInstance", deviceInstance);
@@ -87,11 +92,12 @@ bool AcSensorBridge::fromDBus(const QString &path, QVariant &value)
 	return false;
 }
 
-void AcSensorBridge::producePowerInfo(PowerInfo *pi, const QString &path)
+void AcSensorBridge::producePowerInfo(PowerInfo *pi, const QString &path, bool isGridmeter)
 {
 	produce(pi, "current", path + "/Current", "A", 1);
 	produce(pi, "voltage", path + "/Voltage", "V", 0);
 	produce(pi, "power", path + "/Power", "W", 0);
 	produce(pi, "energyForward", path + "/Energy/Forward", "kWh", 1);
-	produce(pi, "energyReverse", path + "/Energy/Reverse", "kWh", 1);
+	if (isGridmeter)
+		produce(pi, "energyReverse", path + "/Energy/Reverse", "kWh", 1);
 }

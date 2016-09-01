@@ -29,7 +29,7 @@ protected:
 	virtual bool fromDBus(const QString &path, QVariant &value);
 
 private:
-	void producePowerInfo(PowerInfo *pi, const QString &path);
+	void producePowerInfo(PowerInfo *pi, const QString &path, bool isGridmeter);
 
 	AcSensor *mAcSensor;
 };
