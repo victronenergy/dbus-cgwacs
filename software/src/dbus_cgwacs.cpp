@@ -7,7 +7,6 @@
 #include "ac_sensor_updater.h"
 #include "vbus_item_battery.h"
 #include "battery_info.h"
-#include "charge_phase_control.h"
 #include "dbus_cgwacs.h"
 #include "dbus_service_monitor.h"
 #include "hub4_control_bridge.h"

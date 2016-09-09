@@ -74,7 +74,6 @@ SOURCES += \
     src/hub4_control_bridge.cpp \
     src/phase_compensation_control.cpp \
     src/single_phase_control.cpp \
-    src/charge_phase_control.cpp \
     src/battery.cpp \
     src/multi_phase_control.cpp \
     src/split_phase_control.cpp \
@@ -116,10 +115,8 @@ HEADERS += \
     src/dbus_cgwacs.h \
     src/ac_sensor_settings_bridge.h \
     src/hub4_control_bridge.h \
-    src/fastclock.h \
     src/phase_compensation_control.h \
     src/single_phase_control.h \
-    src/charge_phase_control.h \
     src/battery.h \
     src/multi_phase_control.h \
     src/split_phase_control.h \

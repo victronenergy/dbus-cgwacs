@@ -1,7 +1,6 @@
 #include <ac_sensor.h>
 #include <ac_sensor_settings.h>
 #include <battery_info.h>
-#include <charge_phase_control.h>
 #include <multi.h>
 #include <multi_phase_data.h>
 #include <phase_compensation_control.h>

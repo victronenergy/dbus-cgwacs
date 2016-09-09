@@ -41,7 +41,6 @@ SOURCES += \
     $$SRCDIR/battery.cpp \
     $$SRCDIR/battery_info.cpp \
     $$SRCDIR/system_calc.cpp \
-    $$SRCDIR/charge_phase_control.cpp \
     $$TESTDIR/mock_system_calc.cpp \
     main.cpp
 
@@ -60,5 +59,4 @@ HEADERS += \
     $$SRCDIR/battery.h \
     $$SRCDIR/battery_info.h \
     $$SRCDIR/system_calc.h \
-    $$SRCDIR/charge_phase_control.h \
     $$TESTDIR/mock_system_calc.h
