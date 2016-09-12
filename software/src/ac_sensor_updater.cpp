@@ -54,7 +54,12 @@ static const CompositeCommand Em24Commands[] = {
 	{ 0x000C, 4, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 } } },
 	{ 0x003E, 5, { { 0, PositiveEnergy, MultiPhase } } },
 	{ 0x0046, 6, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 } } },
-	{ 0x005C, 7, { { 0, NegativeEnergy, MultiPhase } } }
+	{ 0x005C, 7, { { 0, NegativeEnergy, MultiPhase } } },
+	{ 0x001E, 8, { { 0, VAR, PhaseL1 }, {2, VAR, PhaseL2 }, {4 VAR, PhaseL3} } },
+	{ 0x002C, 9, { { 0,VAR, MultiPhase } } },
+	{ 0x0032, 10,{ { 0, PowerFactor, PhaseL1 }, { 1, PowerFactor, PhaseL2 }, { 2, PowerFactor, PhaseL3} } },
+	{ 0x0035, 11,{ { 0, PowerFactor, MultiPhase } } },
+	{ 0x005E, 12,{ { 0, KVAR, MultiPhase } } }
 };
 
 static const int Em24CommandCount = sizeof(Em24Commands) / sizeof(Em24Commands[0]);
@@ -70,7 +75,10 @@ static const CompositeCommand Em24CommandsP1[] = {
 	{ 0x0024, 1, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x000C, 4, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x003E, 5, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x005C, 7, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
+	{ 0x005C, 7, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x002C, 9, { { 0,VAR, MultiPhase }, { 1, Dummy, MultiPhase} } } ,
+	{ 0x0035, 11,{ { 0, PowerFactor, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x005E, 12,{ { 0, KVAR, MultiPhase }, { 1, Dummy, MultiPhase } } }
 };
 
 static const int Em24CommandP1Count = sizeof(Em24CommandsP1) / sizeof(Em24CommandsP1[0]);
