@@ -20,7 +20,7 @@ void DataProcessor::setPower(Phase phase, double value)
 {
 	PowerInfo *pi = mAcSensor->getPowerInfo(phase);
 	double prev = pi->power();
-	const double Fc = 0.25;
+	const double Fc = 0.05;
 	const double Dt = 0.5;
 	const double Alpha = Fc/(Fc + 1/(2 * M_PI * Dt));
 	value = qIsNaN(prev) ? value : (1 - Alpha) * prev + Alpha * value;

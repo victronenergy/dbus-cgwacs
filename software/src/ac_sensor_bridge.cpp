@@ -20,7 +20,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 	connect(emSettings, SIGNAL(destroyed()), this, SLOT(deleteLater()));
 	// Changes in QT properties will not be propagated to the D-Bus at once, but
 	// in 2500ms invervals.
-	setUpdateInterval(2500);
+	setUpdateInterval(1000);
 
 	produce(acSensor, "connectionState", "/Connected");
 	produce(acSensor, "errorCode", "/ErrorCode");
