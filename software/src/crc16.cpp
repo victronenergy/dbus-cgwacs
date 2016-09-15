@@ -1,5 +1,4 @@
 #include "crc16.h"
-#include "defines.h"
 
 /* Table of CRC values for high–order byte */
 static uint8_t CrcHi[] = {
@@ -51,11 +50,6 @@ Crc16::Crc16()
 	reset();
 }
 
-uint16_t Crc16::getValue() const
-{
-	return toUInt16(mCrcHi, mCrcLo);
-}
-
 void Crc16::add(uint8_t byte)
 {
 	int index = mCrcHi ^ byte;
@@ -67,12 +61,6 @@ void Crc16::add(const QByteArray &bytes)
 {
 	foreach (uint8_t b, bytes)
 		add(b);
-}
-
-void Crc16::reset()
-{
-	mCrcLo = 0xFF;
-	mCrcHi = 0xFF;
 }
 
 uint16_t Crc16::getValue(const QByteArray &bytes)

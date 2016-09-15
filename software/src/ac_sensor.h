@@ -33,14 +33,20 @@ class AcSensor : public QObject
 public:
 	AcSensor(const QString &portName, int slaveAddress, QObject *parent = 0);
 
-	ConnectionState connectionState() const;
+	ConnectionState connectionState() const
+	{
+		return mConnectionState;
+	}
 
 	void setConnectionState(ConnectionState state);
 
 	/*!
 	 * Returns the device type as reported by the energy meter.
 	 */
-	int deviceType() const;
+	int deviceType() const
+	{
+		return mDeviceType;
+	}
 
 	void setDeviceType(int t);
 
@@ -48,7 +54,10 @@ public:
 	 * Returns the device sub type as reported by the energy meter. This value
 	 * is non-zero for EM24 energy meters only.
 	 */
-	int deviceSubType() const;
+	int deviceSubType() const
+	{
+		return mDeviceSubType;
+	}
 
 	void setDeviceSubType(int t);
 
@@ -67,11 +76,17 @@ public:
 	/*!
 	 * Returned the serial number of the energy meter.
 	 */
-	QString serial() const;
+	QString serial() const
+	{
+		return mSerial;
+	}
 
 	void setSerial(const QString &s);
 
-	int firmwareVersion() const;
+	int firmwareVersion() const
+	{
+		return mFirmwareVersion;
+	}
 
 	void setFirmwareVersion(int v);
 
@@ -85,24 +100,45 @@ public:
 	 * and (optionnally) change between single phase and multi phase
 	 * measurement.
 	 */
-	int errorCode() const;
+	int errorCode() const
+	{
+		return mErrorCode;
+	}
 
 	void setErrorCode(int code);
 
 	/*!
 	 * Returns the logical name of the communication port. (eg. /dev/ttyUSB1).
 	 */
-	QString portName() const;
+	QString portName() const
+	{
+		return mPortName;
+	}
 
-	int slaveAddress() const;
+	int slaveAddress() const
+	{
+		return mSlaveAddress;
+	}
 
-	PowerInfo *meanPowerInfo();
+	PowerInfo *meanPowerInfo()
+	{
+		return mMeanPowerInfo;
+	}
 
-	PowerInfo *l1PowerInfo();
+	PowerInfo *l1PowerInfo()
+	{
+		return mL1PowerInfo;
+	}
 
-	PowerInfo *l2PowerInfo();
+	PowerInfo *l2PowerInfo()
+	{
+		return mL2PowerInfo;
+	}
 
-	PowerInfo *l3PowerInfo();
+	PowerInfo *l3PowerInfo()
+	{
+		return mL3PowerInfo;
+	}
 
 	PowerInfo *getPowerInfo(Phase phase);
 

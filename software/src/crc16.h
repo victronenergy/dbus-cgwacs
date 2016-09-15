@@ -3,6 +3,7 @@
 
 #include <QByteArray>
 #include <stdint.h>
+#include "defines.h"
 
 /*!
  * Computes CRC16 checksum according to the Modbus TCU standard.
@@ -17,13 +18,20 @@ public:
 	 * functions since creation of the object or the last call to `reset`.
 	 * @return The CRC16 checksum
 	 */
-	uint16_t getValue() const;
+	uint16_t getValue() const
+	{
+		return toUInt16(mCrcHi, mCrcLo);
+	}
 
 	void add(uint8_t byte);
 
 	void add(const QByteArray &bytes);
 
-	void reset();
+	void reset()
+	{
+		mCrcLo = 0xFF;
+		mCrcHi = 0xFF;
+	}
 
 	/*!
 	 * Computes a CRC16 checksum

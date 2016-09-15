@@ -35,15 +35,24 @@ class AcSensorSettings : public QObject
 public:
 	AcSensorSettings(int deviceType, const QString &serial, QObject *parent = 0);
 
-	int deviceType() const;
+	int deviceType() const
+	{
+		return mDeviceType;
+	}
 
-	QString serial() const;
+	QString serial() const
+	{
+		return mSerial;
+	}
 
 	/*!
 	 * The custom name as entered by the user. Empty when the user did not
 	 * enter a custom name.
 	 */
-	QString customName() const;
+	QString customName() const
+	{
+		return mCustomName;
+	}
 
 	void setCustomName(const QString &n);
 
@@ -63,11 +72,17 @@ public:
 	 * stream is measured).
 	 * Typical values are 'grid', 'genset' (for generator), and 'pvinverter'.
 	 */
-	QString serviceType() const;
+	QString serviceType() const
+	{
+		return mServiceType;
+	}
 
 	void setServiceType(const QString &t);
 
-	bool isMultiPhase() const;
+	bool isMultiPhase() const
+	{
+		return mIsMultiPhase;
+	}
 
 	void setIsMultiPhase(bool b);
 

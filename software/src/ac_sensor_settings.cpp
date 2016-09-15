@@ -18,21 +18,6 @@ AcSensorSettings::AcSensorSettings(int deviceType, const QString &serial,
 {
 }
 
-int AcSensorSettings::deviceType() const
-{
-	return mDeviceType;
-}
-
-QString AcSensorSettings::serial() const
-{
-	return mSerial;
-}
-
-QString AcSensorSettings::customName() const
-{
-	return mCustomName;
-}
-
 void AcSensorSettings::setCustomName(const QString &n)
 {
 	if (mCustomName == n)
@@ -59,11 +44,6 @@ void AcSensorSettings::setEffectiveCustomName(const QString &n)
 	setCustomName(n == productName() ? QString() : n);
 }
 
-QString AcSensorSettings::serviceType() const
-{
-	return mServiceType;
-}
-
 void AcSensorSettings::setServiceType(const QString &t)
 {
 	if (mServiceType == t)
@@ -75,11 +55,6 @@ void AcSensorSettings::setServiceType(const QString &t)
 	emit productNameChanged();
 	if (mCustomName.isEmpty())
 		emit effectiveCustomNameChanged();
-}
-
-bool AcSensorSettings::isMultiPhase() const
-{
-	return mIsMultiPhase;
 }
 
 void AcSensorSettings::setIsMultiPhase(bool b)

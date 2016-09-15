@@ -19,11 +19,6 @@ AcSensor::AcSensor(const QString &portName, int slaveAddress, QObject *parent) :
 	resetValues();
 }
 
-ConnectionState AcSensor::connectionState() const
-{
-	return mConnectionState;
-}
-
 void AcSensor::setConnectionState(ConnectionState state)
 {
 	if (mConnectionState == state)
@@ -32,22 +27,12 @@ void AcSensor::setConnectionState(ConnectionState state)
 	emit connectionStateChanged();
 }
 
-int AcSensor::deviceType() const
-{
-	return mDeviceType;
-}
-
 void AcSensor::setDeviceType(int t)
 {
 	if (mDeviceType == t)
 		return;
 	mDeviceType = t;
 	emit deviceTypeChanged();
-}
-
-int AcSensor::deviceSubType() const
-{
-	return mDeviceSubType;
 }
 
 void AcSensor::setDeviceSubType(int t)
@@ -67,32 +52,12 @@ AcSensor::ProtocolTypes AcSensor::protocolType() const
 	return Em340Protocol;
 }
 
-int AcSensor::errorCode() const
-{
-	return mErrorCode;
-}
-
 void AcSensor::setErrorCode(int code)
 {
 	if (mErrorCode == code)
 		return;
 	mErrorCode = code;
 	emit errorCodeChanged();
-}
-
-QString AcSensor::portName() const
-{
-	return mPortName;
-}
-
-int AcSensor::slaveAddress() const
-{
-	return mSlaveAddress;
-}
-
-QString AcSensor::serial() const
-{
-	return mSerial;
 }
 
 void AcSensor::setSerial(const QString &s)
@@ -103,37 +68,12 @@ void AcSensor::setSerial(const QString &s)
 	emit serialChanged();
 }
 
-int AcSensor::firmwareVersion() const
-{
-	return mFirmwareVersion;
-}
-
 void AcSensor::setFirmwareVersion(int v)
 {
 	if (mFirmwareVersion == v)
 		return;
 	mFirmwareVersion = v;
 	emit firmwareVersionChanged();
-}
-
-PowerInfo *AcSensor::meanPowerInfo()
-{
-	return mMeanPowerInfo;
-}
-
-PowerInfo *AcSensor::l1PowerInfo()
-{
-	return mL1PowerInfo;
-}
-
-PowerInfo *AcSensor::l2PowerInfo()
-{
-	return mL2PowerInfo;
-}
-
-PowerInfo *AcSensor::l3PowerInfo()
-{
-	return mL3PowerInfo;
 }
 
 PowerInfo *AcSensor::getPowerInfo(Phase phase)
