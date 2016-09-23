@@ -34,7 +34,8 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 	producePowerInfo(acSensor->l2PowerInfo(), "/Ac/L2", isGridmeter);
 	producePowerInfo(acSensor->l3PowerInfo(), "/Ac/L3", isGridmeter);
 
-	produce(emSettings, isSecundary ? "l2Position" : "position", "/Position");
+	if (isSecundary || emSettings->serviceType() == "pvinverter")
+		produce(emSettings, isSecundary ? "l2Position" : "position", "/Position");
 	produce(emSettings, isSecundary ? "l2ProductName" : "productName", "/ProductName");
 	produce(emSettings, isSecundary ? "l2EffectiveCustomName" : "effectiveCustomName", "/CustomName");
 
