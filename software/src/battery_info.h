@@ -58,8 +58,6 @@ private:
 
 	void setMaxDischargePower(double p);
 
-	bool isAlarmActive(const Battery *b);
-
 	QList<Battery *> mBatteries;
 	Multi *mMulti;
 	Settings *mSettings;

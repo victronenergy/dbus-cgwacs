@@ -14,22 +14,6 @@ public:
 
 	virtual double maxDischargeCurrent() const;
 
-	virtual int cellImbalanceAlarm() const;
-
-	virtual int highChargeCurrentAlarm() const;
-
-	virtual int highDischargeCurrentAlarm() const;
-
-	virtual int highTemperatureAlarm() const;
-
-	virtual int highVoltageAlarm() const;
-
-	virtual int internalError() const;
-
-	virtual int lowTemperatureAlarm() const;
-
-	virtual int lowVoltageAlarm() const;
-
 	QString serviceName() const;
 
 private:
@@ -40,14 +24,6 @@ private:
 	QString mServiceName;
 	VBusItem *mMaxChargeCurrent;
 	VBusItem *mMaxDischargeCurrent;
-	VBusItem *mCellImbalanceAlarm;
-	VBusItem *mHighChargeCurrentAlarm;
-	VBusItem *mHighDischargeCurrentAlarm;
-	VBusItem *mHighTemperatureAlarm;
-	VBusItem *mHighVoltageAlarm;
-	VBusItem *mInternalError;
-	VBusItem *mLowTemperatureAlarm;
-	VBusItem *mLowVoltageAlarm;
 };
 
 #endif // VBUS_ITEM_BATTERY_H

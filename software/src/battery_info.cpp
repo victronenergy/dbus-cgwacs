@@ -56,14 +56,6 @@ void BatteryInfo::addBattery(Battery *battery)
 	updateBatteryLimits();
 	connect(battery, SIGNAL(maxChargeCurrentChanged()), this, SLOT(updateBatteryLimits()));
 	connect(battery, SIGNAL(maxDischargeCurrentChanged()), this, SLOT(updateBatteryLimits()));
-	connect(battery, SIGNAL(cellImbalanceAlarmChanged()), this, SLOT(updateBatteryLimits()));
-	connect(battery, SIGNAL(highChargeCurrentAlarmChanged()), this, SLOT(updateBatteryLimits()));
-	connect(battery, SIGNAL(highDischargeCurrentAlarmChanged()), this, SLOT(updateBatteryLimits()));
-	connect(battery, SIGNAL(highTemperatureAlarmChanged()), this, SLOT(updateBatteryLimits()));
-	connect(battery, SIGNAL(highVoltageAlarmChanged()), this, SLOT(updateBatteryLimits()));
-	connect(battery, SIGNAL(lowTemperatureAlarmChanged()), this, SLOT(updateBatteryLimits()));
-	connect(battery, SIGNAL(lowVoltageAlarmChanged()), this, SLOT(updateBatteryLimits()));
-	connect(battery, SIGNAL(internalErrorChanged()), this, SLOT(updateBatteryLimits()));
 }
 
 void BatteryInfo::removeBattery(Battery *battery)
@@ -89,16 +81,6 @@ void BatteryInfo::setMaxDischargePower(double p)
 	emit maxDischargePowerChanged();
 }
 
-bool BatteryInfo::isAlarmActive(const Battery *b)
-{
-	// low voltage alarm is excluded here, because charge should be possible on low voltage
-	return
-		b->cellImbalanceAlarm() == 2 || b->highChargeCurrentAlarm() == 2 ||
-		b->highDischargeCurrentAlarm() == 2 || b->highTemperatureAlarm() == 2 ||
-		b->highVoltageAlarm() == 2 ||
-		b->lowTemperatureAlarm() == 2 || b->internalError() == 2;
-}
-
 void BatteryInfo::updateBatteryLimits()
 {
 	// Set max charge/discharge current to 0, so they will still be zero if no battery service is
@@ -107,28 +89,19 @@ void BatteryInfo::updateBatteryLimits()
 	// functionality) was present, but disappears later.
 	double maxChargeCurrent = 0;
 	double maxDischargeCurrent = 0;
-	// hasChargeAlarm/hasDischargeAlarm is only set to true if there are alarms on a battery with
-	// built in BMS (LG/bmz).
-	bool hasChargeAlarm = false;
-	bool hasDischargeAlarm = false;
 	foreach (Battery *battery, mBatteries) {
 		if (qIsFinite(battery->maxChargeCurrent())) {
-			hasChargeAlarm = hasChargeAlarm || isAlarmActive(battery);
 			maxChargeCurrent += battery->maxChargeCurrent();
 			mHasChargeCurrent = true;
 		}
 		if (qIsFinite(battery->maxDischargeCurrent())) {
-			hasDischargeAlarm = hasDischargeAlarm || isAlarmActive(battery) ||
-				battery->lowVoltageAlarm() == 2;
 			maxDischargeCurrent += battery->maxDischargeCurrent();
 			mHasDischargeCurrent = true;
 		}
 	}
 
 	double maxChargePower = qQNaN();
-	if (hasChargeAlarm) {
-		maxChargePower = 0;
-	} else if (mHasChargeCurrent) {
+	if (mHasChargeCurrent) {
 		maxChargePower = maxChargeCurrent * mMulti->dcVoltage() / ChargeEfficiency;
 	} else if (mSettings->maxChargePercentage() <= 99) {
 		// Backward compatible behaviour: only compute a max charge power if the max charge
@@ -147,9 +120,7 @@ void BatteryInfo::updateBatteryLimits()
 
 	double maxDischargePower = qQNaN();
 	double maxDischargePct = qBound(0.0, mSettings->maxDischargePercentage(), 100.0);
-	if (hasDischargeAlarm) {
-		maxDischargePower = 0;
-	} else if (mHasDischargeCurrent) {
+	if (mHasDischargeCurrent) {
 		maxDischargePower = qMax(0.0, (maxDischargeCurrent - DischargeOffset) * mMulti->dcVoltage() * DischargeEfficiency);
 		maxDischargePower *= maxDischargePct / 100;
 	} else if (maxDischargePct < 50) {
