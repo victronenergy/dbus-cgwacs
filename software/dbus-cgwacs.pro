@@ -57,7 +57,7 @@ SOURCES += \
     src/dbus_bridge.cpp \
     src/main.cpp \
     src/modbus_rtu.cpp \
-    src/power_info.cpp
+    src/ac_sensor_phase.cpp
 
 HEADERS += \
     ext/velib/inc/velib/platform/serial.h \
@@ -71,7 +71,6 @@ HEADERS += \
     src/data_processor.h \
     src/dbus_bridge.h \
     src/defines.h \
-    src/power_info.h \
     src/modbus_rtu.h \
     src/velib/velib_config_app.h \
     src/ac_sensor_phase.h

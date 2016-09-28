@@ -5,7 +5,7 @@
 
 class AcSensor;
 class AcSensorSettings;
-class PowerInfo;
+class AcSensorPhase;
 
 /*!
  * @brief Connects data from `AcSensor` to the DBus.
@@ -29,7 +29,7 @@ protected:
 						   int precision);
 
 private:
-	void producePowerInfo(PowerInfo *pi, const QString &path, bool isGridmeter);
+	void producePowerInfo(AcSensorPhase *pi, const QString &path, bool isGridmeter);
 
 	static QString getServiceName(AcSensor *acSensor, AcSensorSettings *settings,
 								  bool isSecundary);

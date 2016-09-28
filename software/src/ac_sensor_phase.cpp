@@ -1,8 +1,8 @@
 #include <qmath.h>
 #include "defines.h"
-#include "power_info.h"
+#include "ac_sensor_phase.h"
 
-PowerInfo::PowerInfo(QObject *parent) :
+AcSensorPhase::AcSensorPhase(QObject *parent) :
 	QObject(parent),
 	mCurrent(qQNaN()),
 	mVoltage(qQNaN()),
@@ -11,12 +11,7 @@ PowerInfo::PowerInfo(QObject *parent) :
 {
 }
 
-double PowerInfo::current() const
-{
-	return mCurrent;
-}
-
-void PowerInfo::setCurrent(double c)
+void AcSensorPhase::setCurrent(double c)
 {
 	if (valuesEqual(mCurrent, c))
 		return;
@@ -24,12 +19,7 @@ void PowerInfo::setCurrent(double c)
 	emit currentChanged();
 }
 
-double PowerInfo::voltage() const
-{
-	return mVoltage;
-}
-
-void PowerInfo::setVoltage(double v)
+void AcSensorPhase::setVoltage(double v)
 {
 	if (valuesEqual(mVoltage, v))
 		return;
@@ -37,12 +27,7 @@ void PowerInfo::setVoltage(double v)
 	emit voltageChanged();
 }
 
-double PowerInfo::power() const
-{
-	return mPower;
-}
-
-void PowerInfo::setPower(double p)
+void AcSensorPhase::setPower(double p)
 {
 	if (valuesEqual(mPower, p))
 		return;
@@ -50,12 +35,7 @@ void PowerInfo::setPower(double p)
 	emit powerChanged();
 }
 
-double PowerInfo::energyForward() const
-{
-	return mEnergyForward;
-}
-
-void PowerInfo::setEnergyForward(double e)
+void AcSensorPhase::setEnergyForward(double e)
 {
 	if (valuesEqual(mEnergyForward, e))
 		return;
@@ -63,12 +43,7 @@ void PowerInfo::setEnergyForward(double e)
 	emit energyForwardChanged();
 }
 
-double PowerInfo::energyReverse() const
-{
-	return mEnergyReverse;
-}
-
-void PowerInfo::setEnergyReverse(double e)
+void AcSensorPhase::setEnergyReverse(double e)
 {
 	if (valuesEqual(mEnergyReverse, e))
 		return;
@@ -76,7 +51,7 @@ void PowerInfo::setEnergyReverse(double e)
 	emit energyReverseChanged();
 }
 
-void PowerInfo::resetValues()
+void AcSensorPhase::resetValues()
 {
 	setCurrent(qQNaN());
 	setPower(qQNaN());
@@ -85,7 +60,7 @@ void PowerInfo::resetValues()
 	setEnergyReverse(qQNaN());
 }
 
-bool PowerInfo::valuesEqual(double v1, double v2)
+bool AcSensorPhase::valuesEqual(double v1, double v2)
 {
 	return (qIsNaN(v1) && qIsNaN(v2)) || (v1 == v2);
 }

@@ -5,9 +5,9 @@
 #include <QTime>
 
 /*!
- * Contains measurement data from an AC sensor.
+ * Contains measurement data from an single AC sensor phase.
  */
-class PowerInfo : public QObject
+class AcSensorPhase : public QObject
 {
 	Q_OBJECT
 	Q_PROPERTY(double current READ current WRITE setCurrent NOTIFY currentChanged)
@@ -16,25 +16,40 @@ class PowerInfo : public QObject
 	Q_PROPERTY(double energyForward READ energyForward WRITE setEnergyForward NOTIFY energyForwardChanged)
 	Q_PROPERTY(double energyReverse READ energyReverse WRITE setEnergyReverse NOTIFY energyReverseChanged)
 public:
-	explicit PowerInfo(QObject *parent = 0);
+	explicit AcSensorPhase(QObject *parent = 0);
 
-	double current() const;
+	double current() const
+	{
+		return mCurrent;
+	}
 
 	void setCurrent(double c);
 
-	double voltage() const;
+	double voltage() const
+	{
+		return mVoltage;
+	}
 
 	void setVoltage(double v);
 
-	double power() const;
+	double power() const
+	{
+		return mPower;
+	}
 
 	void setPower(double p);
 
-	double energyForward() const;
+	double energyForward() const
+	{
+		return mEnergyForward;
+	}
 
 	void setEnergyForward(double e);
 
-	double energyReverse() const;
+	double energyReverse() const
+	{
+		return mEnergyReverse;
+	}
 
 	void setEnergyReverse(double e);
 

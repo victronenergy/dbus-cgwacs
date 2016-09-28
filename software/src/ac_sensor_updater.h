@@ -9,7 +9,7 @@
 class DataProcessor;
 class AcSensor;
 class AcSensorSettings;
-class PowerInfo;
+class AcSensorPhase;
 struct CompositeCommand;
 
 /*!

@@ -1,6 +1,6 @@
 #include <QsLog.h>
 #include "ac_sensor.h"
-#include "power_info.h"
+#include "ac_sensor_phase.h"
 
 AcSensor::AcSensor(const QString &portName, int slaveAddress, QObject *parent) :
 	QObject(parent),
@@ -11,10 +11,10 @@ AcSensor::AcSensor(const QString &portName, int slaveAddress, QObject *parent) :
 	mFirmwareVersion(0),
 	mPortName(portName),
 	mSlaveAddress(slaveAddress),
-	mMeanPowerInfo(new PowerInfo(this)),
-	mL1PowerInfo(new PowerInfo(this)),
-	mL2PowerInfo(new PowerInfo(this)),
-	mL3PowerInfo(new PowerInfo(this))
+	mTotal(new AcSensorPhase(this)),
+	mL1(new AcSensorPhase(this)),
+	mL2(new AcSensorPhase(this)),
+	mL3(new AcSensorPhase(this))
 {
 	resetValues();
 }
@@ -76,17 +76,17 @@ void AcSensor::setFirmwareVersion(int v)
 	emit firmwareVersionChanged();
 }
 
-PowerInfo *AcSensor::getPowerInfo(Phase phase)
+AcSensorPhase *AcSensor::getPhase(Phase phase)
 {
 	switch (phase) {
 	case MultiPhase:
-		return mMeanPowerInfo;
+		return mTotal;
 	case PhaseL1:
-		return mL1PowerInfo;
+		return mL1;
 	case PhaseL2:
-		return mL2PowerInfo;
+		return mL2;
 	case PhaseL3:
-		return mL3PowerInfo;
+		return mL3;
 	default:
 		QLOG_ERROR() << "Incorrect phase:" << phase;
 		return 0;
@@ -95,8 +95,8 @@ PowerInfo *AcSensor::getPowerInfo(Phase phase)
 
 void AcSensor::resetValues()
 {
-	mMeanPowerInfo->resetValues();
-	mL1PowerInfo->resetValues();
-	mL2PowerInfo->resetValues();
-	mL3PowerInfo->resetValues();
+	mTotal->resetValues();
+	mL1->resetValues();
+	mL2->resetValues();
+	mL3->resetValues();
 }

@@ -5,7 +5,7 @@
 #include "ac_sensor.h"
 #include "ac_sensor_bridge.h"
 #include "ac_sensor_settings.h"
-#include "power_info.h"
+#include "ac_sensor_phase.h"
 
 AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 							   bool isSecundary, QObject *parent) :
@@ -25,10 +25,10 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	bool isGridmeter =
 		(isSecundary ? settings->l2ServiceType() : settings->serviceType()) == "grid";
 
-	producePowerInfo(acSensor->meanPowerInfo(), "/Ac", isGridmeter);
-	producePowerInfo(acSensor->l1PowerInfo(), "/Ac/L1", isGridmeter);
-	producePowerInfo(acSensor->l2PowerInfo(), "/Ac/L2", isGridmeter);
-	producePowerInfo(acSensor->l3PowerInfo(), "/Ac/L3", isGridmeter);
+	producePowerInfo(acSensor->total(), "/Ac", isGridmeter);
+	producePowerInfo(acSensor->l1(), "/Ac/L1", isGridmeter);
+	producePowerInfo(acSensor->l2(), "/Ac/L2", isGridmeter);
+	producePowerInfo(acSensor->l3(), "/Ac/L3", isGridmeter);
 
 	if (isSecundary || settings->serviceType() == "pvinverter")
 		produce(settings, isSecundary ? "l2Position" : "position", "/Position");
@@ -105,7 +105,7 @@ QString AcSensorBridge::getServiceName(AcSensor *acSensor, AcSensorSettings *set
 	return serviceName;
 }
 
-void AcSensorBridge::producePowerInfo(PowerInfo *pi, const QString &path, bool isGridmeter)
+void AcSensorBridge::producePowerInfo(AcSensorPhase *pi, const QString &path, bool isGridmeter)
 {
 	produce(pi, "current", path + "/Current", "A", 1);
 	produce(pi, "voltage", path + "/Voltage", "V", 0);

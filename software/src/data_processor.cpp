@@ -3,7 +3,7 @@
 #include "ac_sensor.h"
 #include "ac_sensor_settings.h"
 #include "data_processor.h"
-#include "power_info.h"
+#include "ac_sensor_phase.h"
 
 DataProcessor::DataProcessor(AcSensor *acSensor,
 							 AcSensorSettings *settings, QObject *parent) :
@@ -18,7 +18,7 @@ DataProcessor::DataProcessor(AcSensor *acSensor,
 
 void DataProcessor::setPower(Phase phase, double value)
 {
-	PowerInfo *pi = mAcSensor->getPowerInfo(phase);
+	AcSensorPhase *pi = mAcSensor->getPhase(phase);
 	double prev = pi->power();
 	const double Fc = 0.05;
 	const double Dt = 0.5;
@@ -31,19 +31,19 @@ void DataProcessor::setPower(Phase phase, double value)
 
 void DataProcessor::setVoltage(Phase phase, double value)
 {
-	PowerInfo *pi = mAcSensor->getPowerInfo(phase);
+	AcSensorPhase *pi = mAcSensor->getPhase(phase);
 	pi->setVoltage(value);
 }
 
 void DataProcessor::setCurrent(Phase phase, double value)
 {
-	PowerInfo *pi = mAcSensor->getPowerInfo(phase);
+	AcSensorPhase *pi = mAcSensor->getPhase(phase);
 	pi->setCurrent(value);
 }
 
 void DataProcessor::setPositiveEnergy(Phase phase, double value)
 {
-	PowerInfo *pi = mAcSensor->getPowerInfo(phase);
+	AcSensorPhase *pi = mAcSensor->getPhase(phase);
 	pi->setEnergyForward(value);
 }
 
@@ -86,7 +86,7 @@ void DataProcessor::updateEnergySettings()
 
 void DataProcessor::updateEnergySettings(Phase phase)
 {
-	PowerInfo *pi = mAcSensor->getPowerInfo(phase);
+	AcSensorPhase *pi = mAcSensor->getPhase(phase);
 	if (pi == 0)
 		return;
 	double e = getReverseEnergy(phase);
@@ -104,7 +104,7 @@ void DataProcessor::setInitialEnergy(Phase phase, double defaultValue)
 
 double DataProcessor::getReverseEnergy(Phase phase)
 {
-	PowerInfo *pi = mAcSensor->getPowerInfo(phase);
+	AcSensorPhase *pi = mAcSensor->getPhase(phase);
 	if (pi == 0)
 		return 0;
 	return pi->energyReverse();
@@ -112,7 +112,7 @@ double DataProcessor::getReverseEnergy(Phase phase)
 
 void DataProcessor::setReverseEnergy(Phase phase, double value)
 {
-	PowerInfo *pi = mAcSensor->getPowerInfo(phase);
+	AcSensorPhase *pi = mAcSensor->getPhase(phase);
 	if (pi == 0)
 		return;
 	pi->setEnergyReverse(value);

@@ -6,7 +6,7 @@
 #include "ac_sensor_updater.h"
 #include "data_processor.h"
 #include "modbus_rtu.h"
-#include "power_info.h"
+#include "ac_sensor_phase.h"
 
 static const int MeasurementSystemP1 = 3; // single phase
 static const int MeasurementSystemP3 = 0; // 3 phase
@@ -633,7 +633,7 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 				v = getDouble(registers, ra.regOffset, 2, 1e-3);
 				if (mSetCurrentSign &&
 					dest == mDataProcessor &&
-					mAcSensor->getPowerInfo(ra.phase)->power() < 0) {
+					mAcSensor->getPhase(ra.phase)->power() < 0) {
 					v = -v;
 				}
 				dest->setCurrent(ra.phase, v);
@@ -641,9 +641,9 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 					dest->setCurrent(PhaseL1, v);
 				if (mSettings->isMultiPhase() && ra.phase == PhaseL3) {
 					dest->setCurrent(MultiPhase,
-						mAcSensor->l1PowerInfo()->current() +
-						mAcSensor->l2PowerInfo()->current() +
-						mAcSensor->l3PowerInfo()->current());
+						mAcSensor->l1()->current() +
+						mAcSensor->l2()->current() +
+						mAcSensor->l3()->current());
 				}
 				break;
 			case PositiveEnergy:

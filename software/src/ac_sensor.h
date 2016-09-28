@@ -5,7 +5,7 @@
 #include <QObject>
 #include "defines.h"
 
-class PowerInfo;
+class AcSensorPhase;
 
 enum ConnectionState {
 	Disconnected,
@@ -120,27 +120,27 @@ public:
 		return mSlaveAddress;
 	}
 
-	PowerInfo *meanPowerInfo()
+	AcSensorPhase *total()
 	{
-		return mMeanPowerInfo;
+		return mTotal;
 	}
 
-	PowerInfo *l1PowerInfo()
+	AcSensorPhase *l1()
 	{
-		return mL1PowerInfo;
+		return mL1;
 	}
 
-	PowerInfo *l2PowerInfo()
+	AcSensorPhase *l2()
 	{
-		return mL2PowerInfo;
+		return mL2;
 	}
 
-	PowerInfo *l3PowerInfo()
+	AcSensorPhase *l3()
 	{
-		return mL3PowerInfo;
+		return mL3;
 	}
 
-	PowerInfo *getPowerInfo(Phase phase);
+	AcSensorPhase *getPhase(Phase phase);
 
 	/*!
 	 * Reset all measured values to NaN
@@ -169,10 +169,10 @@ private:
 	QString mPortName;
 	int mSlaveAddress;
 	QString mSerial;
-	PowerInfo *mMeanPowerInfo;
-	PowerInfo *mL1PowerInfo;
-	PowerInfo *mL2PowerInfo;
-	PowerInfo *mL3PowerInfo;
+	AcSensorPhase *mTotal;
+	AcSensorPhase *mL1;
+	AcSensorPhase *mL2;
+	AcSensorPhase *mL3;
 };
 
 #endif // AC_SENSOR_H
