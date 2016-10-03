@@ -2,6 +2,7 @@
 #define ACSENSORMEDIATOR_H
 
 #include <QObject>
+#include <QStringList>
 #include "defines.h"
 
 class AcSensor;
@@ -46,7 +47,8 @@ private:
 
 	QList<AcSensor *> mAcSensors;
 	ModbusRtu *mModbus;
-	VeQItem *mDeviceIds;
+	VeQItem *mDeviceIdsItem;
+	QStringList mDeviceIds;
 };
 
 #endif // ACSENSORMEDIATOR_H

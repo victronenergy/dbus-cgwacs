@@ -15,13 +15,13 @@ AcSensorMediator::AcSensorMediator(const QString &portName, bool isZigbee, VeQIt
 								   QObject *parent) :
 	QObject(parent),
 	mModbus(new ModbusRtu(portName, 9600, isZigbee ? 2000 : 250, this)),
-	mDeviceIds(settingsRoot->itemGetOrCreate(DeviceIdsPath))
+	mDeviceIdsItem(settingsRoot->itemGetOrCreate(DeviceIdsPath))
 {
 	DBusBridge settingsBridge(settingsRoot, false);
 	settingsBridge.addSetting(DeviceIdsPath, "", 0, 0);
 
 	/// @todo EV We assume that this setting is initialized before an AC sensor has been found
-	mDeviceIds->getValue();
+	mDeviceIdsItem->getValue();
 	connect(mModbus, SIGNAL(serialEvent(const char *)), this, SIGNAL(serialEvent(const char *)));
 	for (int i=1; i<=2; ++i) {
 		AcSensor *m = new AcSensor(portName, i, this);
@@ -139,21 +139,20 @@ void AcSensorMediator::publishSensor(AcSensor *acSensor, AcSensor *pvSensor,
 
 void AcSensorMediator::registerDevice(const QString &serial)
 {
-	Q_ASSERT(mDeviceIds->getValue().isValid());
-	QString ids = mDeviceIds->getValue().toString();
-	QStringList deviceIds = ids.split(',');
-	if (deviceIds.contains(serial))
+	if (mDeviceIds.isEmpty()) {
+		QString ids = mDeviceIdsItem->getValue().toString();
+		mDeviceIds = ids.split(',', QString::SkipEmptyParts);
+	}
+	if (mDeviceIds.contains(serial))
 		return;
-	deviceIds.append(serial);
-	mDeviceIds->setValue(deviceIds.join(","));
+	mDeviceIds.append(serial);
+	mDeviceIdsItem->setValue(mDeviceIds.join(","));
 }
 
 int AcSensorMediator::getDeviceInstance(const QString &serial, bool isSecundary) const
 {
-	Q_ASSERT(mDeviceIds->getValue().isValid());
-	QString ids = mDeviceIds->getValue().toString();
-	QStringList deviceIds = ids.split(',');
-	int i = deviceIds.indexOf(serial);
+	Q_ASSERT(mDeviceIdsItem->getValue().isValid());
+	int i = mDeviceIds.indexOf(serial);
 	if (i == -1)
 		return InvalidDeviceInstance;
 	return MinDeviceInstance + (2 * i + (isSecundary ? 1 : 0)) % (MaxDeviceInstance - MinDeviceInstance + 1);
