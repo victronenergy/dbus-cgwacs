@@ -3,24 +3,24 @@
 #include "multi_bridge.h"
 #include "multi_phase_data.h"
 
-MultiBridge::MultiBridge(Multi *multi, const QString &service, QObject *parent) :
-	DBusBridge(service, parent),
+MultiBridge::MultiBridge(Multi *multi, VeQItem *service, QObject *parent) :
+	DBusBridge(service, false, parent),
 	mMulti(multi)
 {
 	Q_ASSERT(mMulti != 0);
-	consumePhase(service, "L1", multi->l1Data());
-	consumePhase(service, "L2", multi->l2Data());
-	consumePhase(service, "L3", multi->l3Data());
-	consume(service, multi->meanData(), "acPowerIn", "/Ac/ActiveIn/P");
-	consume(service, multi, "dcVoltage", "/Dc/0/Voltage");
-	consume(service, multi, "dcCurrent", "/Dc/0/Current");
-	consume(service, multi, "maxChargeCurrent", "/Dc/0/MaxChargeCurrent");
-	consume(service, multi, "isSustainActive", "/Hub4/Sustain");
-	consume(service, multi, "mode", "/Mode");
-	consume(service, multi, "state", "/State");
-	consume(service, multi, "isChargeDisabled", "/Hub4/DisableCharge");
-	consume(service, multi, "isFeedbackDisabled", "/Hub4/DisableFeedback");
-	consume(service, multi, "firmwareVersion", "/FirmwareVersion");
+	consumePhase("L1", multi->l1Data());
+	consumePhase("L2", multi->l2Data());
+	consumePhase("L3", multi->l3Data());
+	consume(multi->meanData(), "acPowerIn", "/Ac/ActiveIn/P");
+	consume(multi, "dcVoltage", "/Dc/0/Voltage");
+	consume(multi, "dcCurrent", "/Dc/0/Current");
+	consume(multi, "maxChargeCurrent", "/Dc/0/MaxChargeCurrent");
+	consume(multi, "isSustainActive", "/Hub4/Sustain");
+	consume(multi, "mode", "/Mode");
+	consume(multi, "state", "/State");
+	consume(multi, "isChargeDisabled", "/Hub4/DisableCharge");
+	consume(multi, "isFeedbackDisabled", "/Hub4/DisableFeedback");
+	consume(multi, "firmwareVersion", "/FirmwareVersion");
 }
 
 bool MultiBridge::toDBus(const QString &path, QVariant &v)
@@ -52,10 +52,9 @@ bool MultiBridge::fromDBus(const QString &path, QVariant &v)
 	return true;
 }
 
-void MultiBridge::consumePhase(const QString &service, const QString &phase,
-							   MultiPhaseData *phaseData)
+void MultiBridge::consumePhase(const QString &phase, MultiPhaseData *phaseData)
 {
-	consume(service, phaseData, "acPowerIn", "/Ac/ActiveIn/" + phase + "/P");
-	consume(service, phaseData, "acPowerOut", "/Ac/Out/" + phase + "/P");
-	consume(service, phaseData, "acPowerSetPoint", "/Hub4/" + phase + "/AcPowerSetpoint");
+	consume(phaseData, "acPowerIn", "/Ac/ActiveIn/" + phase + "/P");
+	consume(phaseData, "acPowerOut", "/Ac/Out/" + phase + "/P");
+	consume(phaseData, "acPowerSetPoint", "/Hub4/" + phase + "/AcPowerSetpoint");
 }

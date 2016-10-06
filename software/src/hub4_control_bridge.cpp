@@ -4,7 +4,7 @@
 #include "settings.h"
 
 Hub4ControlBridge::Hub4ControlBridge(BatteryInfo *batteryInfo, Settings *settings, QObject *parent):
-	DBusBridge("com.victronenergy.hub4", parent)
+	DBusBridge("pub/com.victronenergy.hub4", true, parent)
 {
 	Q_ASSERT(settings != 0);
 	produce(settings, "acPowerSetPoint", "/AcPowerSetpoint");

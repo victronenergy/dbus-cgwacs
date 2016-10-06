@@ -1,28 +1,26 @@
-#include <velib/qt/v_busitem.h>
-#include "dbus_service_monitor.h"
+#include <qnumeric.h>
+#include <velib/qt/ve_qitem.hpp>
 #include "vbus_item_system_calc.h"
 
-static const QString SystemCalcService = "com.victronenergy.system";
-static const QString SocPath = "/Dc/Battery/Soc";
+static const QString SystemCalcService = "sub/com.victronenergy.system/Dc/Battery/Soc";
 
-VBusItemSystemCalc::VBusItemSystemCalc(DbusServiceMonitor *serviceMonitor, QObject *parent):
+VBusItemSystemCalc::VBusItemSystemCalc(QObject *parent):
 	SystemCalc(parent),
-	mSystemSoc(new VBusItem(this))
+	mSystemSoc(VeQItems::getRoot()->itemGetOrCreate(SystemCalcService))
 {
-	connect(serviceMonitor, SIGNAL(serviceAdded(QString)), this, SLOT(onServiceAdded(QString)));
-	connect(mSystemSoc, SIGNAL(valueChanged()), this, SIGNAL(socChanged()));
-	mSystemSoc->consume(SystemCalcService, SocPath);
+	connect(mSystemSoc, SIGNAL(valueChanged(VeQItem *, QVariant)), this, SIGNAL(socChanged()));
 	mSystemSoc->getValue();
 }
 
 double VBusItemSystemCalc::soc() const
 {
-	QVariant v = mSystemSoc->getValue();
-	return v.isValid() ? v.toDouble() : qQNaN();
-}
-
-void VBusItemSystemCalc::onServiceAdded(QString service)
-{
-	if (service == SystemCalcService)
-		mSystemSoc->consume(SystemCalcService, SocPath);
+	switch (mSystemSoc->getState()) {
+	case VeQItem::Idle:
+	case VeQItem::Offline:
+	case VeQItem::Requested:
+		return qQNaN();
+	default:
+		QVariant v = mSystemSoc->getValue();
+		return v.isValid() ? v.toDouble() : qQNaN();
+	}
 }

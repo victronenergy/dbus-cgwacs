@@ -15,7 +15,7 @@ class MultiBridge : public DBusBridge
 {
 	Q_OBJECT
 public:
-	MultiBridge(Multi *multi, const QString &service, QObject *parent = 0);
+	MultiBridge(Multi *multi, VeQItem *service, QObject *parent = 0);
 
 protected:
 	virtual bool toDBus(const QString &path, QVariant &v);
@@ -23,8 +23,7 @@ protected:
 	virtual bool fromDBus(const QString &path, QVariant &v);
 
 private:
-	void consumePhase(const QString &service,
-					  const QString &phase, MultiPhaseData *phaseData);
+	void consumePhase(const QString &phase, MultiPhaseData *phaseData);
 
 	Multi *mMulti;
 };

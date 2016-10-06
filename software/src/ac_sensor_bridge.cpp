@@ -11,7 +11,7 @@
 
 AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 							   bool isSecundary, QObject *parent) :
-	DBusBridge(parent),
+	DBusBridge(getServiceName(acSensor, emSettings, isSecundary), true, parent),
 	mAcSensor(acSensor)
 {
 	Q_ASSERT(acSensor != 0);
@@ -21,24 +21,6 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 	// Changes in QT properties will not be propagated to the D-Bus at once, but
 	// in 2500ms invervals.
 	setUpdateInterval(2500);
-
-	QString serviceType = isSecundary ?
-		emSettings->l2ServiceType() :
-		emSettings->serviceType();
-	QString portId = acSensor->portName().
-			replace("/dev/", "").
-			replace("/", "_");
-	int deviceInstance = isSecundary ?
-		emSettings->l2DeviceInstance() :
-		emSettings->deviceInstance();
-	QString serviceName = QString("com.victronenergy.%1.cgwacs_%2_di%3_mb%4").
-			arg(serviceType).
-			arg(portId).
-			arg(deviceInstance).
-			arg(acSensor->slaveAddress());
-	if (isSecundary)
-		serviceName += "_l2";
-	setServiceName(serviceName);
 
 	produce(acSensor, "connectionState", "/Connected");
 	produce(acSensor, "errorCode", "/ErrorCode");
@@ -66,6 +48,10 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *emSettings,
 										VE_PROD_ID_CARLO_GAVAZZI_EM);
 	produce("/DeviceType", acSensor->deviceType());
 	produce("/Mgmt/Connection", acSensor->portName());
+
+	int deviceInstance = isSecundary ?
+		emSettings->l2DeviceInstance() :
+		emSettings->deviceInstance();
 	produce("/DeviceInstance", deviceInstance);
 	produce("/Serial", acSensor->serial());
 
@@ -90,6 +76,28 @@ bool AcSensorBridge::fromDBus(const QString &path, QVariant &value)
 	if (path == "/CustomName")
 		return true;
 	return false;
+}
+
+QString AcSensorBridge::getServiceName(AcSensor *acSensor, AcSensorSettings *emSettings,
+									   bool isSecundary)
+{
+	QString serviceType = isSecundary ?
+		emSettings->l2ServiceType() :
+		emSettings->serviceType();
+	QString portId = acSensor->portName().
+			replace("/dev/", "").
+			replace("/", "_");
+	int deviceInstance = isSecundary ?
+		emSettings->l2DeviceInstance() :
+		emSettings->deviceInstance();
+	QString serviceName = QString("pub/com.victronenergy.%1.cgwacs_%2_di%3_mb%4").
+			arg(serviceType).
+			arg(portId).
+			arg(deviceInstance).
+			arg(acSensor->slaveAddress());
+	if (isSecundary)
+		serviceName += "_l2";
+	return serviceName;
 }
 
 void AcSensorBridge::producePowerInfo(PowerInfo *pi, const QString &path, bool isGridmeter)

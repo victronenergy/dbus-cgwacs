@@ -1,11 +1,7 @@
 #include <QsLog.h>
-#include <velib/qt/v_busitem.h>
+#include <velib/qt/ve_qitem.hpp>
 #include "ac_sensor.h"
 #include "ac_sensor_mediator.h"
-#include "ac_sensor_settings.h"
-#include "ac_sensor_settings_bridge.h"
-#include "ac_sensor_updater.h"
-#include "vbus_item_battery.h"
 #include "battery_info.h"
 #include "dbus_cgwacs.h"
 #include "dbus_service_monitor.h"
@@ -20,7 +16,10 @@
 #include "settings_bridge.h"
 #include "single_phase_control.h"
 #include "split_phase_control.h"
+#include "vbus_item_battery.h"
 #include "vbus_item_system_calc.h"
+
+Q_DECLARE_METATYPE(Position)
 
 DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 	QObject(parent),
@@ -28,12 +27,12 @@ DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 	mSettings(new Settings(this)),
 	mAcSensorMediator(new AcSensorMediator(portName, isZigbee, mSettings, this)),
 	mMulti(new Multi(this)),
-	mSystemCalc(new VBusItemSystemCalc(mServiceMonitor, this)),
+	mSystemCalc(new VBusItemSystemCalc(this)),
 	mMaintenanceControl(0),
 	mControlLoop(0),
 	mBatteryInfo(new BatteryInfo(mMulti, mSettings)),
 	mHub4ControlBridge(0),
-	mTimeZone(new VBusItem(this))
+	mTimeZone(VeQItems::getRoot()->itemGetOrCreate("sub/com.victronenergy.settings/Settings/System/TimeZone"))
 {
 	qRegisterMetaType<ConnectionState>();
 	qRegisterMetaType<BatteryLifeState>();
@@ -41,8 +40,7 @@ DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 	qRegisterMetaType<Position>();
 	qRegisterMetaType<QList<quint16> >();
 
-	connect(mTimeZone, SIGNAL(valueChanged()), this, SLOT(onTimeZoneChanged()));
-	mTimeZone->consume("com.victronenergy.settings", "/Settings/System/TimeZone");
+	connect(mTimeZone, SIGNAL(valueChanged(VeQItem *, QVariant)), this, SLOT(onTimeZoneChanged()));
 	mTimeZone->getValue();
 
 	connect(mAcSensorMediator, SIGNAL(gridMeterChanged()),
@@ -63,9 +61,10 @@ DBusCGwacs::DBusCGwacs(const QString &portName, bool isZigbee, QObject *parent):
 		connect(mMulti->getPhaseData(phase), SIGNAL(isSetPointAvailableChanged()),
 				this, SLOT(onIsSetPointAvailableChanged()));
 	}
-
-	connect(mServiceMonitor, SIGNAL(serviceAdded(QString)), this, SLOT(onServiceAdded(QString)));
-	connect(mServiceMonitor, SIGNAL(serviceRemoved(QString)), this, SLOT(onServiceRemoved(QString)));
+	connect(mServiceMonitor, SIGNAL(serviceAdded(VeQItem *)),
+			this, SLOT(onServiceAdded(VeQItem *)));
+	connect(mServiceMonitor, SIGNAL(serviceRemoved(VeQItem *)),
+			this, SLOT(onServiceRemoved(VeQItem *)));
 	mServiceMonitor->start();
 }
 
@@ -111,34 +110,36 @@ void DBusCGwacs::onSerialEvent(const char *description)
 	exit(1);
 }
 
-void DBusCGwacs::onServiceAdded(QString service)
+void DBusCGwacs::onServiceAdded(VeQItem *root)
 {
-	if (service.startsWith("com.victronenergy.vebus.")) {
+	QString serviceName = root->id();
+	if (serviceName.startsWith("com.victronenergy.vebus.")) {
 		MultiBridge *bridge = mMulti->findChild<MultiBridge *>();
 		if (bridge == 0) {
-			QLOG_INFO() << "Multi found @" << service;
-			new MultiBridge(mMulti, service, mMulti);
+			QLOG_INFO() << "Multi found @" << serviceName;
+			new MultiBridge(mMulti, root, mMulti);
 		}
-	} else if (service.startsWith("com.victronenergy.battery.")) {
-		QLOG_INFO() << "Battery found @" << service;
-		Battery *battery = new VbusItemBattery(service, this);
+	} else if (serviceName.startsWith("com.victronenergy.battery.")) {
+		QLOG_INFO() << "Battery found @" << serviceName;
+		Battery *battery = new VbusItemBattery(root, this);
 		mBatteryInfo->addBattery(battery);
 	}
 }
 
-void DBusCGwacs::onServiceRemoved(QString service)
+void DBusCGwacs::onServiceRemoved(VeQItem *root)
 {
-	if (service.startsWith("com.victronenergy.vebus.")) {
+	QString serviceName = root->id();
+	if (serviceName.startsWith("com.victronenergy.vebus.")) {
 		MultiBridge *bridge = mMulti->findChild<MultiBridge *>();
-		if (bridge != 0 && bridge->serviceName() == service) {
-			QLOG_INFO() << "Multi @" << bridge->serviceName() << "disappeared.";
+		if (bridge != 0 && bridge->service() == root) {
+			QLOG_INFO() << "Multi @" << serviceName << "disappeared.";
 			delete bridge;
 			bridge = 0;
 		}
-	} else if (service.startsWith("com.victronenergy.battery.")) {
-		QLOG_INFO() << "Battery @" << service << "disappeared.";
+	} else if (serviceName.startsWith("com.victronenergy.battery.")) {
+		QLOG_INFO() << "Battery @" << serviceName << "disappeared.";
 		foreach (VbusItemBattery *b, findChildren<VbusItemBattery *>()) {
-			if (b->serviceName() == service) {
+			if (b->service() == root) {
 				mBatteryInfo->removeBattery(b);
 				delete b;
 				break;

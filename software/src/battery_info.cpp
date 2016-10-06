@@ -1,7 +1,6 @@
 #include <qnumeric.h>
 #include <QsLog.h>
 #include "battery.h"
-#include "battery_bridge.h"
 #include "battery_info.h"
 #include "dbus_service_monitor.h"
 #include "multi_phase_data.h"

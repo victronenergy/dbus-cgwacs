@@ -7,15 +7,15 @@
 class AcSensor;
 class AcSensorMediator;
 class BatteryInfo;
+class BatteryLife;
 class ControlLoop;
 class DbusServiceMonitor;
 class Hub4ControlBridge;
-class BatteryLife;
 class ModbusRtu;
 class Multi;
 class Settings;
 class SystemCalc;
-class VBusItem;
+class VeQItem;
 
 /*!
  * Main object which ties everything together.
@@ -43,9 +43,9 @@ private slots:
 
 	void onSerialEvent(const char *description);
 
-	void onServiceAdded(QString service);
+	void onServiceAdded(VeQItem *item);
 
-	void onServiceRemoved(QString service);
+	void onServiceRemoved(VeQItem *item);
 
 	void onHub4ModeChanged();
 
@@ -67,7 +67,7 @@ private:
 	ControlLoop *mControlLoop;
 	BatteryInfo *mBatteryInfo;
 	Hub4ControlBridge *mHub4ControlBridge;
-	VBusItem *mTimeZone;
+	VeQItem *mTimeZone;
 };
 
 #endif // DBUS_CGWACS_H

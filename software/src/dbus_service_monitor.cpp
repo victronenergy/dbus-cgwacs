@@ -1,6 +1,4 @@
-#include <QDBusConnectionInterface>
-#include <QDBusConnection>
-#include <velib/qt/v_busitems.h>
+#include <velib/qt/ve_qitem.hpp>
 #include "dbus_service_monitor.h"
 
 DbusServiceMonitor::DbusServiceMonitor(QObject *parent):
@@ -10,39 +8,45 @@ DbusServiceMonitor::DbusServiceMonitor(QObject *parent):
 
 void DbusServiceMonitor::start()
 {
-	QDBusConnectionInterface *ci = VBusItems::getConnection().interface();
-	connect(ci, SIGNAL(serviceOwnerChanged(QString, QString, QString)),
-			this, SLOT(onServiceOwnerChanged(QString, QString, QString)));
-	QDBusReply<QStringList> reply = ci->registeredServiceNames();
-	foreach (QString s, reply.value())
-		processNewService(s);
+	VeQItem *root = VeQItems::getRoot()->itemGetOrCreate("sub");
+	connect(root, SIGNAL(childAdded(VeQItem *)), this, SLOT(onChildAdded(VeQItem *)));
+	connect(root, SIGNAL(childRemoved(VeQItem *)), this, SLOT(onChildRemoved(VeQItem *)));
+	for (int i=0;; ++i) {
+		VeQItem *child = root->itemChild(i);
+		if (child == 0)
+			break;
+		onChildAdded(child);
+	}
 }
 
-void DbusServiceMonitor::onServiceOwnerChanged(const QString &name,
-											   const QString &oldOwner,
-											   const QString &newOwner)
+void DbusServiceMonitor::onChildAdded(VeQItem *child)
 {
-	if (oldOwner == newOwner)
-		return;
-	if (!oldOwner.isEmpty())
-		processOldService(name);
-	if (!newOwner.isEmpty())
-		processNewService(name);
+	// Note that the service root item will start with state Idle, which will change to Offline
+	// if the service disappears.
+	QString name = child->id();
+	connect(child, SIGNAL(stateChanged(VeQItem *, State)),
+			this, SLOT(onChildStateChanged(VeQItem *)));
+	onChildStateChanged(child);
 }
 
-bool DbusServiceMonitor::isVictronService(const QString &name)
+void DbusServiceMonitor::onChildRemoved(VeQItem *child)
 {
-	return name.startsWith("com.victronenergy.");
+	QString name = child->id();
+	if (mServices.contains(child)) {
+		mServices.removeOne(child);
+		emit serviceRemoved(child);
+	}
 }
 
-void DbusServiceMonitor::processNewService(const QString &name)
+void DbusServiceMonitor::onChildStateChanged(VeQItem *child)
 {
-	if (isVictronService(name))
-		emit serviceAdded(name);
-}
-
-void DbusServiceMonitor::processOldService(const QString &name)
-{
-	if (isVictronService(name))
-		emit serviceRemoved(name);
+	VeQItem::State state = child->getState();
+	bool connected = state != VeQItem::Offline;
+	if (connected && !mServices.contains(child)) {
+		mServices.append(child);
+		emit serviceAdded(child);
+	} else if (!connected && mServices.contains(child)) {
+		mServices.removeOne(child);
+		emit serviceRemoved(child);
+	}
 }

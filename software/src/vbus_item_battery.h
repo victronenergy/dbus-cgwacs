@@ -3,27 +3,30 @@
 
 #include "battery.h"
 
-class VBusItem;
+class VeQItem;
 
 class VbusItemBattery : public Battery
 {
 public:
-	VbusItemBattery(const QString &service, QObject *parent = 0);
+	explicit VbusItemBattery(VeQItem *service, QObject *parent = 0);
 
 	virtual double maxChargeCurrent() const;
 
 	virtual double maxDischargeCurrent() const;
 
-	QString serviceName() const;
+	VeQItem *service() const
+	{
+		return mService;
+	}
 
 private:
-	VBusItem *createItem(const QString &path, const char *signal);
+	VeQItem *createItem(const QString &path, const char *signal);
 
-	static double getDouble(VBusItem *item);
+	static double getDouble(VeQItem *item);
 
-	QString mServiceName;
-	VBusItem *mMaxChargeCurrent;
-	VBusItem *mMaxDischargeCurrent;
+	VeQItem *mService;
+	VeQItem *mMaxChargeCurrent;
+	VeQItem *mMaxDischargeCurrent;
 };
 
 #endif // VBUS_ITEM_BATTERY_H

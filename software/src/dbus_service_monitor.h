@@ -2,13 +2,11 @@
 #define DBUS_SERVICE_MONITOR_H
 
 #include <QObject>
+#include <QList>
 
-/*!
- * Monitors the presence of services whose name start with a known prefix (eg.
- * com.victronenergy.vebus).
- * The list of services is stored in the `services` property. The
- * `servicesChanged` signal will be raised whenever the service list changed.
- */
+class VeQItem;
+
+/// Emits signals when D-Bus services appear/disappears to/from the D-Bus
 class DbusServiceMonitor : public QObject
 {
 	Q_OBJECT
@@ -18,20 +16,19 @@ public:
 	void start();
 
 signals:
-	void serviceAdded(QString service);
+	void serviceAdded(VeQItem *root);
 
-	void serviceRemoved(QString service);
+	void serviceRemoved(VeQItem *root);
 
 private slots:
-	void onServiceOwnerChanged(const QString &name, const QString &oldOwner,
-							   const QString &newOwner);
+	void onChildAdded(VeQItem *child);
+
+	void onChildRemoved(VeQItem *child);
+
+	void onChildStateChanged(VeQItem *child);
 
 private:
-	void processNewService(const QString &name);
-
-	void processOldService(const QString &name);
-
-	static bool isVictronService(const QString &name);
+	QList<VeQItem *> mServices;
 };
 
 #endif // DBUS_SERVICE_MONITOR_H

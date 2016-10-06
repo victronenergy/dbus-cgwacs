@@ -1,15 +1,15 @@
 #include <qnumeric.h>
 #include <QVariant>
-#include <velib/qt/v_busitem.h>
+#include <velib/qt/ve_qitem.hpp>
 #include "vbus_item_battery.h"
 
-VbusItemBattery::VbusItemBattery(const QString &service, QObject *parent):
+VbusItemBattery::VbusItemBattery(VeQItem *service, QObject *parent):
 	Battery(parent),
-	mServiceName(service),
+	mService(service),
 	mMaxChargeCurrent(
-		createItem("/Info/MaxChargeCurrent", SIGNAL(maxChargeCurrentChanged()))),
+		createItem("Info/MaxChargeCurrent", SIGNAL(maxChargeCurrentChanged()))),
 	mMaxDischargeCurrent(
-		createItem("/Info/MaxDischargeCurrent", SIGNAL(maxDischargeCurrentChanged())))
+		createItem("Info/MaxDischargeCurrent", SIGNAL(maxDischargeCurrentChanged())))
 {
 }
 
@@ -23,21 +23,15 @@ double VbusItemBattery::maxDischargeCurrent() const
 	return getDouble(mMaxDischargeCurrent);
 }
 
-QString VbusItemBattery::serviceName() const
+VeQItem *VbusItemBattery::createItem(const QString &path, const char *signal)
 {
-	return mServiceName;
-}
-
-VBusItem *VbusItemBattery::createItem(const QString &path, const char *signal)
-{
-	VBusItem *result = new VBusItem(this);
-	connect(result, SIGNAL(valueChanged()), this, signal);
-	result->consume(mServiceName, path);
+	VeQItem *result = mService->itemGetOrCreate(path);
+	connect(result, SIGNAL(valueChanged(VeQItem *, QVariant)), this, signal);
 	result->getValue();
 	return result;
 }
 
-double VbusItemBattery::getDouble(VBusItem *item)
+double VbusItemBattery::getDouble(VeQItem *item)
 {
 	bool ok = false;
 	QVariant v = item->getValue();

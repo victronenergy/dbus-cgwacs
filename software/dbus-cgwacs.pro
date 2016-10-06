@@ -22,7 +22,7 @@ unix {
 MOC_DIR=.moc
 OBJECTS_DIR=.obj
 
-QT += core dbus
+QT += core dbus xml
 QT -= gui
 
 TARGET = dbus-cgwacs
@@ -33,6 +33,7 @@ DEFINES += VERSION=\\\"$${VERSION}\\\"
 TEMPLATE = app
 
 include(ext/qslog/QsLog.pri)
+include(ext/velib/src/qt/ve_qitems.pri)
 
 INCLUDEPATH += \
     ext/qslog \
@@ -41,12 +42,6 @@ INCLUDEPATH += \
     src
 
 SOURCES += \
-    ext/velib/src/qt/v_busitem.cpp \
-    ext/velib/src/qt/v_busitems.cpp \
-    ext/velib/src/qt/v_busitem_adaptor.cpp \
-    ext/velib/src/qt/v_busitem_private_cons.cpp \
-    ext/velib/src/qt/v_busitem_private_prod.cpp \
-    ext/velib/src/qt/v_busitem_proxy.cpp \
     ext/velib/src/plt/serial.c \
     ext/velib/src/plt/posix_serial.c \
     ext/velib/src/plt/posix_ctx.c \
@@ -55,7 +50,6 @@ SOURCES += \
     src/dbus_bridge.cpp \
     src/power_info.cpp \
     src/modbus_rtu.cpp \
-    src/v_bus_node.cpp \
     src/crc16.cpp \
     src/settings.cpp \
     src/multi.cpp \
@@ -85,20 +79,12 @@ SOURCES += \
     src/vbus_item_battery.cpp
 
 HEADERS += \
-    ext/velib/src/qt/v_busitem_adaptor.h \
-    ext/velib/src/qt/v_busitem_private_cons.h \
-    ext/velib/src/qt/v_busitem_private_prod.h \
-    ext/velib/src/qt/v_busitem_private.h \
-    ext/velib/src/qt/v_busitem_proxy.h \
-    ext/velib/inc/velib/qt/v_busitem.h \
-    ext/velib/inc/velib/qt/v_busitems.h \
     ext/velib/inc/velib/platform/serial.h \
     src/dbus_bridge.h \
     src/power_info.h \
     src/defines.h \
     src/settings.h \
     src/modbus_rtu.h \
-    src/v_bus_node.h \
     src/crc16.h \
     src/multi.h \
     src/multi_phase_data.h \

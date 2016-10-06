@@ -23,19 +23,19 @@ static const QString MinSocLimitPath = BatteryLifePath + "/MinimumSocLimit";
 static const QString DischargedTimePath = BatteryLifePath + "/DischargedTime";
 
 SettingsBridge::SettingsBridge(Settings *settings, QObject *parent):
-	DBusBridge(parent)
+	DBusBridge("sub/com.victronenergy.settings", false, parent)
 {
-	consume(Service, settings, "deviceIds", QVariant(""), DeviceIdsPath);
-	consume(Service, settings, "acPowerSetPoint", 0.0, -1e5, 1e5, AcPowerSetPointPath);
-	consume(Service, settings, "maxChargePercentage", 100, 0, 100, MaxChargePercentagePath);
-	consume(Service, settings, "maxDischargePercentage", 100, 0, 100, MaxDischargePercentagePath);
-	consume(Service, settings, "state", static_cast<int>(BatteryLifeStateRestart), StatePath);
-	consume(Service, settings, "flags", 0, FlagsPath);
-	consume(Service, settings, "socLimit", SocSwitchDefaultMin, 0, 100, SocLimitPath);
-	consume(Service, settings, "minSocLimit", SocSwitchDefaultMin, 0, 100, MinSocLimitPath);
-	consume(Service, settings, "maxChargePower", -1.0, -1.0, 1e5, MaxChargePowerPath);
-	consume(Service, settings, "maxDischargePower", -1.0, -1.0, 1e5, MaxDischargePowerPath);
-	consume(Service, settings, "dischargedTime", QVariant(0), DischargedTimePath);
+	consume(settings, "deviceIds", QVariant(""), DeviceIdsPath);
+	consume(settings, "acPowerSetPoint", 0.0, -1e5, 1e5, AcPowerSetPointPath);
+	consume(settings, "maxChargePercentage", 100, 0, 100, MaxChargePercentagePath);
+	consume(settings, "maxDischargePercentage", 100, 0, 100, MaxDischargePercentagePath);
+	consume(settings, "state", 0, StatePath);
+	consume(settings, "flags", 0, FlagsPath);
+	consume(settings, "socLimit", SocSwitchDefaultMin, 0, 100, SocLimitPath);
+	consume(settings, "minSocLimit", SocSwitchDefaultMin, 0, 100, MinSocLimitPath);
+	consume(settings, "maxChargePower", -1.0, -1.0, 1e5, MaxChargePowerPath);
+	consume(settings, "maxDischargePower", -1.0, -1.0, 1e5, MaxDischargePowerPath);
+	consume(settings, "dischargedTime", QVariant(0), DischargedTimePath);
 }
 
 bool SettingsBridge::toDBus(const QString &path, QVariant &value)

@@ -5,43 +5,43 @@
 #include "ac_sensor_settings.h"
 #include "ac_sensor_settings_bridge.h"
 
-static const QString Service = "com.victronenergy.settings";
+static const QString Service = "sub/com.victronenergy.settings";
 
 AcSensorSettingsBridge::AcSensorSettingsBridge(
 	AcSensorSettings *settings, QObject *parent) :
-	DBusBridge(parent)
+	DBusBridge(Service, false, parent)
 {
 	QString path = QString("/Settings/CGwacs/Devices/D%1").
 				   arg(settings->serial());
-	consume(Service, settings, "deviceType", QVariant(settings->deviceType()),
+	consume(settings, "deviceType", QVariant(settings->deviceType()),
 			path + "/DeviceType");
-	consume(Service, settings, "customName", QVariant(""),
+	consume(settings, "customName", QVariant(""),
 			path + "/CustomName");
-	consume(Service, settings, "serviceType", QVariant("grid"),
+	consume(settings, "serviceType", QVariant("grid"),
 			path + "/ServiceType");
-	consume(Service, settings, "isMultiPhase",
+	consume(settings, "isMultiPhase",
 			QVariant(static_cast<int>(settings->isMultiPhase())),
 			path + "/IsMultiPhase");
-	consume(Service, settings, "hub4Mode", QVariant(0),
+	consume(settings, "hub4Mode", QVariant(0),
 			path + "/Hub4Mode");
-	consume(Service, settings, "position", QVariant(0),
+	consume(settings, "position", QVariant(0),
 			path + "/Position");
-	consume(Service, settings, "deviceInstance", QVariant(-1),
+	consume(settings, "deviceInstance", QVariant(-1),
 			path + "/DeviceInstance");
-	consume(Service, settings, "l1ReverseEnergy", 0.0, 0.0, 1e6,
+	consume(settings, "l1ReverseEnergy", 0.0, 0.0, 1e6,
 			path + "/L1ReverseEnergy");
-	consume(Service, settings, "l2ReverseEnergy", 0.0, 0.0, 1e6,
+	consume(settings, "l2ReverseEnergy", 0.0, 0.0, 1e6,
 			path + "/L2ReverseEnergy");
-	consume(Service, settings, "l3ReverseEnergy", 0.0, 0.0, 1e6,
+	consume(settings, "l3ReverseEnergy", 0.0, 0.0, 1e6,
 			path + "/L3ReverseEnergy");
 
-	consume(Service, settings, "l2CustomName", QVariant(""),
+	consume(settings, "l2CustomName", QVariant(""),
 			path + "/L2/CustomName");
-	consume(Service, settings, "l2ServiceType", QVariant(""),
+	consume(settings, "l2ServiceType", QVariant(""),
 			path + "/L2/ServiceType");
-	consume(Service, settings, "l2Position", QVariant(0),
+	consume(settings, "l2Position", QVariant(0),
 			path + "/L2/Position");
-	consume(Service, settings, "l2DeviceInstance", QVariant(-1),
+	consume(settings, "l2DeviceInstance", QVariant(-1),
 			path + "/L2/DeviceInstance");
 }
 

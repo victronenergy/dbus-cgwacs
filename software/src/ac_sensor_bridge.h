@@ -31,6 +31,9 @@ protected:
 private:
 	void producePowerInfo(PowerInfo *pi, const QString &path, bool isGridmeter);
 
+	static QString getServiceName(AcSensor *acSensor, AcSensorSettings *emSettings,
+								  bool isSecundary);
+
 	AcSensor *mAcSensor;
 };
 
