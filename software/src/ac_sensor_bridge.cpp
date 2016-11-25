@@ -15,15 +15,15 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	Q_ASSERT(settings != 0);
 	connect(acSensor, SIGNAL(destroyed()), this, SLOT(deleteLater()));
 	connect(settings, SIGNAL(destroyed()), this, SLOT(deleteLater()));
-	// Changes in QT properties will not be propagated to the D-Bus at once, but
-	// in 2500ms invervals.
-	setUpdateInterval(1000);
-
-	produce(acSensor, "connectionState", "/Connected");
-	produce(acSensor, "errorCode", "/ErrorCode");
 
 	bool isGridmeter =
 		(isSecundary ? settings->l2ServiceType() : settings->serviceType()) == "grid";
+	// Changes in QT properties will not be propagated to the D-Bus at once, but in 1000ms
+	// invervals.
+	setUpdateInterval(isGridmeter ? 1000 : 2500);
+
+	produce(acSensor, "connectionState", "/Connected");
+	produce(acSensor, "errorCode", "/ErrorCode");
 
 	producePowerInfo(acSensor->total(), "/Ac", isGridmeter);
 	producePowerInfo(acSensor->l1(), "/Ac/L1", isGridmeter);

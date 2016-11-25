@@ -12,7 +12,7 @@ static const int MeasurementSystemP1 = 3; // single phase
 static const int MeasurementSystemP3 = 0; // 3 phase
 
 static const int ApplicationH = 7; // show negative power
-static const int MaxAcquisitionIndex = 8;
+static const int MaxAcquisitionIndex = 16;
 static const int MaxRegCount = 5;
 static const int MaxTimeoutCount = 5;
 
@@ -49,12 +49,12 @@ struct CompositeCommand {
 static const CompositeCommand Em24Commands[] = {
 	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
 	{ 0x0012, 0, { { 0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
-	{ 0x0024, 1, { { 0, Voltage, MultiPhase } } },
-	{ 0x0000, 2, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 }, { 4, Voltage, PhaseL3 } } },
-	{ 0x000C, 4, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 } } },
-	{ 0x003E, 5, { { 0, PositiveEnergy, MultiPhase } } },
-	{ 0x0046, 6, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 } } },
-	{ 0x005C, 7, { { 0, NegativeEnergy, MultiPhase } } }
+	{ 0x0024, 2, { { 0, Voltage, MultiPhase } } },
+	{ 0x0000, 4, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 }, { 4, Voltage, PhaseL3 } } },
+	{ 0x000C, 8, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 } } },
+	{ 0x003E, 10, { { 0, PositiveEnergy, MultiPhase } } },
+	{ 0x0046, 12, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 } } },
+	{ 0x005C, 14, { { 0, NegativeEnergy, MultiPhase } } }
 };
 
 static const int Em24CommandCount = sizeof(Em24Commands) / sizeof(Em24Commands[0]);
@@ -67,20 +67,20 @@ static const int Em24CommandCount = sizeof(Em24Commands) / sizeof(Em24Commands[0
 /// late packets.
 static const CompositeCommand Em24CommandsP1[] = {
 	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
-	{ 0x0024, 1, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x000C, 4, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x003E, 5, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x005C, 7, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
+	{ 0x0024, 2, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x000C, 8, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x003E, 10, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x005C, 14, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
 };
 
 static const int Em24CommandP1Count = sizeof(Em24CommandsP1) / sizeof(Em24CommandsP1[0]);
 
 static const CompositeCommand Em24CommandsP1PV[] = {
 	{ 0x0012, 0, { { 0, Power, PhaseL1 } } },
-	{ 0x0014, 1, { { 0, Power, PhaseL2 }, { 1, Dummy, MultiPhase } } },
-	{ 0x0000, 2, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 } } },
-	{ 0x000C, 3, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 } } },
-	{ 0x0046, 4, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 } } },
+	{ 0x0014, 2, { { 0, Power, PhaseL2 }, { 1, Dummy, MultiPhase } } },
+	{ 0x0000, 4, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 } } },
+	{ 0x000C, 6, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 } } },
+	{ 0x0046, 8, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 } } },
 	// Note that NegativeEnergy will give us the energy of all phases. Right now
 	// we assume that in case of a shared system L1 is a grid meter and L2 a
 	// PV inverter (which always has ReverseEnergy=0 because power and current

@@ -117,6 +117,7 @@ int main(int argc, char *argv[])
 	}
 
 	VeQItemDbusProducer producer(VeQItems::getRoot(), "sub", false, false);
+	producer.setListenIndividually(true);
 	producer.open(dbusAddress);
 
 	BridgeItemProducer dbusExportProducer(VeQItems::getRoot(), "pub");
