@@ -220,20 +220,7 @@ void AcSensorUpdater::onErrorReceived(int errorType, quint8 addr, int exception)
 							 << mAcSensor->portName() << ':'
 							 << mAcSensor->slaveAddress();
 			}
-			mState = WaitOnConnectionLost;
-			delete mSettings;
-			mSettings = 0;
-			delete mDataProcessor;
-			mDataProcessor = 0;
-			delete mPvDataProcessor;
-			mPvDataProcessor = 0;
-			mTimeoutCount = MaxTimeoutCount;
-			mAcSensor->setSerial(QString());
-			mAcSensor->resetValues();
-			mAcSensor->setConnectionState(Disconnected);
-			mAcPvSensor->setSerial(QString());
-			mAcPvSensor->resetValues();
-			mAcPvSensor->setConnectionState(Disconnected);
+			disconnectSensor();
 		} else {
 			++mTimeoutCount;
 		}
@@ -241,15 +228,14 @@ void AcSensorUpdater::onErrorReceived(int errorType, quint8 addr, int exception)
 	startNextAction();
 }
 
-void AcSensorUpdater::onReadCompleted(int function, quint8 addr,
-									  const QList<quint16> &registers)
+void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<quint16> &registers)
 {
 	if (addr != mAcSensor->slaveAddress())
 		return;
 	Q_UNUSED(function)
 	switch (mState) {
 	case DeviceId:
-		QLOG_INFO() << "DeviceId:" << registers[0];
+		QLOG_INFO() << "Device ID:" << registers[0];
 		mAcSensor->setDeviceType(registers[0]);
 		mAcPvSensor->setDeviceType(registers[0]);
 		switch (mAcSensor->protocolType()) {
@@ -264,6 +250,10 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr,
 		case AcSensor::Em340Protocol:
 			mSetCurrentSign = false;
 			mState = Serial;
+			break;
+		case AcSensor::Unknown:
+			QLOG_WARN() << "Unknown device ID, disconnecting";
+			disconnectSensor();
 			break;
 		}
 		break;
@@ -580,6 +570,24 @@ void AcSensorUpdater::startNextAcquisition()
 	}
 	int maxOffset = getMaxOffset(*cmd);
 	readRegisters(cmd->reg, maxOffset + 2);
+}
+
+void AcSensorUpdater::disconnectSensor()
+{
+	mState = WaitOnConnectionLost;
+	delete mSettings;
+	mSettings = 0;
+	delete mDataProcessor;
+	mDataProcessor = 0;
+	delete mPvDataProcessor;
+	mPvDataProcessor = 0;
+	mTimeoutCount = MaxTimeoutCount;
+	mAcSensor->setSerial(QString());
+	mAcSensor->resetValues();
+	mAcSensor->setConnectionState(Disconnected);
+	mAcPvSensor->setSerial(QString());
+	mAcPvSensor->resetValues();
+	mAcPvSensor->setConnectionState(Disconnected);
 }
 
 void AcSensorUpdater::readRegisters(quint16 startReg, quint16 count)

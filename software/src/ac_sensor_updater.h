@@ -90,6 +90,8 @@ private:
 
 	void startNextAcquisition();
 
+	void disconnectSensor();
+
 	void readRegisters(quint16 startReg, quint16 count);
 
 	void writeRegister(quint16 reg, quint16 value);
