@@ -9,7 +9,8 @@ DataProcessor::DataProcessor(AcSensor *acSensor,
 							 AcSensorSettings *settings, QObject *parent) :
 	QObject(parent),
 	mAcSensor(acSensor),
-	mSettings(settings)
+	mSettings(settings),
+	mStoreReverseEnergy(false)
 {
 	Q_ASSERT(acSensor != 0);
 	Q_ASSERT(settings != 0);
@@ -49,6 +50,7 @@ void DataProcessor::setPositiveEnergy(Phase phase, double value)
 
 void DataProcessor::setNegativeEnergy(double sum)
 {
+	mStoreReverseEnergy = true;
 	double e1 = getReverseEnergy(PhaseL1);
 	if (!qIsFinite(e1)) {
 		setInitialEnergy(PhaseL1, sum / 3);
@@ -79,6 +81,8 @@ void DataProcessor::setNegativeEnergy(Phase phase, double value)
 
 void DataProcessor::updateEnergySettings()
 {
+	if (!mStoreReverseEnergy)
+		return;
 	updateEnergySettings(PhaseL1);
 	updateEnergySettings(PhaseL2);
 	updateEnergySettings(PhaseL3);

@@ -91,9 +91,10 @@ static const CompositeCommand Em24CommandsP1PV[] = {
 static const int Em24CommandsP1PVCount = sizeof(Em24CommandsP1PV) / sizeof(Em24CommandsP1PV[0]);
 
 static const CompositeCommand Em112Commands[] = {
-	{ 0x0000, 0, { { 0, Voltage, MultiPhase }, { 2, Current, MultiPhase }, { 4, Power, MultiPhase } } },
-	{ 0x0010, 3, { { 0, PositiveEnergy, MultiPhase } } },
-	{ 0x0020, 6, { { 0, NegativeEnergy, MultiPhase } } }
+	{ 0x0004, 0, { { 0, Power, MultiPhase } } },
+	{ 0x0000, 4, { { 0, Voltage, MultiPhase }, { 2, Current, MultiPhase } } },
+	{ 0x0010, 8, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x0020, 12, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
 };
 
 static const int Em112CommandCount = sizeof(Em112Commands) / sizeof(Em112Commands[0]);
@@ -106,10 +107,32 @@ static const CompositeCommand Em340Commands[] = {
 	{ 0x000C, 4, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 } } },
 	{ 0x0034, 5, { { 0, PositiveEnergy, MultiPhase } } },
 	{ 0x0040, 6, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 } } },
-	{ 0x004E, 7, { { 0, NegativeEnergy, MultiPhase } } }
+	{ 0x004E, 7, { { 0, NegativeEnergy, MultiPhase } } },
+	{ 0x0060, 8, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 }, { 4, NegativeEnergy, PhaseL3 } } },
 };
 
 static const int Em340CommandCount = sizeof(Em340Commands) / sizeof(Em340Commands[0]);
+
+static const CompositeCommand Em340P1Commands[] = {
+	{ 0x0012, 0, { { 0, Power, MultiPhase } } },
+	{ 0x0000, 1, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x000C, 3, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x0040, 5, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x0060, 7, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+};
+
+static const int Em340P1CommandCount = sizeof(Em340P1Commands) / sizeof(Em340P1Commands[0]);
+
+static const CompositeCommand Em340CommandsP1PV[] = {
+	{ 0x0012, 0, { { 0, Power, PhaseL1 } } },
+	{ 0x0014, 2, { { 0, Power, PhaseL2 }, { 1, Dummy, MultiPhase } } },
+	{ 0x0000, 4, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 } } },
+	{ 0x000C, 6, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 } } },
+	{ 0x0040, 8, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 } } },
+	{ 0x0060, 10, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 } } }
+};
+
+static const int Em340CommandsP1PVCount = sizeof(Em340CommandsP1PV) / sizeof(Em340CommandsP1PV[0]);
 
 int getMaxOffset(const CompositeCommand &cmd) {
 	int maxOffset = 0;
@@ -197,8 +220,11 @@ void AcSensorUpdater::startMeasurements()
 	case AcSensor::Et112Protocol:
 		mState = CheckMeasurementMode;
 		break;
-	default:
+	case AcSensor::Em340Protocol:
 		mState = Acquisition;
+		break;
+	case AcSensor::Unknown:
+		Q_ASSERT(false);
 		break;
 	}
 	startNextAction();
@@ -244,7 +270,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 			mState = VersionCode;
 			break;
 		case AcSensor::Et112Protocol:
-			mSetCurrentSign = true;
+			mSetCurrentSign = false;
 			mState = Serial;
 			break;
 		case AcSensor::Em340Protocol:
@@ -254,7 +280,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 		case AcSensor::Unknown:
 			QLOG_WARN() << "Unknown device ID, disconnecting";
 			disconnectSensor();
-			break;
+			return;
 		}
 		break;
 	case VersionCode:
@@ -430,11 +456,10 @@ void AcSensorUpdater::startNextAction()
 {
 	if (mSetupRequested) {
 		mSetupRequested = false;
-		if (mAcSensor->protocolType() == AcSensor::Em24Protocol) {
-			mAcSensor->resetValues();
-			mAcPvSensor->resetValues();
+		mAcSensor->resetValues();
+		mAcPvSensor->resetValues();
+		if (mAcSensor->protocolType() == AcSensor::Em24Protocol)
 			mState = CheckSetup;
-		}
 	}
 	switch (mState) {
 	case DeviceId:
@@ -512,8 +537,19 @@ void AcSensorUpdater::startNextAction()
 			mCommandCount = Em112CommandCount;
 			break;
 		case AcSensor::Em340Protocol:
-			mCommands = Em340Commands;
-			mCommandCount = Em340CommandCount;
+			if (mSettings->isMultiPhase()) {
+				mCommands = Em340Commands;
+				mCommandCount = Em340CommandCount;
+			} else if (!mSettings->l2ServiceType().isEmpty()) {
+				mCommands = Em340CommandsP1PV;
+				mCommandCount = Em340CommandsP1PVCount;
+			} else {
+				mCommands = Em340P1Commands;
+				mCommandCount = Em340P1CommandCount;
+			}
+			break;
+		case AcSensor::Unknown:
+			Q_ASSERT(false);
 			break;
 		}
 		startNextAcquisition();
@@ -664,11 +700,13 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 				// ET112 seems to return negative values for kWh(-), unlike the
 				// other meters.
 				v = qAbs(getDouble(registers, ra.regOffset, 2, 0.1));
-				if (mSettings->isMultiPhase()) {
+				if (mAcSensor->protocolType() == AcSensor::Em24Protocol &&
+					mSettings->isMultiPhase()) {
 					dest->setNegativeEnergy(v);
 				} else {
-					dest->setNegativeEnergy(MultiPhase, v);
-					dest->setNegativeEnergy(PhaseL1, v);
+					dest->setNegativeEnergy(ra.phase, v);
+					if (setPhaseL1)
+						dest->setNegativeEnergy(PhaseL1, v);
 				}
 				break;
 			default:

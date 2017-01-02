@@ -45,6 +45,7 @@ private:
 	AcSensor *mAcSensor;
 	AcSensorSettings *mSettings;
 	double mNegativePower[4];
+	bool mStoreReverseEnergy;
 };
 
 #endif // DATA_PROCESSOR_H

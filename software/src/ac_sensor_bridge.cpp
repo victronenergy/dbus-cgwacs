@@ -41,8 +41,22 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	produce("/Mgmt/ProcessName", processName);
 	produce("/Mgmt/ProcessVersion", QCoreApplication::applicationVersion());
 	produce("/FirmwareVersion", acSensor->firmwareVersion());
-	produce("/ProductId", isSecundary ? VE_PROD_ID_CARLO_GAVAZZI_PIGGY_BACK :
-										VE_PROD_ID_CARLO_GAVAZZI_EM);
+	int productId = 0;
+	switch (acSensor->protocolType()) {
+	case AcSensor::Em24Protocol:
+		productId = isSecundary ? VE_PROD_ID_CARLO_GAVAZZI_PIGGY_BACK : VE_PROD_ID_CARLO_GAVAZZI_EM24;
+		break;
+	case AcSensor::Et112Protocol:
+		productId = VE_PROD_ID_CARLO_GAVAZZI_ET112;
+		break;
+	case AcSensor::Em340Protocol:
+		productId = VE_PROD_ID_CARLO_GAVAZZI_ET340;
+		break;
+	default:
+		Q_ASSERT(false);
+		break;
+	}
+	produce("/ProductId", productId);
 	produce("/DeviceType", acSensor->deviceType());
 	produce("/Mgmt/Connection", acSensor->portName());
 
