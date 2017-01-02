@@ -85,7 +85,7 @@ static const CompositeCommand Em24CommandsP1PV[] = {
 	// we assume that in case of a shared system L1 is a grid meter and L2 a
 	// PV inverter (which always has ReverseEnergy=0 because power and current
 	// are always positive).
-	{ 0x005C, 5, { { 0, NegativeEnergy, PhaseL1 }, { 1, Dummy, MultiPhase } } }
+	{ 0x005C, 10, { { 0, NegativeEnergy, PhaseL1 }, { 1, Dummy, MultiPhase } } }
 };
 
 static const int Em24CommandsP1PVCount = sizeof(Em24CommandsP1PV) / sizeof(Em24CommandsP1PV[0]);
