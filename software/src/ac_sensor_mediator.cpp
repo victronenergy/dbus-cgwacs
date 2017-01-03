@@ -54,6 +54,7 @@ void AcSensorMediator::onDeviceFound()
 	connect(b, SIGNAL(initialized()),
 			this, SLOT(onDeviceSettingsInitialized()));
 	registerDevice(m->serial());
+	b->updateIsInitialized();
 }
 
 void AcSensorMediator::onDeviceSettingsInitialized()
