@@ -61,10 +61,6 @@ void AcSensorMediator::onDeviceSettingsInitialized()
 {
 	AcSensorSettingsBridge *b = static_cast<AcSensorSettingsBridge *>(sender());
 	AcSensorSettings *s = static_cast<AcSensorSettings *>(b->parent());
-	if (s->deviceInstance() == -1)
-		s->setDeviceInstance(getDeviceInstance(s->serial(), false));
-	if (s->l2DeviceInstance() == -1)
-		s->setL2DeviceInstance(getDeviceInstance(s->serial(), true));
 	AcSensor *m = static_cast<AcSensor *>(s->parent());
 	AcSensorUpdater *mu = m->findChild<AcSensorUpdater *>();
 	mu->startMeasurements();
@@ -132,6 +128,10 @@ void AcSensorMediator::onServiceTypeChanged()
 void AcSensorMediator::publishSensor(AcSensor *acSensor, AcSensor *pvSensor,
 									 AcSensorSettings *acSensorSettings)
 {
+	if (acSensorSettings->deviceInstance() == -1)
+		acSensorSettings->setDeviceInstance(getDeviceInstance(acSensorSettings->serial(), false));
+	if (acSensorSettings->l2DeviceInstance() == -1)
+		acSensorSettings->setL2DeviceInstance(getDeviceInstance(acSensorSettings->serial(), true));
 	new AcSensorBridge(acSensor, acSensorSettings, false, acSensor);
 	if (!acSensorSettings->l2ServiceType().isEmpty())
 		new AcSensorBridge(pvSensor, acSensorSettings, true, pvSensor);
