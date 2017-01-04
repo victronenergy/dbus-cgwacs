@@ -123,8 +123,7 @@ void AcSensorMediator::onServiceTypeChanged()
 	delete bridge;
 	AcSensorUpdater *updater = acSensor->findChild<AcSensorUpdater *>();
 	AcSensor *pvSensor = updater->pvSensor();
-	// Just in case pvInverterOnPhase2 was set, in which case we have to bridge
-	// objects.
+	// Just in case pvInverterOnPhase2 was set, in which case we have two bridge objects.
 	delete pvSensor->findChild<AcSensorBridge *>();
 	publishSensor(acSensor, pvSensor, sensorSettings);
 }

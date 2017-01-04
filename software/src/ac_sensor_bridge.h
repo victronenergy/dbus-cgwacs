@@ -11,7 +11,7 @@ class AcSensorPhase;
  * @brief Connects data from `AcSensor` to the DBus.
  * This class creates and fills the com.victronenergy.xxx.yyy service.
  * Where xxx is grid, pvinverter or shore depending on the `AcSensorSettings`,
- * and yyy is the communication port (eg /dev/ttyUSB0).
+ * and yyy is appended to make the service name unique.
  */
 class AcSensorBridge : public DBusBridge
 {
