@@ -42,7 +42,7 @@ struct RegisterCommand {
 
 struct CompositeCommand {
 	int reg;
-	int inverval;
+	int interval;
 	RegisterCommand actions[MaxRegCount];
 };
 
@@ -551,7 +551,7 @@ void AcSensorUpdater::startNextAcquisition()
 	for (;;) {
 		if (mCommandIndex < mCommandCount)
 			cmd = &mCommands[mCommandIndex];
-		if (cmd !=0 && (cmd->inverval == 0 || mAcquisitionIndex == cmd->inverval)) {
+		if (cmd !=0 && (cmd->interval == 0 || mAcquisitionIndex == cmd->interval)) {
 			break;
 		} else {
 			++mCommandIndex;
