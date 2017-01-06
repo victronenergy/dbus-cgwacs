@@ -2,7 +2,7 @@ dbus-cgwacs
 ===========
 
 Reads energy measuremens from Carlo Gavazzi Wired AC Sensors (hence cgwacs),
-and puts in on the D-Bus. At this point only the EM24 model is supported.
+and puts in on the D-Bus. Supported models: EM24, ET112, and ET340.
 
 Architecture
 ============
