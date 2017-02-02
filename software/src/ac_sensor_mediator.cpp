@@ -18,7 +18,7 @@ AcSensorMediator::AcSensorMediator(const QString &portName, bool isZigbee, VeQIt
 	mDeviceIdsItem(settingsRoot->itemGetOrCreate(DeviceIdsPath))
 {
 	DBusBridge settingsBridge(settingsRoot, false);
-	settingsBridge.addSetting(DeviceIdsPath, "", 0, 0);
+	settingsBridge.addSetting(DeviceIdsPath, "", 0, 0, false);
 
 	/// @todo EV We assume that this setting is initialized before an AC sensor has been found
 	mDeviceIdsItem->getValue();
