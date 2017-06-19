@@ -1,4 +1,4 @@
-#include <QMutexLocker>
+#include <QSocketNotifier>
 #include <QTimer>
 #include <unistd.h>
 #include "defines.h"
@@ -6,19 +6,21 @@
 
 ModbusRtu::ModbusRtu(const QString &portName, int baudrate, int timeout, QObject *parent):
 	QObject(parent),
-	mPortName(portName.toLatin1()),
+	mSerialPort(veSerialAllocate(portName.toLatin1().data())),
 	mTimer(new QTimer(this)),
 	mCurrentSlave(0)
 {
-	memset(&mSerialPort, 0, sizeof(mSerialPort));
-	// The pointer returned by mPortName.data() will remain valid as long as
-	// mPortName exists and is not changed.
-	mSerialPort.dev = mPortName.data();
-	mSerialPort.baudrate = static_cast<un32>(baudrate);
-	mSerialPort.intLevel = 2;
-	mSerialPort.rxCallback = onDataRead;
-	mSerialPort.eventCallback = onSerialEvent;
-	veSerialOpen(&mSerialPort, this);
+	veSerialSetBaud(mSerialPort, static_cast<un32>(baudrate));
+	veSerialSetKind(mSerialPort, 0); // Requires external event pump
+	veSerialOpen(mSerialPort, 0);
+
+	QSocketNotifier *readNotifier =
+		new QSocketNotifier(mSerialPort->fh, QSocketNotifier::Read, this);
+	connect(readNotifier, SIGNAL(activated(int)), this, SLOT(onReadyRead()));
+
+	QSocketNotifier *errorNotifier =
+		new QSocketNotifier(mSerialPort->fh, QSocketNotifier::Exception, this);
+	connect(errorNotifier, SIGNAL(activated(int)), this, SLOT(onError()));
 
 	mData.reserve(16);
 
@@ -29,13 +31,13 @@ ModbusRtu::ModbusRtu(const QString &portName, int baudrate, int timeout, QObject
 
 ModbusRtu::~ModbusRtu()
 {
-	veSerialClose(&mSerialPort);
+	veSerialClose(mSerialPort);
+	VeSerialPortFree(mSerialPort);
 }
 
-void ModbusRtu::readRegisters(FunctionCode function, quint8 slaveAddress,
-							  quint16 startReg, quint16 count)
+void ModbusRtu::readRegisters(FunctionCode function, quint8 slaveAddress, quint16 startReg,
+							  quint16 count)
 {
-	QMutexLocker lock(&mMutex);
 	if (mState == Idle) {
 		_readRegisters(function, slaveAddress, startReg, count);
 	} else {
@@ -48,10 +50,9 @@ void ModbusRtu::readRegisters(FunctionCode function, quint8 slaveAddress,
 	}
 }
 
-void ModbusRtu::writeRegister(FunctionCode function, quint8 slaveAddress,
-							  quint16 reg, quint16 value)
+void ModbusRtu::writeRegister(FunctionCode function, quint8 slaveAddress, quint16 reg,
+							  quint16 value)
 {
-	QMutexLocker lock(&mMutex);
 	if (mState == Idle) {
 		_writeRegister(function, slaveAddress, reg, value);
 	} else {
@@ -66,45 +67,29 @@ void ModbusRtu::writeRegister(FunctionCode function, quint8 slaveAddress,
 
 void ModbusRtu::onTimeout()
 {
-	QMutexLocker lock(&mMutex);
-	if (mState == Idle || mState == Process)
+	if (mState == Idle)
 		return;
-	quint8 cs = mCurrentSlave;
+	emit errorReceived(Timeout, mCurrentSlave, 0);
 	resetStateEngine();
 	processPending();
-	mMutex.unlockInline();
-	emit errorReceived(Timeout, cs, 0);
 }
 
 void ModbusRtu::processPacket()
 {
-	QMutexLocker lock(&mMutex);
-	quint8 cs = mCurrentSlave;
 	if (mCrc != mCrcBuilder.getValue()) {
-		resetStateEngine();
-		processPending();
-		mMutex.unlockInline();
-		emit errorReceived(CrcError, cs, 0);
+		emit errorReceived(CrcError, mCurrentSlave, 0);
 		return;
 	}
 	if ((mFunction & 0x80) != 0) {
 		quint8 errorCode = static_cast<quint8>(mData[0]);
-		resetStateEngine();
-		processPending();
-		mMutex.unlockInline();
-		emit errorReceived(Exception, cs, errorCode);
+		emit errorReceived(Exception, mCurrentSlave, errorCode);
 		return;
 	}
 	if (mState == Function) {
-		FunctionCode function = mFunction;
-		resetStateEngine();
-		processPending();
-		mMutex.unlockInline();
-		emit errorReceived(Unsupported, cs, function);
+		emit errorReceived(Unsupported, mCurrentSlave, mFunction);
 		return;
 	}
-	FunctionCode function = mFunction;
-	switch (function) {
+	switch (mFunction) {
 	case ReadHoldingRegisters:
 	case ReadInputRegisters:
 	{
@@ -112,25 +97,45 @@ void ModbusRtu::processPacket()
 		for (int i=0; i<mData.length(); i+=2) {
 			registers.append(toUInt16(mData, i));
 		}
-		resetStateEngine();
-		processPending();
-		mMutex.unlockInline();
-		emit readCompleted(function, cs, registers);
+		emit readCompleted(mFunction, mCurrentSlave, registers);
 		return;
 	}
 	case WriteSingleRegister:
 	{
 		quint16 value = toUInt16(mData, 0);
-		quint16 startAddress = mStartAddress;
-		resetStateEngine();
-		processPending();
-		mMutex.unlockInline();
-		emit writeCompleted(function, cs, startAddress, value);
+		emit writeCompleted(mFunction, mCurrentSlave, mStartAddress, value);
 		return;
 	}
 	default:
 		break;
 	}
+}
+
+void ModbusRtu::onReadyRead()
+{
+	quint8 buf[64];
+	bool first = true;
+	for (;;) {
+		ssize_t len = read(mSerialPort->fh, buf, sizeof(buf));
+		if (len < 0) {
+			emit serialEvent("serial read failure");
+			return;
+		}
+		if (first && len == 0) {
+			emit serialEvent("Ready for reading but read 0 bytes. Device removed?");
+			return;
+		}
+		for (ssize_t i = 0; i<len; ++i)
+			handleByteRead(buf[i]);
+		if (len < static_cast<int>(sizeof(buf)))
+			break;
+		first = false;
+	}
+}
+
+void ModbusRtu::onError()
+{
+	emit serialEvent("Serial error");
 }
 
 void ModbusRtu::handleByteRead(quint8 b)
@@ -139,7 +144,6 @@ void ModbusRtu::handleByteRead(quint8 b)
 		mCrcBuilder.add(b);
 	switch (mState) {
 	case Idle:
-	case Process:
 		// We received data when we were not expecting any. Ignore the data.
 		break;
 	case Address:
@@ -201,8 +205,9 @@ void ModbusRtu::handleByteRead(quint8 b)
 		break;
 	case CrcLsb:
 		mCrc |= b;
-		mState = Process;
-		QMetaObject::invokeMethod(this, "processPacket");
+		processPacket();
+		resetStateEngine();
+		processPending();
 		break;
 	}
 }
@@ -236,9 +241,8 @@ void ModbusRtu::processPending()
 	mPendingCommands.removeFirst();
 }
 
-void ModbusRtu::_readRegisters(ModbusRtu::FunctionCode function,
-							   quint8 slaveAddress, quint16 startReg,
-							   quint16 count)
+void ModbusRtu::_readRegisters(ModbusRtu::FunctionCode function, quint8 slaveAddress,
+							   quint16 startReg, quint16 count)
 {
 	Q_ASSERT(mState == Idle);
 	QByteArray frame;
@@ -252,8 +256,8 @@ void ModbusRtu::_readRegisters(ModbusRtu::FunctionCode function,
 	send(frame);
 }
 
-void ModbusRtu::_writeRegister(ModbusRtu::FunctionCode function,
-							   quint8 slaveAddress, quint16 reg, quint16 value)
+void ModbusRtu::_writeRegister(ModbusRtu::FunctionCode function, quint8 slaveAddress, quint16 reg,
+							   quint16 value)
 {
 	Q_ASSERT(mState == Idle);
 	QByteArray frame;
@@ -281,27 +285,10 @@ void ModbusRtu::send(QByteArray &data)
 	// Then number of bits devided by the the baudrate (unit: bits/second) gives
 	// us the time in seconds. usleep wants time in microseconds, so we have to
 	// multiply by 1 million.
-	usleep((4 * 10 * 1000 * 1000) / mSerialPort.baudrate);
-	veSerialPutBuf(&mSerialPort, reinterpret_cast<un8 *>(data.data()),
+	usleep((4 * 10 * 1000 * 1000) / mSerialPort->baudrate);
+	veSerialPutBuf(mSerialPort, reinterpret_cast<un8 *>(data.data()),
 				   static_cast<un32>(data.size()));
 	mTimer->start();
 	mState = Address;
 	mCurrentSlave = static_cast<quint8>(data[0]);
-}
-
-void ModbusRtu::onDataRead(VeSerialPortS *port, const quint8 *buffer,
-						   quint32 length)
-{
-	ModbusRtu *rtu = reinterpret_cast<ModbusRtu *>(port->ctx);
-	QMutexLocker lock(&rtu->mMutex);
-	for (quint32 i=0; i<length; ++i)
-		rtu->handleByteRead(buffer[i]);
-}
-
-void ModbusRtu::onSerialEvent(VeSerialPortS *port, VeSerialEvent event,
-							  const char *desc)
-{
-	Q_UNUSED(event);
-	ModbusRtu *rtu = reinterpret_cast<ModbusRtu *>(port->ctx);
-	emit rtu->serialEvent(desc);
 }

@@ -92,6 +92,10 @@ private slots:
 
 	void processPacket();
 
+	void onReadyRead();
+
+	void onError();
+
 private:
 	void handleByteRead(quint8 b);
 
@@ -107,12 +111,6 @@ private:
 
 	void send(QByteArray &data);
 
-	static void onDataRead(struct VeSerialPortS *port, const quint8 *buffer,
-						   quint32 length);
-
-	static void onSerialEvent(struct VeSerialPortS *port, VeSerialEvent event,
-							  char const *desc);
-
 	enum ReadState {
 		Idle,
 		Address,
@@ -122,14 +120,11 @@ private:
 		StartAddressLsb,
 		Data,
 		CrcMsb,
-		CrcLsb,
-		Process
+		CrcLsb
 	};
 
-	VeSerialPort mSerialPort;
-	QByteArray mPortName;
+	VeSerialPort *mSerialPort;
 	QTimer *mTimer;
-	QMutex mMutex;
 	struct Cmd {
 		ModbusRtu::FunctionCode function;
 		quint8 slaveAddress;
