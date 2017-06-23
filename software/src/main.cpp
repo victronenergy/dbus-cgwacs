@@ -133,6 +133,7 @@ int main(int argc, char *argv[])
 	AcSensorMediator m(portName, isZigbee, settingsRoot);
 
 	app.connect(&m, SIGNAL(connectionLost()), &app, SLOT(quit()));
+	app.connect(&m, SIGNAL(serialEvent(const char *)), &app, SLOT(quit()));
 
 	return app.exec();
 }
