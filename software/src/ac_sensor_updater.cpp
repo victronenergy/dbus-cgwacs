@@ -598,6 +598,7 @@ void AcSensorUpdater::startNextAcquisition()
 				if (mAcquisitionIndex == MaxAcquisitionIndex) {
 					mAcquisitionIndex = 0;
 					mAcSensor->setConnectionState(Connected);
+					mAcPvSensor->setConnectionState(Connected);
 				}
 				startNextAction();
 				return;
