@@ -11,6 +11,10 @@
 static const int MeasurementSystemP1 = 3; // single phase
 static const int MeasurementSystemP3 = 0; // 3 phase
 
+// measurement mode used for ET1xx/ET3xx meters. Mode B means that feed back to grid yields
+// negative power readings.
+static const int MeasurementModeB = 1;
+
 static const int ApplicationH = 7; // show negative power
 static const int MaxAcquisitionIndex = 16;
 static const int MaxRegCount = 5;
@@ -218,10 +222,9 @@ void AcSensorUpdater::startMeasurements()
 		mState = CheckSetup;
 		break;
 	case AcSensor::Et112Protocol:
-		mState = CheckMeasurementMode;
-		break;
+		// Fall through
 	case AcSensor::Em340Protocol:
-		mState = Acquisition;
+		mState = CheckMeasurementMode;
 		break;
 	case AcSensor::Unknown:
 		Q_ASSERT(false);
@@ -355,7 +358,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 		break;
 	case CheckMeasurementMode:
 		Q_ASSERT(registers.size() == 1);
-		mState = registers[0] == 0x01 ? Acquisition : SetMeasurementMode;
+		mState = registers[0] == MeasurementModeB ? Acquisition : SetMeasurementMode;
 		break;
 	case Acquisition:
 		processAcquisitionData(registers);
@@ -500,10 +503,10 @@ void AcSensorUpdater::startNextAction()
 		readRegisters(RegEm112MeasurementMode, 1);
 		break;
 	case SetMeasurementMode:
-		QLOG_INFO() << "Set EM1xx measurement mode";
-		// This will cause the EM112 range to report negative power values when
+		QLOG_INFO() << "Set EM1xx/EM3xx measurement mode";
+		// This will cause the EM1xx/EM3xx range to report negative power values when
 		// sending power to the grid.
-		writeRegister(RegEm112MeasurementMode, 0x01);
+		writeRegister(RegEm112MeasurementMode, MeasurementModeB);
 		break;
 	case WaitForStart:
 		Q_ASSERT(mSettings == 0);
