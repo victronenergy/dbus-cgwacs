@@ -121,7 +121,6 @@ int main(int argc, char *argv[])
 	producer.open(dbusAddress);
 
 	BridgeItemProducer dbusExportProducer(VeQItems::getRoot(), "pub");
-	dbusExportProducer.open();
 	VeQItemDbusPublisher publisher(dbusExportProducer.services());
 	publisher.open(dbusAddress);
 

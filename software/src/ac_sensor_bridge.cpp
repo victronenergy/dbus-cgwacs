@@ -44,13 +44,17 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	int productId = 0;
 	switch (acSensor->protocolType()) {
 	case AcSensor::Em24Protocol:
-		productId = isSecundary ? VE_PROD_ID_CARLO_GAVAZZI_PIGGY_BACK : VE_PROD_ID_CARLO_GAVAZZI_EM24;
+		productId = isSecundary ?
+			VE_PROD_ID_CARLO_GAVAZZI_EM24_PIGGY_BACK :
+			VE_PROD_ID_CARLO_GAVAZZI_EM24;
 		break;
 	case AcSensor::Et112Protocol:
 		productId = VE_PROD_ID_CARLO_GAVAZZI_ET112;
 		break;
 	case AcSensor::Em340Protocol:
-		productId = VE_PROD_ID_CARLO_GAVAZZI_ET340;
+		productId = isSecundary ?
+			VE_PROD_ID_CARLO_GAVAZZI_ET340_PIGGY_BACK :
+			VE_PROD_ID_CARLO_GAVAZZI_ET340;
 		break;
 	default:
 		Q_ASSERT(false);
