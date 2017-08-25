@@ -111,6 +111,7 @@ private:
 		CheckFrontSelector,
 		WaitFrontSelector,
 		SetApplication,
+		CheckMeasurementSystem,
 		SetMeasuringSystem,
 		CheckMeasurementMode,
 		SetMeasurementMode,
@@ -123,6 +124,7 @@ private:
 
 	enum Registers {
 		RegDeviceId = 0x000B,
+		RegEm340MeasurementSystem = 0x1002,
 		RegApplication = 0x1101,
 		RegMeasurementSystem = 0x1102,
 		RegEm112MeasurementMode = 0x1103,

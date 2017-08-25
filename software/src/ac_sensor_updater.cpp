@@ -8,14 +8,15 @@
 #include "modbus_rtu.h"
 #include "ac_sensor_phase.h"
 
-static const int MeasurementSystemP1 = 3; // single phase
-static const int MeasurementSystemP3 = 0; // 3 phase
+static const int MeasurementSystemP1 = 3; // single phase (1P)
+static const int MeasurementSystemP2 = 2; // 2 phase (2P)
+static const int MeasurementSystemP3 = 0; // 3 phase (3Pn)
 
 // measurement mode used for ET1xx/ET3xx meters. Mode B means that feed back to grid yields
 // negative power readings.
 static const int MeasurementModeB = 1;
 
-static const int ApplicationH = 7; // show negative power
+static const int ApplicationH = 7; // show negative power (EM24)
 static const int MaxAcquisitionIndex = 16;
 static const int MaxRegCount = 5;
 static const int MaxTimeoutCount = 5;
@@ -323,9 +324,11 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 	case CheckSetup:
 		Q_ASSERT(registers.size() == 2);
 		mApplication = registers[0];
-		mDesiredMeasuringSystem =
-			mSettings->isMultiPhase() || !mSettings->l2ServiceType().isEmpty() ?
-			MeasurementSystemP3 : MeasurementSystemP1;
+		mDesiredMeasuringSystem = mSettings->isMultiPhase() ?
+			MeasurementSystemP3 : (
+			mSettings->l2ServiceType().isEmpty() ?
+				MeasurementSystemP1:
+				MeasurementSystemP2);
 		mMeasuringSystem = registers[1];
 		mState = mApplication == ApplicationH &&
 				 mMeasuringSystem == mDesiredMeasuringSystem ?
@@ -358,7 +361,22 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 		break;
 	case CheckMeasurementMode:
 		Q_ASSERT(registers.size() == 1);
-		mState = registers[0] == MeasurementModeB ? Acquisition : SetMeasurementMode;
+		if (registers[0] == MeasurementModeB) {
+			mState = mAcSensor->protocolType() == AcSensor::Em340Protocol ?
+				CheckMeasurementSystem :
+				Acquisition;
+		} else {
+			mState = SetMeasurementMode;
+		}
+		break;
+	case CheckMeasurementSystem:
+		Q_ASSERT(registers.size() == 1);
+		Q_ASSERT(mAcSensor->protocolType() == AcSensor::Em340Protocol);
+		// Caution: EM3xx meters do not support MeasurementSystemP1
+		// Changing the measurement system also resets the kWh counters.
+		mDesiredMeasuringSystem = mSettings->isMultiPhase() || mSettings->l2ServiceType().isEmpty() ?
+			MeasurementSystemP3 : MeasurementSystemP2;
+		mState = mDesiredMeasuringSystem == registers[0] ? Acquisition : SetMeasuringSystem;
 		break;
 	case Acquisition:
 		processAcquisitionData(registers);
@@ -390,7 +408,7 @@ void AcSensorUpdater::onWriteCompleted(int function, quint8 addr,
 		Q_ASSERT(address == RegApplication);
 		Q_ASSERT(value == ApplicationH);
 		mState = mMeasuringSystem == mDesiredMeasuringSystem ?
-					 Acquisition : SetMeasuringSystem;
+			Acquisition : SetMeasuringSystem;
 		break;
 	case SetMeasuringSystem:
 		Q_ASSERT(function == ModbusRtu::WriteSingleRegister);
@@ -399,7 +417,9 @@ void AcSensorUpdater::onWriteCompleted(int function, quint8 addr,
 		mState = Acquisition;
 		break;
 	case SetMeasurementMode:
-		mState = Acquisition;
+		mState = mAcSensor->protocolType() == AcSensor::Em340Protocol ?
+			CheckMeasurementSystem :
+			Acquisition;
 		break;
 	case SetAddress:
 		QLOG_WARN() << "Slave Address Changed";
@@ -461,8 +481,16 @@ void AcSensorUpdater::startNextAction()
 		mSetupRequested = false;
 		mAcSensor->resetValues();
 		mAcPvSensor->resetValues();
-		if (mAcSensor->protocolType() == AcSensor::Em24Protocol)
+		switch (mAcSensor->protocolType()) {
+		case AcSensor::Em24Protocol:
 			mState = CheckSetup;
+			break;
+		case AcSensor::Em340Protocol:
+			mState = CheckMeasurementMode;
+			break;
+		default:
+			break;
+		}
 	}
 	switch (mState) {
 	case DeviceId:
@@ -476,7 +504,7 @@ void AcSensorUpdater::startNextAction()
 		if (mAcSensor->protocolType() == AcSensor::Em24Protocol) {
 			readRegisters(RegEm24Serial, 7);
 		} else {
-			// Also works for EM300
+			// Also works for EM3xx
 			readRegisters(RegEm112Serial, 7);
 		}
 		break;
@@ -494,16 +522,29 @@ void AcSensorUpdater::startNextAction()
 		mAcquisitionTimer->start();
 		break;
 	case SetApplication:
+		QLOG_INFO() << "Change application to application H";
 		writeRegister(RegApplication, ApplicationH);
 		break;
 	case SetMeasuringSystem:
-		writeRegister(RegMeasurementSystem, mDesiredMeasuringSystem);
+		QLOG_INFO() << "Change measuring system to:" << mDesiredMeasuringSystem;
+		writeRegister(
+			mAcSensor->protocolType() == AcSensor::Em24Protocol ?
+				RegMeasurementSystem :
+				RegEm340MeasurementSystem,
+			mDesiredMeasuringSystem);
 		break;
 	case CheckMeasurementMode:
 		readRegisters(RegEm112MeasurementMode, 1);
 		break;
+	case CheckMeasurementSystem:
+		readRegisters(
+			mAcSensor->protocolType() == AcSensor::Em24Protocol ?
+				RegMeasurementSystem :
+				RegEm340MeasurementSystem,
+			1);
+		break;
 	case SetMeasurementMode:
-		QLOG_INFO() << "Set EM1xx/EM3xx measurement mode";
+		QLOG_INFO() << "Set EM1xx/EM3xx measurement mode to B";
 		// This will cause the EM1xx/EM3xx range to report negative power values when
 		// sending power to the grid.
 		writeRegister(RegEm112MeasurementMode, MeasurementModeB);
@@ -518,7 +559,7 @@ void AcSensorUpdater::startNextAction()
 		connect(mSettings, SIGNAL(isMultiPhaseChanged()),
 				this, SLOT(onIsMultiPhaseChanged()));
 		connect(mSettings, SIGNAL(l2ServiceTypeChanged()),
-				this, SLOT(onIsMultiPhaseChanged()));
+				this, SLOT(onL2ServiceTypeChanged()));
 		mAcSensor->setConnectionState(Detected);
 		break;
 	case Acquisition:
@@ -574,6 +615,7 @@ void AcSensorUpdater::startNextAction()
 		mAcquisitionTimer->start();
 		break;
 	case SetAddress:
+		QLOG_INFO() << "Set modbuss address to 2";
 		writeRegister(0x2000, 2);
 		break;
 	default:
