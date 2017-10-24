@@ -324,11 +324,9 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 	case CheckSetup:
 		Q_ASSERT(registers.size() == 2);
 		mApplication = registers[0];
-		mDesiredMeasuringSystem = mSettings->isMultiPhase() ?
-			MeasurementSystemP3 : (
-			mSettings->l2ServiceType().isEmpty() ?
-				MeasurementSystemP1:
-				MeasurementSystemP2);
+		mDesiredMeasuringSystem =
+			mSettings->isMultiPhase() || !mSettings->l2ServiceType().isEmpty() ?
+			MeasurementSystemP3 : MeasurementSystemP1;
 		mMeasuringSystem = registers[1];
 		mState = mApplication == ApplicationH &&
 				 mMeasuringSystem == mDesiredMeasuringSystem ?
