@@ -18,8 +18,8 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 
 	bool isGridmeter =
 		(isSecundary ? settings->l2ServiceType() : settings->serviceType()) == "grid";
-	// Changes in QT properties will not be propagated to the D-Bus at once, but in 1000ms
-	// invervals.
+	// Changes in QT properties will not be propagated to the D-Bus at once, but in 1000ms/2500ms
+	// intervals.
 	setUpdateInterval(isGridmeter ? 1000 : 2500);
 
 	produce(acSensor, "connectionState", "/Connected");
@@ -33,7 +33,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	if (isSecundary || settings->serviceType() == "pvinverter")
 		produce(settings, isSecundary ? "l2Position" : "position", "/Position");
 	produce(settings, isSecundary ? "l2ProductName" : "productName", "/ProductName");
-	produce(settings, isSecundary ? "l2EffectiveCustomName" : "effectiveCustomName", "/CustomName");
+	produce(settings, isSecundary ? "l2CustomName" : "customName", "/CustomName");
 
 	QString processName = QCoreApplication::applicationName();
 	// The values of the items below will not change after creation, so we don't

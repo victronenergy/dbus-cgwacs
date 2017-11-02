@@ -23,24 +23,11 @@ void AcSensorSettings::setCustomName(const QString &n)
 		return;
 	mCustomName	= n;
 	emit customNameChanged();
-	emit effectiveCustomNameChanged();
 }
 
 QString AcSensorSettings::productName() const
 {
 	return getProductName(mServiceType, mPosition);
-}
-
-QString AcSensorSettings::effectiveCustomName() const
-{
-	if (!mCustomName.isEmpty())
-		return mCustomName;
-	return productName();
-}
-
-void AcSensorSettings::setEffectiveCustomName(const QString &n)
-{
-	setCustomName(n == productName() ? QString() : n);
 }
 
 void AcSensorSettings::setServiceType(const QString &t)
@@ -52,8 +39,6 @@ void AcSensorSettings::setServiceType(const QString &t)
 		setL2ServiceType(QString());
 	emit serviceTypeChanged();
 	emit productNameChanged();
-	if (mCustomName.isEmpty())
-		emit effectiveCustomNameChanged();
 }
 
 void AcSensorSettings::setIsMultiPhase(bool b)
@@ -77,24 +62,11 @@ void AcSensorSettings::setL2CustomName(const QString &v)
 		return;
 	mL2CustomName = v;
 	emit l2CustomNameChanged();
-	emit l2EffectiveCustomNameChanged();
 }
 
 QString AcSensorSettings::l2ProductName() const
 {
 	return getProductName(mL2ServiceType, mL2Position);
-}
-
-QString AcSensorSettings::l2EffectiveCustomName() const
-{
-	if (!mL2CustomName.isEmpty())
-		return mL2CustomName;
-	return l2ProductName();
-}
-
-void AcSensorSettings::setL2EffectiveCustomName(const QString &n)
-{
-	setL2CustomName(n == l2ProductName() ? QString() : n);
 }
 
 QString AcSensorSettings::l2ServiceType() const
@@ -111,8 +83,6 @@ void AcSensorSettings::setL2ServiceType(const QString &v)
 		setIsMultiPhase(false);
 	emit l2ServiceTypeChanged();
 	emit l2ProductNameChanged();
-	if (mL2CustomName.isEmpty())
-		emit l2EffectiveCustomNameChanged();
 }
 
 Position AcSensorSettings::l2Position() const
@@ -127,8 +97,6 @@ void AcSensorSettings::setL2Position(Position v)
 	mL2Position = v;
 	emit l2PositionChanged();
 	emit l2ProductNameChanged();
-	if (mL2CustomName.isEmpty())
-		emit l2EffectiveCustomNameChanged();
 }
 
 Position AcSensorSettings::position()
@@ -143,8 +111,6 @@ void AcSensorSettings::setPosition(Position p)
 	mPosition = p;
 	emit positionChanged();
 	emit productNameChanged();
-	if (mCustomName.isEmpty())
-		emit effectiveCustomNameChanged();
 }
 
 int AcSensorSettings::deviceInstance() const

@@ -14,7 +14,6 @@ class AcSensorSettings : public QObject
 	Q_PROPERTY(int deviceType READ deviceType)
 	Q_PROPERTY(QString serial READ serial)
 	Q_PROPERTY(QString customName READ customName WRITE setCustomName NOTIFY customNameChanged)
-	Q_PROPERTY(QString effectiveCustomName READ effectiveCustomName WRITE setEffectiveCustomName NOTIFY effectiveCustomNameChanged)
 	Q_PROPERTY(QString productName READ productName NOTIFY productNameChanged)
 	Q_PROPERTY(QString serviceType READ serviceType WRITE setServiceType NOTIFY serviceTypeChanged)
 	Q_PROPERTY(bool isMultiPhase READ isMultiPhase WRITE setIsMultiPhase NOTIFY isMultiPhaseChanged)
@@ -25,7 +24,6 @@ class AcSensorSettings : public QObject
 	Q_PROPERTY(double l3ReverseEnergy READ l3ReverseEnergy WRITE setL3ReverseEnergy NOTIFY l3ReverseEnergyChanged)
 
 	Q_PROPERTY(QString l2CustomName READ l2CustomName WRITE setL2CustomName NOTIFY l2CustomNameChanged)
-	Q_PROPERTY(QString l2EffectiveCustomName READ l2EffectiveCustomName WRITE setL2EffectiveCustomName NOTIFY l2EffectiveCustomNameChanged)
 	Q_PROPERTY(QString l2ProductName READ l2ProductName NOTIFY l2ProductNameChanged)
 	Q_PROPERTY(QString l2ServiceType READ l2ServiceType WRITE setL2ServiceType NOTIFY l2ServiceTypeChanged)
 	Q_PROPERTY(Position l2Position READ l2Position WRITE setL2Position NOTIFY l2PositionChanged)
@@ -57,13 +55,6 @@ public:
 	QString productName() const;
 
 	/*!
-	 * Returns customName if not empty, else productName
-	 */
-	QString effectiveCustomName() const;
-
-	void setEffectiveCustomName(const QString &n);
-
-	/*!
 	 * This string is used to create the D-Bus service.
 	 * D-Bus service name will be 'com.victronenergy.[serviceName]'. So
 	 * `serviceType` tells us where the device is installed (ie. which power
@@ -89,10 +80,6 @@ public:
 	void setL2CustomName(const QString &v);
 
 	QString l2ProductName() const;
-
-	QString l2EffectiveCustomName() const;
-
-	void setL2EffectiveCustomName(const QString &n);
 
 	QString l2ServiceType() const;
 
@@ -135,8 +122,6 @@ signals:
 
 	void productNameChanged();
 
-	void effectiveCustomNameChanged();
-
 	void serviceTypeChanged();
 
 	void isMultiPhaseChanged();
@@ -154,8 +139,6 @@ signals:
 	void l3ReverseEnergyChanged();
 
 	void l2CustomNameChanged();
-
-	void l2EffectiveCustomNameChanged();
 
 	void l2ProductNameChanged();
 
