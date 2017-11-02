@@ -17,10 +17,14 @@ digraph {
         SetApplication[shape="box"];
         SetMeasuringSystem[shape="box"];
     }
-    subgraph cluster_EM112Setup {
+    subgraph cluster_ET112Setup {
         CheckMeasurementMode[shape="box"];
-        ChangeSetup2[shape="diamond" label="Change\nsetup?"];
+        ChangeSetup2[shape="diamond" label="Change\nmeasurement mode?\n(allow negative power)"];
         SetMeasurementMode[shape="box"];
+        DeviceType3[shape="diamond" label="Device\ntype?"];
+        CheckMeasurementSystem[shape="box"];
+        ChangeMeasurementSystem[shape="diamond" label="Change\nmeasuring system?\n(Single/Multi phase)"];
+        SetMeasuringSystem2[shape="box" label="Set measuring system"];
     }
     Acquisition[shape="box"];
     Wait[shape="box"];
@@ -29,14 +33,13 @@ digraph {
     DeviceId->DeviceType;
     DeviceType->VersionCode[label="EM24"];
     VersionCode->Serial;
-    DeviceType->Serial[label="EM112 & EM340"];
+    DeviceType->Serial[label="ET112 & ET340"];
     Serial->FirmwareVersion;
     FirmwareVersion->WaitForStart;
     WaitForStart->StartMeasurements;
     StartMeasurements->DeviceType2;
     DeviceType2->CheckSetup[label="EM24"];
-    DeviceType2->CheckMeasurementMode[label="EM112"];
-    DeviceType2->Acquisition[label="EM340"];
+    DeviceType2->CheckMeasurementMode[label="ET112 & ET340"];
     CheckSetup->ChangeSetup1;
     ChangeSetup1->CheckFrontSelector[label="Yes"];
     ChangeSetup1->Acquisition[label="No"];
@@ -48,8 +51,14 @@ digraph {
     SetMeasuringSystem->Acquisition;
     CheckMeasurementMode->ChangeSetup2;
     ChangeSetup2->SetMeasurementMode[label="Yes"];
-    ChangeSetup2->Acquisition[label="No"];
-    SetMeasurementMode->Acquisition;
+    ChangeSetup2->DeviceType3[label="No"];
+    SetMeasurementMode->DeviceType3;
+    DeviceType3->Acquisition[label="ET112"];
+    DeviceType3->CheckMeasurementSystem[label="ET340"];
+    CheckMeasurementSystem->ChangeMeasurementSystem;
+    ChangeMeasurementSystem->SetMeasuringSystem2[label="Yes"];
+    ChangeMeasurementSystem->Acquisition[label="No"];
+    SetMeasuringSystem2->Acquisition
     Acquisition->Wait;
     Wait->Acquisition;
 }
