@@ -1,6 +1,8 @@
 #include <QCoreApplication>
 #include <QsLog.h>
 #include <QStringList>
+#include <QDBusMessage>
+#include <QEventLoop>
 #include <unistd.h>
 #include <velib/qt/ve_qitem.hpp>
 #include <velib/qt/ve_qitems_dbus.hpp>
@@ -9,20 +11,22 @@
 #include "ac_sensor.h"
 #include "ac_sensor_mediator.h"
 
-void initDBus()
+void initDBus(QDBusConnection &dbus)
 {
-	// Wait for localsettings. We need this because later on we might need the call 'AddSetting'
-	// on localsettings, which will cause problems if the settings are not there yet.
-	VeQItem *item = VeQItems::getRoot()->itemGetOrCreate(
-		"sub/com.victronenergy.settings/Settings/Vrmlogger/Url", true);
-	item->getValue();
+	// Calling GetDefault on /Settings should return -1. It's a simple way
+	// to see if localsettings is up without relying on a particular path.
+	QDBusMessage m = QDBusMessage::createMethodCall("com.victronenergy.settings",
+		"/Settings", "com.victronenergy.BusItem", "GetDefault");
 
 	QLOG_INFO() << "Wait for local settings on DBus... ";
+
 	for (;;) {
-		if (item->getState() == VeQItem::Synchronized)
+		QDBusMessage reply = dbus.call(m);
+		if (reply.type() == QDBusMessage::ReplyMessage)
 			break;
+
 		QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-		usleep(500000);
+		usleep(1000000);
 		QLOG_INFO() << "Waiting...";
 	}
 	QLOG_INFO() << "Local settings found";
@@ -126,7 +130,7 @@ int main(int argc, char *argv[])
 
 	qRegisterMetaType<ConnectionState>();
 
-	initDBus();
+	initDBus(producer.dbusConnection());
 
 	VeQItem *settingsRoot = VeQItems::getRoot()->itemGetOrCreate("sub/com.victronenergy.settings", false);
 	AcSensorMediator m(portName, isZigbee, settingsRoot);
