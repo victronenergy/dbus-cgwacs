@@ -11,7 +11,7 @@
 #include "ac_sensor.h"
 #include "ac_sensor_mediator.h"
 
-void initDBus(QDBusConnection &dbus)
+bool initDBus(QDBusConnection &dbus)
 {
 	// Calling GetDefault on /Settings should return -1. It's a simple way
 	// to see if localsettings is up without relying on a particular path.
@@ -20,16 +20,18 @@ void initDBus(QDBusConnection &dbus)
 
 	QLOG_INFO() << "Wait for local settings on DBus... ";
 
-	for (;;) {
+	for (int i=0; i<30; i++) {
 		QDBusMessage reply = dbus.call(m);
-		if (reply.type() == QDBusMessage::ReplyMessage)
-			break;
+		if (reply.type() == QDBusMessage::ReplyMessage) {
+			QLOG_INFO() << "Local settings found";
+			return true;
+		}
 
 		QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 		usleep(1000000);
 		QLOG_INFO() << "Waiting...";
 	}
-	QLOG_INFO() << "Local settings found";
+	return false;
 }
 
 void initLogger(QsLogging::Level logLevel)
@@ -130,7 +132,9 @@ int main(int argc, char *argv[])
 
 	qRegisterMetaType<ConnectionState>();
 
-	initDBus(producer.dbusConnection());
+	if (!initDBus(producer.dbusConnection())) {
+		return 1; // Not success
+	}
 
 	VeQItem *settingsRoot = VeQItems::getRoot()->itemGetOrCreate("sub/com.victronenergy.settings", false);
 	AcSensorMediator m(portName, isZigbee, settingsRoot);
