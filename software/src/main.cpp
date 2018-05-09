@@ -3,6 +3,7 @@
 #include <QStringList>
 #include <QDBusMessage>
 #include <QEventLoop>
+#include <QTimer>
 #include <unistd.h>
 #include <velib/qt/ve_qitem.hpp>
 #include <velib/qt/ve_qitems_dbus.hpp>
@@ -20,16 +21,18 @@ bool initDBus(QDBusConnection &dbus)
 
 	QLOG_INFO() << "Wait for local settings on DBus... ";
 
-	for (int i=0; i<30; i++) {
+	for (int i=0; i<10; i++) {
 		QDBusMessage reply = dbus.call(m);
 		if (reply.type() == QDBusMessage::ReplyMessage) {
 			QLOG_INFO() << "Local settings found";
 			return true;
 		}
 
-		QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-		usleep(1000000);
 		QLOG_INFO() << "Waiting...";
+
+		QEventLoop l;
+		QTimer::singleShot(2000, &l, SLOT(quit()));
+		l.exec();
 	}
 	return false;
 }
