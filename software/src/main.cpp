@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
 	bool isZigbee = false;
 	QString portName;
 	QString dbusAddress = "system";
+	int timeout = 250;
 	QStringList args = app.arguments();
 	args.pop_front();
 
@@ -84,10 +85,12 @@ int main(int argc, char *argv[])
 			QLOG_INFO() << "\t Show this message.";
 			QLOG_INFO() << "\t-V, --version";
 			QLOG_INFO() << "\t Show the application version.";
-			QLOG_INFO() << "\t-d level, --debug level";
-			QLOG_INFO() << "\t Set log level";
 			QLOG_INFO() << "\t-b, --dbus";
 			QLOG_INFO() << "\t dbus address or 'session' or 'system'";
+			QLOG_INFO() << "\t-d level, --debug level";
+			QLOG_INFO() << "\t Set log level";
+			QLOG_INFO() << "\t--timeout milliseconds";
+			QLOG_INFO() << "\t Timeout in milliseconds for RS485 responses";
 			QLOG_INFO() << "\t <Port Name>";
 			QLOG_INFO() << "\t Name of communication port (eg. /dev/ttyUSB0)";
 			exit(1);
@@ -107,10 +110,14 @@ int main(int argc, char *argv[])
 		} else if (arg == "-t" || arg == "--timestamp") {
 			QsLogging::Logger &logger = QsLogging::Logger::instance();
 			logger.setIncludeTimestamp(true);
+		} else if (arg == "--timeout") {
+			if (!args.isEmpty())
+				timeout = qBound(150, args.takeFirst().toInt(), 10000);
 		} else if (arg == "-b" || arg == "--dbus") {
 			if (!args.isEmpty())
 				dbusAddress = args.takeFirst();
 		} else if (arg == "-z" || arg == "--zigbee") {
+			timeout = qMax(2000, timeout);
 			isZigbee = true;
 		} else if (!arg.startsWith('-')) {
 			portName = arg;
@@ -139,7 +146,7 @@ int main(int argc, char *argv[])
 	}
 
 	VeQItem *settingsRoot = VeQItems::getRoot()->itemGetOrCreate("sub/com.victronenergy.settings", false);
-	AcSensorMediator m(portName, isZigbee, settingsRoot);
+	AcSensorMediator m(portName, timeout, isZigbee, settingsRoot);
 
 	app.connect(&m, SIGNAL(connectionLost()), &app, SLOT(quit()));
 	app.connect(&m, SIGNAL(serialEvent(const char *)), &app, SLOT(quit()));

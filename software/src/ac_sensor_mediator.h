@@ -15,7 +15,7 @@ class AcSensorMediator : public QObject
 {
 	Q_OBJECT
 public:
-	AcSensorMediator(const QString &portName, bool isZigbee, VeQItem *settingsRoot,
+	AcSensorMediator(const QString &portName, int timeout, bool isZigbee, VeQItem *settingsRoot,
 					 QObject *parent = 0);
 
 signals:
