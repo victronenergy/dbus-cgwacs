@@ -69,26 +69,16 @@ int main(int argc, char *argv[])
 
 	initLogger(QsLogging::InfoLevel);
 
-	bool expectVerbosity = false;
-	bool expectDBusAddress = false;
 	bool isZigbee = false;
 	QString portName;
 	QString dbusAddress = "system";
 	QStringList args = app.arguments();
 	args.pop_front();
-	foreach (QString arg, args) {
-		if (expectVerbosity) {
-			QsLogging::Logger &logger = QsLogging::Logger::instance();
-			QsLogging::Level logLevel = static_cast<QsLogging::Level>(qBound(
-				static_cast<int>(QsLogging::TraceLevel),
-				arg.toInt(),
-				static_cast<int>(QsLogging::OffLevel)));
-			logger.setLoggingLevel(logLevel);
-			expectVerbosity = false;
-		} else if (expectDBusAddress) {
-			dbusAddress = arg;
-			expectDBusAddress = false;
-		} else if (arg == "-h" || arg == "--help") {
+
+	while (!args.isEmpty()) {
+		QString arg = args.takeFirst();
+
+		if (arg == "-h" || arg == "--help") {
 			QLOG_INFO() << app.arguments().first();
 			QLOG_INFO() << "\t-h, --help";
 			QLOG_INFO() << "\t Show this message.";
@@ -105,12 +95,21 @@ int main(int argc, char *argv[])
 			QLOG_INFO() << VERSION;
 			exit(0);
 		} else if (arg == "-d" || arg == "--debug") {
-			expectVerbosity = true;
+			if (!args.isEmpty()) {
+				arg = args.takeFirst();
+				QsLogging::Logger &logger = QsLogging::Logger::instance();
+				QsLogging::Level logLevel = static_cast<QsLogging::Level>(qBound(
+					static_cast<int>(QsLogging::TraceLevel),
+					arg.toInt(),
+					static_cast<int>(QsLogging::OffLevel)));
+				logger.setLoggingLevel(logLevel);
+			}
 		} else if (arg == "-t" || arg == "--timestamp") {
 			QsLogging::Logger &logger = QsLogging::Logger::instance();
 			logger.setIncludeTimestamp(true);
 		} else if (arg == "-b" || arg == "--dbus") {
-			expectDBusAddress = true;
+			if (!args.isEmpty())
+				dbusAddress = args.takeFirst();
 		} else if (arg == "-z" || arg == "--zigbee") {
 			isZigbee = true;
 		} else if (!arg.startsWith('-')) {
