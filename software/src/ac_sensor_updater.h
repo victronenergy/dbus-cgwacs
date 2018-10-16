@@ -98,8 +98,7 @@ private:
 
 	void processAcquisitionData(const QList<quint16> &registers);
 
-	double getDouble(const QList<quint16> &registers, int offset, int size,
-					 double factor);
+	double getDouble(const QList<quint16> &registers, int offset, double factor);
 
 	enum State {
 		DeviceId,

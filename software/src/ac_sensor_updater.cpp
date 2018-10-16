@@ -706,19 +706,19 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 			double v = 0;
 			switch (ra.action) {
 			case Power:
-				v = getDouble(registers, ra.regOffset, 2, 0.1);
+				v = getDouble(registers, ra.regOffset, 0.1);
 				dest->setPower(ra.phase, v);
 				if (setPhaseL1)
 					dest->setPower(PhaseL1, v);
 				break;
 			case Voltage:
-				v = getDouble(registers, ra.regOffset, 2, 0.1);
+				v = getDouble(registers, ra.regOffset, 0.1);
 				dest->setVoltage(ra.phase, v);
 				if (setPhaseL1)
 					dest->setVoltage(PhaseL1, v);
 				break;
 			case Current:
-				v = getDouble(registers, ra.regOffset, 2, 1e-3);
+				v = getDouble(registers, ra.regOffset, 1e-3);
 				if (mSetCurrentSign &&
 					dest == mDataProcessor &&
 					mAcSensor->getPhase(ra.phase)->power() < 0) {
@@ -735,7 +735,7 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 				}
 				break;
 			case PositiveEnergy:
-				v = getDouble(registers, ra.regOffset, 2, 0.1);
+				v = getDouble(registers, ra.regOffset, 0.1);
 				dest->setPositiveEnergy(ra.phase, v);
 				if (setPhaseL1)
 					dest->setPositiveEnergy(PhaseL1, v);
@@ -743,7 +743,7 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 			case NegativeEnergy:
 				// ET112 seems to return negative values for kWh(-), unlike the
 				// other meters.
-				v = qAbs(getDouble(registers, ra.regOffset, 2, 0.1));
+				v = qAbs(getDouble(registers, ra.regOffset, 0.1));
 				if (mAcSensor->protocolType() == AcSensor::Em24Protocol &&
 					mSettings->isMultiPhase()) {
 					dest->setNegativeEnergy(v);
@@ -761,13 +761,10 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 }
 
 double AcSensorUpdater::getDouble(const QList<quint16> &registers,
-									 int offset, int size, double factor)
+									 int offset, double factor)
 {
 	double value = 0;
-	if (size == 2) {
-		value = (int32_t)(registers[offset] | registers[offset + 1] << 16);
-	} else {
-		value = (int16_t)registers[offset];
-	}
+	value = (int32_t)(registers[offset] | registers[offset + 1] << 16);
+	if (value == 0x7FFFFFFF) return qQNaN();
 	return value * factor;
 }
