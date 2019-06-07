@@ -242,18 +242,19 @@ void AcSensorUpdater::onErrorReceived(int errorType, quint8 addr, int exception)
 				 << "State:" << mState << "Slave Address" << addr
 				 << "Acq State:" << mAcquisitionIndex
 				 << "Timeout count:" << mTimeoutCount;
-	if (errorType == ModbusRtu::Timeout) {
-		if (mTimeoutCount == MaxTimeoutCount) {
-			if (!mAcSensor->serial().isEmpty()) {
-				QLOG_ERROR() << "Lost connection to energy meter"
-							 << mAcSensor->serial() << '@'
-							 << mAcSensor->portName() << ':'
-							 << mAcSensor->slaveAddress();
-			}
-			disconnectSensor();
-		} else {
-			++mTimeoutCount;
+	/* Deliberately treat all errors the same. Possible errors are Timeout,
+	 * Exception, Unsupported, CrcError. If we get any of these 5 times in a
+	 * row we should bail. */
+	if (mTimeoutCount == MaxTimeoutCount) {
+		if (!mAcSensor->serial().isEmpty()) {
+			QLOG_ERROR() << "Lost connection to energy meter"
+						 << mAcSensor->serial() << '@'
+						 << mAcSensor->portName() << ':'
+						 << mAcSensor->slaveAddress();
 		}
+		disconnectSensor();
+	} else {
+		++mTimeoutCount;
 	}
 	startNextAction();
 }
