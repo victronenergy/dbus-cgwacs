@@ -4,7 +4,7 @@
 	branch = master
 [submodule "software/ext/qtserialport"]
 	path = software/ext/qtserialport
-	url = git://code.qt.io/qt/qtserialport.git
+	url = https://code.qt.io/qt/qtserialport.git
 	branch = qt4-dev
 [submodule "software/ext/velib"]
 	path = software/ext/velib
