@@ -17,7 +17,7 @@ bool initDBus(QDBusConnection &dbus)
 	// Calling GetDefault on /Settings should return -1. It's a simple way
 	// to see if localsettings is up without relying on a particular path.
 	QDBusMessage m = QDBusMessage::createMethodCall("com.victronenergy.settings",
-		"/Settings", "com.victronenergy.BusItem", "GetDefault");
+		"/Settings", "org.freedesktop.DBus.Introspectable", "Introspect");
 
 	QLOG_INFO() << "Wait for local settings on DBus... ";
 
