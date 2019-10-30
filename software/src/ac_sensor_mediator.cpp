@@ -149,11 +149,11 @@ void AcSensorMediator::registerDevice(const QString &serial)
 	mDeviceIdsItem->setValue(mDeviceIds.join(","));
 }
 
-int AcSensorMediator::getDeviceInstance(const QString &serial, bool isSecundary) const
+int AcSensorMediator::getDeviceInstance(const QString &serial, bool isSecondary) const
 {
 	Q_ASSERT(mDeviceIdsItem->getValue().isValid());
 	int i = mDeviceIds.indexOf(serial);
 	if (i == -1)
 		return InvalidDeviceInstance;
-	return MinDeviceInstance + (2 * i + (isSecundary ? 1 : 0)) % (MaxDeviceInstance - MinDeviceInstance + 1);
+	return MinDeviceInstance + (2 * i + (isSecondary ? 1 : 0)) % (MaxDeviceInstance - MinDeviceInstance + 1);
 }

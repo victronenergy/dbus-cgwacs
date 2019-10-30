@@ -17,7 +17,7 @@ class AcSensorBridge : public DBusBridge
 {
 	Q_OBJECT
 public:
-	AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings, bool isSecundary,
+	AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings, bool isSecondary,
 				   QObject *parent = 0);
 
 protected:
@@ -32,7 +32,7 @@ private:
 	void producePowerInfo(AcSensorPhase *pi, const QString &path, bool isGridmeter);
 
 	static QString getServiceName(AcSensor *acSensor, AcSensorSettings *settings,
-								  bool isSecundary);
+								  bool isSecondary);
 };
 
 #endif // AC_SENSOR_BRIDGE_H

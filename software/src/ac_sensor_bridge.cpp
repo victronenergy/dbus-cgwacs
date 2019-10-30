@@ -8,8 +8,8 @@
 #include "ac_sensor_phase.h"
 
 AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
-							   bool isSecundary, QObject *parent) :
-	DBusBridge(getServiceName(acSensor, settings, isSecundary), true, parent)
+							   bool isSecondary, QObject *parent) :
+	DBusBridge(getServiceName(acSensor, settings, isSecondary), true, parent)
 {
 	Q_ASSERT(acSensor != 0);
 	Q_ASSERT(settings != 0);
@@ -17,7 +17,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	connect(settings, SIGNAL(destroyed()), this, SLOT(deleteLater()));
 
 	bool isGridmeter =
-		(isSecundary ? settings->l2ServiceType() : settings->serviceType()) == "grid";
+		(isSecondary ? settings->l2ServiceType() : settings->serviceType()) == "grid";
 	// Changes in QT properties will not be propagated to the D-Bus at once, but in 1000ms/2500ms
 	// intervals.
 	setUpdateInterval(isGridmeter ? 1000 : 2500);
@@ -30,10 +30,10 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	producePowerInfo(acSensor->l2(), "/Ac/L2", isGridmeter);
 	producePowerInfo(acSensor->l3(), "/Ac/L3", isGridmeter);
 
-	if (isSecundary || settings->serviceType() == "pvinverter")
-		produce(settings, isSecundary ? "l2Position" : "position", "/Position");
-	produce(settings, isSecundary ? "l2ProductName" : "productName", "/ProductName");
-	produce(settings, isSecundary ? "l2CustomName" : "customName", "/CustomName");
+	if (isSecondary || settings->serviceType() == "pvinverter")
+		produce(settings, isSecondary ? "l2Position" : "position", "/Position");
+	produce(settings, isSecondary ? "l2ProductName" : "productName", "/ProductName");
+	produce(settings, isSecondary ? "l2CustomName" : "customName", "/CustomName");
 
 	QString processName = QCoreApplication::applicationName();
 	// The values of the items below will not change after creation, so we don't
@@ -44,7 +44,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	int productId = 0;
 	switch (acSensor->protocolType()) {
 	case AcSensor::Em24Protocol:
-		productId = isSecundary ?
+		productId = isSecondary ?
 			VE_PROD_ID_CARLO_GAVAZZI_EM24_PIGGY_BACK :
 			VE_PROD_ID_CARLO_GAVAZZI_EM24;
 		break;
@@ -52,7 +52,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 		productId = VE_PROD_ID_CARLO_GAVAZZI_ET112;
 		break;
 	case AcSensor::Em340Protocol:
-		productId = isSecundary ?
+		productId = isSecondary ?
 			VE_PROD_ID_CARLO_GAVAZZI_ET340_PIGGY_BACK :
 			VE_PROD_ID_CARLO_GAVAZZI_ET340;
 		break;
@@ -64,7 +64,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	produce("/DeviceType", acSensor->deviceType());
 	produce("/Mgmt/Connection", acSensor->portName());
 
-	int deviceInstance = isSecundary ?
+	int deviceInstance = isSecondary ?
 		settings->l2DeviceInstance() :
 		settings->deviceInstance();
 	produce("/DeviceInstance", deviceInstance);
@@ -102,15 +102,15 @@ QString AcSensorBridge::toText(const QString &path, const QVariant &value, const
 }
 
 QString AcSensorBridge::getServiceName(AcSensor *acSensor, AcSensorSettings *settings,
-									   bool isSecundary)
+									   bool isSecondary)
 {
-	QString serviceType = isSecundary ?
+	QString serviceType = isSecondary ?
 		settings->l2ServiceType() :
 		settings->serviceType();
 	QString portId = acSensor->portName().
 			replace("/dev/", "").
 			replace("/", "_");
-	int deviceInstance = isSecundary ?
+	int deviceInstance = isSecondary ?
 		settings->l2DeviceInstance() :
 		settings->deviceInstance();
 	QString serviceName = QString("pub/com.victronenergy.%1.cgwacs_%2_di%3_mb%4").
@@ -118,7 +118,7 @@ QString AcSensorBridge::getServiceName(AcSensor *acSensor, AcSensorSettings *set
 			arg(portId).
 			arg(deviceInstance).
 			arg(acSensor->slaveAddress());
-	if (isSecundary)
+	if (isSecondary)
 		serviceName += "_l2";
 	return serviceName;
 }
