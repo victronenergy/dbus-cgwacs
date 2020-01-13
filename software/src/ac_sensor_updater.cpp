@@ -20,6 +20,7 @@ static const int ApplicationH = 7; // show negative power (EM24)
 static const int MaxAcquisitionIndex = 16;
 static const int MaxRegCount = 5;
 static const int MaxTimeoutCount = 5;
+static const int MaxErrorCount = 100;
 
 static const int NoError = 0;
 static const int ErrorFronSelectorLocked = 1;
@@ -162,6 +163,7 @@ AcSensorUpdater::AcSensorUpdater(AcSensor *acSensor, AcSensor *acPvSensor, Modbu
 	mAcquisitionTimer(new QTimer(this)),
 	mSettingsUpdateTimer(new QTimer(this)),
 	mTimeoutCount(0),
+	mErrorCount(0),
 	mMeasuringSystem(0),
 	mDesiredMeasuringSystem(0),
 	mIsZigbee(isZigbee),
@@ -241,11 +243,12 @@ void AcSensorUpdater::onErrorReceived(int errorType, quint8 addr, int exception)
 	QLOG_DEBUG() << "ModBus Error:" << errorType << exception
 				 << "State:" << mState << "Slave Address" << addr
 				 << "Acq State:" << mAcquisitionIndex
-				 << "Timeout count:" << mTimeoutCount;
+				 << "Timeout count:" << mTimeoutCount
+				 << "Error count:" << mErrorCount;
 	/* Deliberately treat all errors the same. Possible errors are Timeout,
 	 * Exception, Unsupported, CrcError. If we get any of these 5 times in a
 	 * row we should bail. */
-	if (mTimeoutCount == MaxTimeoutCount) {
+	if ((mTimeoutCount >= MaxTimeoutCount) || (mErrorCount >= MaxErrorCount)) {
 		if (!mAcSensor->serial().isEmpty()) {
 			QLOG_ERROR() << "Lost connection to energy meter"
 						 << mAcSensor->serial() << '@'
@@ -253,8 +256,10 @@ void AcSensorUpdater::onErrorReceived(int errorType, quint8 addr, int exception)
 						 << mAcSensor->slaveAddress();
 		}
 		disconnectSensor();
-	} else {
+	} else if (errorType == ModbusRtu::Timeout) {
 		++mTimeoutCount;
+	} else {
+		++mErrorCount;
 	}
 	startNextAction();
 }
@@ -390,6 +395,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 		break;
 	}
 	mTimeoutCount = 0;
+	mErrorCount = 0;
 	startNextAction();
 }
 
@@ -431,6 +437,7 @@ void AcSensorUpdater::onWriteCompleted(int function, quint8 addr,
 		break;
 	}
 	mTimeoutCount = 0;
+	mErrorCount = 0;
 	startNextAction();
 }
 
@@ -663,6 +670,7 @@ void AcSensorUpdater::disconnectSensor()
 	delete mPvDataProcessor;
 	mPvDataProcessor = 0;
 	mTimeoutCount = MaxTimeoutCount;
+	mErrorCount = MaxErrorCount;
 	mAcSensor->setSerial(QString());
 	mAcSensor->resetValues();
 	mAcSensor->setConnectionState(Disconnected);

@@ -143,6 +143,7 @@ private:
 	QTimer *mAcquisitionTimer;
 	QTimer *mSettingsUpdateTimer;
 	int mTimeoutCount;
+	int mErrorCount;
 	int mMeasuringSystem;
 	int mDesiredMeasuringSystem;
 	bool mIsZigbee;
