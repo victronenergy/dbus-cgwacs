@@ -325,7 +325,21 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 	case FirmwareVersion:
 		mAcSensor->setFirmwareVersion(registers[0]);
 		mAcPvSensor->setFirmwareVersion(registers[0]);
-		mState = WaitForStart;
+
+		// For meters that support it, read the phase sequence
+		if ((mAcSensor->protocolType() == AcSensor::Em24Protocol) ||
+				(mAcSensor->protocolType() == AcSensor::Em340Protocol)) {
+			mState = PhaseSequence;
+		} else {
+			mState = WaitForStart;
+		}
+		break;
+	case PhaseSequence:
+		{
+			int seq = (registers[0] == 0 ? PhaseSequenceOk : PhaseSequenceNotOk);
+			mAcSensor->setPhaseSequence(seq);
+			mState = WaitForStart;
+		}
 		break;
 	case CheckSetup:
 		Q_ASSERT(registers.size() == 2);
@@ -516,6 +530,12 @@ void AcSensorUpdater::startNextAction()
 		break;
 	case FirmwareVersion:
 		readRegisters(RegFirmwareVersion, 1);
+		break;
+	case PhaseSequence:
+		readRegisters(
+			mAcSensor->protocolType() == AcSensor::Em24Protocol ?
+				RegEm24PhaseSequence :
+				RegEm340PhaseSequence, 1);
 		break;
 	case CheckSetup:
 		readRegisters(RegApplication, 2);

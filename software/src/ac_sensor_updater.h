@@ -118,11 +118,14 @@ private:
 		Wait,
 		WaitOnConnectionLost,
 
-		SetAddress
+		SetAddress,
+		PhaseSequence
 	};
 
 	enum Registers {
 		RegDeviceId = 0x000B,
+		RegEm340PhaseSequence = 0x0032,
+		RegEm24PhaseSequence = 0x0036,
 		RegEm340MeasurementSystem = 0x1002,
 		RegApplication = 0x1101,
 		RegMeasurementSystem = 0x1102,
@@ -132,6 +135,11 @@ private:
 		RegFirmwareVersion = 0x0303,
 		RegEm24FrontSelector = 0x0304,
 		RegEm112Serial = 0x5000,
+	};
+
+	enum PhaseSequenceState {
+		PhaseSequenceOk,
+		PhaseSequenceNotOk
 	};
 
 	DataProcessor *mDataProcessor;

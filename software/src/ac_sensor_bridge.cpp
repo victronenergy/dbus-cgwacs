@@ -41,6 +41,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	produce("/Mgmt/ProcessName", processName);
 	produce("/Mgmt/ProcessVersion", QCoreApplication::applicationVersion());
 	produce("/FirmwareVersion", acSensor->firmwareVersion());
+	produce("/PhaseSequence", acSensor->phaseSequence() < 0 ? QVariant() : acSensor->phaseSequence());
 	int productId = 0;
 	switch (acSensor->protocolType()) {
 	case AcSensor::Em24Protocol:

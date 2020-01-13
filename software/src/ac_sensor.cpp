@@ -11,6 +11,7 @@ AcSensor::AcSensor(const QString &portName, int slaveAddress, QObject *parent) :
 	mFirmwareVersion(0),
 	mPortName(portName),
 	mSlaveAddress(slaveAddress),
+	mPhaseSequence(-1),
 	mTotal(new AcSensorPhase(this)),
 	mL1(new AcSensorPhase(this)),
 	mL2(new AcSensorPhase(this)),
@@ -68,6 +69,11 @@ void AcSensor::setSerial(const QString &s)
 		return;
 	mSerial = s;
 	emit serialChanged();
+}
+
+void AcSensor::setPhaseSequence(int v)
+{
+	mPhaseSequence = v;
 }
 
 void AcSensor::setFirmwareVersion(int v)

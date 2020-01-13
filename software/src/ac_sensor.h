@@ -84,6 +84,13 @@ public:
 
 	void setSerial(const QString &s);
 
+	int phaseSequence() const
+	{
+		return mPhaseSequence;
+	}
+
+	void setPhaseSequence(int v);
+
 	int firmwareVersion() const
 	{
 		return mFirmwareVersion;
@@ -170,6 +177,7 @@ private:
 	QString mPortName;
 	int mSlaveAddress;
 	QString mSerial;
+	int mPhaseSequence;
 	AcSensorPhase *mTotal;
 	AcSensorPhase *mL1;
 	AcSensorPhase *mL2;
