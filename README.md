@@ -27,3 +27,20 @@ The application consists of several layers:
       Path: /Settings/CGwacs/D[serial]
 
 Finally _AcSensorMediator_ ties everything together.
+
+Error handling
+==============
+
+It is important for dbus-cgwacs to terminate if it is not talking to a
+Carlo Gavazzi meter, otherwise serial-starter cannot work properly. Two
+kinds of errors are possible.
+
+* A timeout:
+    - There was no response to a modbus request. The default timeout is 250ms
+      (2 seconds for zigbee) and can be overridden with the `--timeout`
+      commandline option.
+    - dbus-cgwacs will terminate after 5 consecutive requests ends in a timeout.
+* A modbus error:
+    - These include outright errors such as unsupported registers or CRC errors.
+    - In order to be forgiving to intermittent conditions causing CRC errors,
+      dbus-cgwacs will terminate after 20 consecutive errors.
