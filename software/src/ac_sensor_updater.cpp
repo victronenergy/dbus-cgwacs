@@ -20,7 +20,7 @@ static const int ApplicationH = 7; // show negative power (EM24)
 static const int MaxAcquisitionIndex = 16;
 static const int MaxRegCount = 5;
 static const int MaxTimeoutCount = 5;
-static const int MaxErrorCount = 100;
+static const int MaxErrorCount = 20;
 
 static const int NoError = 0;
 static const int ErrorFronSelectorLocked = 1;
