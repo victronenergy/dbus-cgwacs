@@ -203,6 +203,27 @@ bool DBusBridge::addSetting(const QString &path,
 	return reply.type() == QDBusMessage::ReplyMessage;
 }
 
+void DBusBridge::initDeviceInstance(const QString &uniqueId, const QString &deviceClass, int defaultValue)
+{
+	QString value = QString("%1:%2").arg(deviceClass).arg(defaultValue);
+	QVariantMap inner;
+	inner.insert("path",
+		QVariant(QString("%1/ClassAndVrmInstance").arg(uniqueId)));
+	inner.insert("default", QVariant(value));
+
+	QDBusArgument argument;
+	argument.beginArray(QVariant::Map);
+	argument << inner;
+	argument.endArray();
+
+	QDBusConnection &connection = qobject_cast<VeQItemDbusProducer *>(mServiceRoot->producer())->dbusConnection();
+	QDBusMessage m = QDBusMessage::createMethodCall(
+				"com.victronenergy.settings", "/Settings/Devices",
+				"com.victronenergy.Settings", "AddSettings")
+		<< QVariant::fromValue(argument);
+	connection.asyncCall(m);
+}
+
 void DBusBridge::onPropertyChanged()
 {
 	QObject *src = sender();

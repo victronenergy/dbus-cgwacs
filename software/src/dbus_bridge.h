@@ -13,6 +13,9 @@ class QDBusConnection;
 class QTimer;
 class VeQItem;
 
+// Needed by QT4
+Q_DECLARE_METATYPE (QList<QVariantMap>);
+
 /*!
  * \brief Synchronizes QT properties with DBus objects.
  * This class synchronizes properties defined by Q_PROPERTY with objects on the
@@ -104,6 +107,8 @@ public:
 
 	bool addSetting(const QString &path, const QVariant &defaultValue,
 					const QVariant &minValue, const QVariant &maxValue, bool silent);
+
+	void initDeviceInstance(const QString &uniqueId, const QString &deviceClass, int defaultValue);
 
 signals:
 	void initialized();
