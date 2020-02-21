@@ -51,7 +51,7 @@ void AcSensorSettings::setIsMultiPhase(bool b)
 	emit isMultiPhaseChanged();
 }
 
-QString AcSensorSettings::l2CustomName() const
+const QString AcSensorSettings::l2CustomName() const
 {
 	return mL2CustomName;
 }
@@ -64,12 +64,12 @@ void AcSensorSettings::setL2CustomName(const QString &v)
 	emit l2CustomNameChanged();
 }
 
-QString AcSensorSettings::l2ProductName() const
+const QString AcSensorSettings::l2ProductName() const
 {
 	return getProductName(mL2ServiceType, mL2Position);
 }
 
-QString AcSensorSettings::l2ServiceType() const
+const QString AcSensorSettings::l2ServiceType() const
 {
 	return mL2ServiceType;
 }

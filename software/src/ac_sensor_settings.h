@@ -75,13 +75,13 @@ public:
 
 	void setIsMultiPhase(bool b);
 
-	QString l2CustomName() const;
+	const QString l2CustomName() const;
 
 	void setL2CustomName(const QString &v);
 
-	QString l2ProductName() const;
+	const QString l2ProductName() const;
 
-	QString l2ServiceType() const;
+	const QString l2ServiceType() const;
 
 	void setL2ServiceType(const QString &v);
 
