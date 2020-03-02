@@ -12,9 +12,9 @@ class BridgeItem;
 class QDBusConnection;
 class QTimer;
 class VeQItem;
+class DBusBridge;
 
-// Needed by QT4
-Q_DECLARE_METATYPE (QList<QVariantMap>);
+typedef bool (*dbus_transform_t) (DBusBridge*, QVariant &v);
 
 /*!
  * \brief Synchronizes QT properties with DBus objects.
@@ -53,7 +53,8 @@ public:
 	 * if the property has a floating point value.
 	 */
 	void produce(QObject *src, const char *property, const QString &path,
-				 const QString &unit = QString(), int precision = -1, bool alwaysNotify = false);
+				 const QString &unit = QString(), int precision = -1, bool alwaysNotify = false,
+				 dbus_transform_t _fromDBus = 0, dbus_transform_t _toDBus = 0);
 
 	/*!
 	 * \brief Pushes a constant value to the DBus, and registers the object.
@@ -68,7 +69,8 @@ public:
 	 * \param unit
 	 */
 	void produce(const QString &path, const QVariant &value,
-				 const QString &unit = QString(), int precision = -1);
+				 const QString &unit = QString(), int precision = -1,
+				 dbus_transform_t _fromDBus = 0, dbus_transform_t _toDBus = 0);
 
 	/*!
 	 * \brief Connects a QT property to an existing DBus item.
@@ -79,13 +81,16 @@ public:
 	 * \param property
 	 * \param path
 	 */
-	void consume(QObject *src, const char *property, const QString &path);
+	void consume(QObject *src, const char *property, const QString &path,
+			dbus_transform_t _fromDBus = 0, dbus_transform_t _toDBus = 0);
 
 	void consume(QObject *src, const char *property,
-				 const QVariant &defaultValue, const QString &path, bool silentSetting);
+				 const QVariant &defaultValue, const QString &path, bool silentSetting,
+				 dbus_transform_t _fromDBus = 0, dbus_transform_t _toDBus = 0);
 
 	void consume(QObject *src, const char *property, double defaultValue,
-				 double minValue, double maxValue, const QString &path, bool silentSetting);
+				 double minValue, double maxValue, const QString &path, bool silentSetting,
+				 dbus_transform_t _fromDBus = 0, dbus_transform_t _toDBus = 0);
 
 	VeQItem *service() const
 	{
@@ -162,11 +167,14 @@ private:
 		bool busy;
 		bool changed;
 		bool alwaysNotify;
+		dbus_transform_t fromDBus;
+		dbus_transform_t toDBus;
 	};
 
 	BusItemBridge &connectItem(VeQItem *item, QObject *src, const char *property,
 							   const QString &path, const QString &unit, int precision,
-							   bool publish, bool alwaysNotify);
+							   bool publish, bool alwaysNotify,
+							   dbus_transform_t _fromDBus = 0, dbus_transform_t _toDBus = 0);
 
 	void publishValue(BusItemBridge &item);
 

@@ -49,28 +49,31 @@ void DBusBridge::setUpdateInterval(int interval)
 }
 
 void DBusBridge::produce(QObject *src, const char *property, const QString &path,
-						 const QString &unit, int precision, bool alwaysNotify)
+						 const QString &unit, int precision, bool alwaysNotify,
+						 dbus_transform_t _fromDBus, dbus_transform_t _toDBus)
 {
 	Q_ASSERT(mIsProducer);
 	VeQItem *vbi = mServiceRoot->itemGetOrCreate(path);
-	BusItemBridge &b = connectItem(vbi, src, property, path, unit, precision, true, alwaysNotify);
+	BusItemBridge &b = connectItem(vbi, src, property, path, unit, precision, true, alwaysNotify, _fromDBus, _toDBus);
 	publishValue(b);
 }
 
 void DBusBridge::produce(const QString &path, const QVariant &value,
-						 const QString &unit, int precision)
+						 const QString &unit, int precision,
+						 dbus_transform_t _fromDBus, dbus_transform_t _toDBus)
 {
 	Q_ASSERT(mIsProducer);
 	VeQItem *vbi = mServiceRoot->itemGetOrCreate(path);
-	BusItemBridge &b = connectItem(vbi, 0, 0, path, unit, precision, true, false);
+	BusItemBridge &b = connectItem(vbi, 0, 0, path, unit, precision, true, false, _fromDBus, _toDBus);
 	publishValue(b, value);
 }
 
-void DBusBridge::consume(QObject *src, const char *property, const QString &path)
+void DBusBridge::consume(QObject *src, const char *property, const QString &path,
+						 dbus_transform_t _fromDBus, dbus_transform_t _toDBus)
 {
 	Q_ASSERT(!mIsProducer);
 	VeQItem *vbi = mServiceRoot->itemGetOrCreate(path);
-	BusItemBridge &b = connectItem(vbi, src, property, path, QString(), 0, false, false);
+	BusItemBridge &b = connectItem(vbi, src, property, path, QString(), 0, false, false, _fromDBus, _toDBus);
 	connect(vbi, SIGNAL(valueChanged(VeQItem *, QVariant)),
 			this, SLOT(onVBusItemChanged(VeQItem *)));
 	QVariant v = vbi->getValue(); // force value retrieval
@@ -79,17 +82,19 @@ void DBusBridge::consume(QObject *src, const char *property, const QString &path
 }
 
 void DBusBridge::consume(QObject *src, const char *property, const QVariant &defaultValue,
-						 const QString &path, bool silentSetting)
+						 const QString &path, bool silentSetting,
+						 dbus_transform_t _fromDBus, dbus_transform_t _toDBus)
 {
 	addSetting(path, defaultValue, QVariant(0), QVariant(0), silentSetting);
-	consume(src, property, path);
+	consume(src, property, path, _fromDBus, _toDBus);
 }
 
 void DBusBridge::consume(QObject *src, const char *property, double defaultValue,
-						 double minValue, double maxValue, const QString &path, bool silentSetting)
+						 double minValue, double maxValue, const QString &path, bool silentSetting,
+						 dbus_transform_t _fromDBus, dbus_transform_t _toDBus)
 {
 	addSetting(path, QVariant(defaultValue), QVariant(minValue), QVariant(maxValue), silentSetting);
-	consume(src, property, path);
+	consume(src, property, path, _fromDBus, _toDBus);
 }
 
 void DBusBridge::registerService()
@@ -263,7 +268,8 @@ void DBusBridge::onUpdateTimer()
 DBusBridge::BusItemBridge & DBusBridge::connectItem(VeQItem *busItem, QObject *src,
 													const char *property, const QString &path,
 													const QString &unit, int precision,
-													bool produce, bool alwaysNotify)
+													bool produce, bool alwaysNotify,
+													dbus_transform_t _fromDBus, dbus_transform_t _toDBus)
 {
 	Q_ASSERT(produce || !alwaysNotify);
 	BusItemBridge bib;
@@ -275,6 +281,8 @@ DBusBridge::BusItemBridge & DBusBridge::connectItem(VeQItem *busItem, QObject *s
 	bib.precision = precision;
 	bib.busy = false;
 	bib.alwaysNotify = alwaysNotify;
+	bib.fromDBus = _fromDBus;
+	bib.toDBus = _toDBus;
 	if (produce) {
 		BridgeItem *bi = qobject_cast<BridgeItem *>(busItem);
 		if (bi != 0)
@@ -324,6 +332,8 @@ void DBusBridge::publishValue(DBusBridge::BusItemBridge &item, QVariant value)
 	Q_ASSERT(!item.busy);
 	if (item.busy)
 		return;
+	if (item.toDBus && !item.toDBus(this, value))
+		return;
 	if (!toDBus(item.path, value))
 		return;
 	item.busy = true;
@@ -343,7 +353,9 @@ void DBusBridge::setValue(BusItemBridge &bridge, QVariant &value)
 	if (bridge.src == 0) {
 		QLOG_WARN() << "Value changed on D-Bus could not be stored in QT-property";
 	} else if (bridge.property.isValid()) {
-		if (fromDBus(bridge.path, value))
+		if (bridge.fromDBus && bridge.fromDBus(this, value))
+			bridge.src->setProperty(bridge.property.name(), value);
+		else if (fromDBus(bridge.path, value))
 			bridge.src->setProperty(bridge.property.name(), value);
 	}
 }
