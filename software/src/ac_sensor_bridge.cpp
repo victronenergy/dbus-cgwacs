@@ -7,6 +7,12 @@
 #include "ac_sensor_settings.h"
 #include "ac_sensor_phase.h"
 
+static bool roleFromDBus(DBusBridge*, QVariant &v)
+{
+	QString s = v.toString();
+	return (QStringList() << "grid" << "pvinverter" << "genset").contains(s);
+}
+
 AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 							   bool isSecondary, QObject *parent) :
 	DBusBridge(getServiceName(acSensor, settings, isSecondary), true, parent)
@@ -34,6 +40,8 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 		produce(settings, isSecondary ? "l2Position" : "position", "/Position");
 	produce(settings, isSecondary ? "l2ProductName" : "productName", "/ProductName");
 	produce(settings, isSecondary ? "l2CustomName" : "customName", "/CustomName");
+	produce(settings, isSecondary ? "l2ServiceType" : "serviceType", "/Role",
+		QString(), -1, false, roleFromDBus);
 
 	QString processName = QCoreApplication::applicationName();
 	// The values of the items below will not change after creation, so we don't
@@ -70,6 +78,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 		settings->deviceInstance();
 	produce("/DeviceInstance", deviceInstance);
 	produce("/Serial", acSensor->serial());
+	produce("/AllowedRoles", isSecondary ? (QStringList() << "pvinverter") : (QStringList() << "grid" << "pvinverter" << "genset"));
 
 	registerService();
 }

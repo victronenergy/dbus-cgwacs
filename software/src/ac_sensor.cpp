@@ -71,6 +71,14 @@ void AcSensor::setSerial(const QString &s)
 	emit serialChanged();
 }
 
+void AcSensor::setRole(const QString &s)
+{
+	if (mRole == s)
+		return;
+	mRole = s;
+	emit roleChanged();
+}
+
 void AcSensor::setPhaseSequence(int v)
 {
 	mPhaseSequence = v;

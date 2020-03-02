@@ -27,6 +27,7 @@ class AcSensor : public QObject
 	Q_PROPERTY(int deviceType READ deviceType WRITE setDeviceType NOTIFY deviceTypeChanged)
 	Q_PROPERTY(int deviceSubType READ deviceSubType WRITE setDeviceSubType NOTIFY deviceSubTypeChanged)
 	Q_PROPERTY(QString serial READ serial WRITE setSerial NOTIFY serialChanged)
+	Q_PROPERTY(QString role READ role WRITE setRole NOTIFY roleChanged)
 	Q_PROPERTY(int firmwareVersion READ firmwareVersion WRITE setFirmwareVersion NOTIFY firmwareVersionChanged)
 	Q_PROPERTY(int errorCode READ errorCode WRITE setErrorCode NOTIFY errorCodeChanged)
 	Q_PROPERTY(QString portName READ portName)
@@ -83,6 +84,13 @@ public:
 	}
 
 	void setSerial(const QString &s);
+
+	QString role() const
+	{
+		return mRole;
+	}
+
+	void setRole(const QString &s);
 
 	int phaseSequence() const
 	{
@@ -164,6 +172,8 @@ signals:
 
 	void serialChanged();
 
+	void roleChanged();
+
 	void firmwareVersionChanged();
 
 	void errorCodeChanged();
@@ -177,6 +187,7 @@ private:
 	QString mPortName;
 	int mSlaveAddress;
 	QString mSerial;
+	QString mRole;
 	int mPhaseSequence;
 	AcSensorPhase *mTotal;
 	AcSensorPhase *mL1;
