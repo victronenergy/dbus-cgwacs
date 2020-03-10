@@ -12,22 +12,26 @@ class AcSensorSettings : public QObject
 {
 	Q_OBJECT
 	Q_PROPERTY(int deviceType READ deviceType)
+	Q_PROPERTY(bool supportMultiphase READ supportMultiphase)
 	Q_PROPERTY(QString serial READ serial)
 	Q_PROPERTY(QString customName READ customName WRITE setCustomName NOTIFY customNameChanged)
 	Q_PROPERTY(QString productName READ productName NOTIFY productNameChanged)
-	Q_PROPERTY(QString serviceType READ serviceType WRITE setServiceType NOTIFY serviceTypeChanged)
+	Q_PROPERTY(QString serviceType READ serviceType WRITE setServiceType)
+	Q_PROPERTY(QString classAndVrmInstance READ classAndVrmInstance WRITE setClassAndVrmInstance NOTIFY classAndVrmInstanceChanged)
+	Q_PROPERTY(QString l2ClassAndVrmInstance READ l2ClassAndVrmInstance WRITE setL2ClassAndVrmInstance NOTIFY l2ClassAndVrmInstanceChanged)
 	Q_PROPERTY(bool isMultiPhase READ isMultiPhase WRITE setIsMultiPhase NOTIFY isMultiPhaseChanged)
+	Q_PROPERTY(bool piggyEnabled READ piggyEnabled WRITE setPiggyEnabled NOTIFY piggyEnabledChanged)
 	Q_PROPERTY(Position position READ position WRITE setPosition NOTIFY positionChanged)
-	Q_PROPERTY(int deviceInstance READ deviceInstance WRITE setDeviceInstance NOTIFY deviceInstanceChanged)
+	Q_PROPERTY(int deviceInstance READ deviceInstance)
 	Q_PROPERTY(double l1ReverseEnergy READ l1ReverseEnergy WRITE setL1ReverseEnergy NOTIFY l1ReverseEnergyChanged)
 	Q_PROPERTY(double l2ReverseEnergy READ l2ReverseEnergy WRITE setL2ReverseEnergy NOTIFY l2ReverseEnergyChanged)
 	Q_PROPERTY(double l3ReverseEnergy READ l3ReverseEnergy WRITE setL3ReverseEnergy NOTIFY l3ReverseEnergyChanged)
 
 	Q_PROPERTY(QString l2CustomName READ l2CustomName WRITE setL2CustomName NOTIFY l2CustomNameChanged)
 	Q_PROPERTY(QString l2ProductName READ l2ProductName NOTIFY l2ProductNameChanged)
-	Q_PROPERTY(QString l2ServiceType READ l2ServiceType WRITE setL2ServiceType NOTIFY l2ServiceTypeChanged)
+	Q_PROPERTY(QString l2ServiceType READ l2ServiceType)
 	Q_PROPERTY(Position l2Position READ l2Position WRITE setL2Position NOTIFY l2PositionChanged)
-	Q_PROPERTY(int l2DeviceInstance READ l2DeviceInstance WRITE setL2DeviceInstance NOTIFY l2DeviceInstanceChanged)
+	Q_PROPERTY(int l2DeviceInstance READ l2DeviceInstance NOTIFY l2DeviceInstanceChanged)
 public:
 	AcSensorSettings(int deviceType, const QString &serial, QObject *parent = 0);
 
@@ -35,6 +39,8 @@ public:
 	{
 		return mDeviceType;
 	}
+
+	bool supportMultiphase() const;
 
 	QString serial() const
 	{
@@ -61,17 +67,35 @@ public:
 	 * stream is measured).
 	 * Typical values are 'grid', 'genset' (for generator), and 'pvinverter'.
 	 */
-	QString serviceType() const
-	{
-		return mServiceType;
-	}
+	QString serviceType() const;
 
 	void setServiceType(const QString &t);
+
+	QString classAndVrmInstance() const
+	{
+		return mClassAndVrmInstance;
+	}
+
+	void setClassAndVrmInstance(const QString &s);
+
+	QString l2ClassAndVrmInstance() const
+	{
+		return mL2ClassAndVrmInstance;
+	}
+
+	void setL2ClassAndVrmInstance(const QString &s);
 
 	bool isMultiPhase() const
 	{
 		return mIsMultiPhase;
 	}
+
+	bool piggyEnabled() const
+	{
+		return mPiggyEnabled;
+	}
+
+	void setPiggyEnabled(bool b);
 
 	void setIsMultiPhase(bool b);
 
@@ -83,8 +107,6 @@ public:
 
 	const QString l2ServiceType() const;
 
-	void setL2ServiceType(const QString &v);
-
 	Position l2Position() const;
 
 	void setL2Position(Position p);
@@ -95,11 +117,7 @@ public:
 
 	int deviceInstance() const;
 
-	void setDeviceInstance(int d);
-
 	int l2DeviceInstance() const;
-
-	void setL2DeviceInstance(int d);
 
 	double l1ReverseEnergy() const;
 
@@ -122,15 +140,17 @@ signals:
 
 	void productNameChanged();
 
-	void serviceTypeChanged();
+	void classAndVrmInstanceChanged();
+
+	void l2ClassAndVrmInstanceChanged();
 
 	void isMultiPhaseChanged();
+
+	void piggyEnabledChanged();
 
 	void hub4ModeChanged();
 
 	void positionChanged();
-
-	void deviceInstanceChanged();
 
 	void l1ReverseEnergyChanged();
 
@@ -142,8 +162,6 @@ signals:
 
 	void l2ProductNameChanged();
 
-	void l2ServiceTypeChanged();
-
 	void l2PositionChanged();
 
 	void l2DeviceInstanceChanged();
@@ -154,18 +172,17 @@ private:
 	int mDeviceType;
 	QString mSerial;
 	QString mCustomName;
-	QString mServiceType;
+	QString mClassAndVrmInstance;
+	QString mL2ClassAndVrmInstance;
 	bool mIsMultiPhase;
+	bool mPiggyEnabled;
 	Position mPosition;
-	int mDeviceInstance;
 	double mL1Energy;
 	double mL2Energy;
 	double mL3Energy;
 
 	QString mL2CustomName;
-	QString mL2ServiceType;
 	Position mL2Position;
-	int mL2DeviceInstance;
 };
 
 #endif // AC_SENSOR_SETTINGS_H

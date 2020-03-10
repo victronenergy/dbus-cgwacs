@@ -19,11 +19,6 @@ class AcSensorSettingsBridge : public DBusBridge
 public:
 	AcSensorSettingsBridge(AcSensorSettings *settings,
 							  QObject *parent = 0);
-
-protected:
-	virtual bool toDBus(const QString &path, QVariant &v);
-
-	virtual bool fromDBus(const QString &path, QVariant &v);
 };
 
 #endif // AC_SENSOR_SETTINGS_BRIDGE_H

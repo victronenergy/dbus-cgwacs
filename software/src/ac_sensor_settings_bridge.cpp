@@ -5,53 +5,54 @@
 
 static const QString Service = "sub/com.victronenergy.settings";
 
+static bool positionFromDBus(DBusBridge*, QVariant &v)
+{
+	v = qVariantFromValue(static_cast<Position>(v.toInt()));
+	return true;
+}
+
+static bool positionToDBus(DBusBridge*, QVariant &v)
+{
+	v = QVariant(static_cast<int>(v.value<Position>()));
+	return true;
+}
+
 AcSensorSettingsBridge::AcSensorSettingsBridge(AcSensorSettings *settings, QObject *parent) :
 	DBusBridge(Service, false, parent)
 {
-	QString path = QString("/Settings/CGwacs/Devices/D%1").
-				   arg(settings->serial());
-	consume(settings, "deviceType", QVariant(settings->deviceType()),
-			path + "/DeviceType", false);
+	QString primaryId = settings->serial();
+	QString secondaryId = QString("%1_S").arg(settings->serial());
+	QString primaryPath = QString("/Settings/Devices/%1").arg(primaryId);
+	QString secondaryPath = QString("/Settings/Devices/%1").arg(secondaryId);
+
 	consume(settings, "customName", QVariant(""),
-			path + "/CustomName", false);
-	consume(settings, "serviceType", QVariant("grid"),
-			path + "/ServiceType", false);
+			primaryPath + "/CustomName", false);
+	consume(settings, "classAndVrmInstance",
+			primaryPath + "/ClassAndVrmInstance");
 	consume(settings, "isMultiPhase",
 			QVariant(static_cast<int>(settings->isMultiPhase())),
-			path + "/IsMultiPhase", false);
+			primaryPath + "/IsMultiphase", false);
 	consume(settings, "position", QVariant(0),
-			path + "/Position", false);
-	consume(settings, "deviceInstance", QVariant(-1),
-			path + "/DeviceInstance", false);
+			primaryPath + "/Position", false, positionFromDBus, positionToDBus);
 	consume(settings, "l1ReverseEnergy", 0.0, 0.0, 1e6,
-			path + "/L1ReverseEnergy", true);
+			primaryPath + "/L1ReverseEnergy", true);
 	consume(settings, "l2ReverseEnergy", 0.0, 0.0, 1e6,
-			path + "/L2ReverseEnergy", true);
+			primaryPath + "/L2ReverseEnergy", true);
 	consume(settings, "l3ReverseEnergy", 0.0, 0.0, 1e6,
-			path + "/L3ReverseEnergy", true);
+			primaryPath + "/L3ReverseEnergy", true);
+	consume(settings, "supportMultiphase", QVariant(static_cast<int>(settings->supportMultiphase())),
+			primaryPath + "/SupportMultiphase", false);
 
+	consume(settings, "l2ClassAndVrmInstance",
+			secondaryPath + "/ClassAndVrmInstance");
 	consume(settings, "l2CustomName", QVariant(""),
-			path + "/L2/CustomName", false);
-	consume(settings, "l2ServiceType", QVariant(""),
-			path + "/L2/ServiceType", false);
+			secondaryPath + "/CustomName", false);
 	consume(settings, "l2Position", QVariant(0),
-			path + "/L2/Position", false);
-	consume(settings, "l2DeviceInstance", QVariant(-1),
-			path + "/L2/DeviceInstance", false);
-}
+			secondaryPath + "/Position", false);
+	consume(settings, "piggyEnabled", QVariant(0),
+			secondaryPath + "/Enabled", false);
 
-bool AcSensorSettingsBridge::toDBus(const QString &path, QVariant &v)
-{
-	if (path.endsWith("/Position")) {
-		v = QVariant(static_cast<int>(v.value<Position>()));
-	}
-	return true;
-}
-
-bool AcSensorSettingsBridge::fromDBus(const QString &path, QVariant &v)
-{
-	if (path.endsWith("/Position")) {
-		v = qVariantFromValue(static_cast<Position>(v.toInt()));
-	}
-	return true;
+	// Allocate deviceinstances
+	initDeviceInstance(primaryId, "grid", MinDeviceInstance);
+	initDeviceInstance(secondaryId, "pvinverter", MinDeviceInstance);
 }

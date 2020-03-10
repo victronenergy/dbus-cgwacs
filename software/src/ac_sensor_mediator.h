@@ -43,8 +43,6 @@ private:
 
 	void registerDevice(const QString &serial);
 
-	int getDeviceInstance(const QString &serial, bool isSecondary) const;
-
 	QList<AcSensor *> mAcSensors;
 	ModbusRtu *mModbus;
 	VeQItem *mDeviceIdsItem;

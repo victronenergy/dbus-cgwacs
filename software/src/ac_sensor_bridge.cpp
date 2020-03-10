@@ -77,7 +77,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 		settings->l2DeviceInstance() :
 		settings->deviceInstance();
 	produce("/DeviceInstance", deviceInstance);
-	produce("/Serial", acSensor->serial());
+	produce("/Serial", isSecondary ? QString("%1_S").arg(acSensor->serial()) : acSensor->serial());
 	produce("/AllowedRoles", isSecondary ? (QStringList() << "pvinverter") : (QStringList() << "grid" << "pvinverter" << "genset"));
 
 	registerService();

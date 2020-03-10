@@ -41,14 +41,13 @@ void AcSensorMediator::onDeviceFound()
 	AcSensorSettings *settings = mu->settings();
 	settings->setIsMultiPhase(m->protocolType() != AcSensor::Et112Protocol);
 	settings->setParent(m);
-	connect(settings, SIGNAL(serviceTypeChanged()),
+	connect(settings, SIGNAL(classAndVrmInstanceChanged()),
 			this, SLOT(onServiceTypeChanged()));
-	connect(settings, SIGNAL(deviceInstanceChanged()),
+	connect(settings, SIGNAL(l2ClassAndVrmInstanceChanged()),
 			this, SLOT(onServiceTypeChanged()));
-	connect(settings, SIGNAL(l2DeviceInstanceChanged()),
+	connect(settings, SIGNAL(piggyEnabledChanged()),
 			this, SLOT(onServiceTypeChanged()));
-	connect(settings, SIGNAL(l2ServiceTypeChanged()),
-			this, SLOT(onServiceTypeChanged()));
+
 	AcSensorSettingsBridge *b =
 			new AcSensorSettingsBridge(settings, settings);
 	connect(b, SIGNAL(initialized()),
@@ -128,12 +127,8 @@ void AcSensorMediator::onServiceTypeChanged()
 void AcSensorMediator::publishSensor(AcSensor *acSensor, AcSensor *pvSensor,
 									 AcSensorSettings *acSensorSettings)
 {
-	if (acSensorSettings->deviceInstance() == -1)
-		acSensorSettings->setDeviceInstance(getDeviceInstance(acSensorSettings->serial(), false));
-	if (acSensorSettings->l2DeviceInstance() == -1)
-		acSensorSettings->setL2DeviceInstance(getDeviceInstance(acSensorSettings->serial(), true));
 	new AcSensorBridge(acSensor, acSensorSettings, false, acSensor);
-	if (!acSensorSettings->l2ServiceType().isEmpty())
+	if (acSensorSettings->piggyEnabled())
 		new AcSensorBridge(pvSensor, acSensorSettings, true, pvSensor);
 }
 
@@ -147,13 +142,4 @@ void AcSensorMediator::registerDevice(const QString &serial)
 		return;
 	mDeviceIds.append(serial);
 	mDeviceIdsItem->setValue(mDeviceIds.join(","));
-}
-
-int AcSensorMediator::getDeviceInstance(const QString &serial, bool isSecondary) const
-{
-	Q_ASSERT(mDeviceIdsItem->getValue().isValid());
-	int i = mDeviceIds.indexOf(serial);
-	if (i == -1)
-		return InvalidDeviceInstance;
-	return MinDeviceInstance + (2 * i + (isSecondary ? 1 : 0)) % (MaxDeviceInstance - MinDeviceInstance + 1);
 }

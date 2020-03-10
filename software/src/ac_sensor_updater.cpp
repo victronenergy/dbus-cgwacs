@@ -345,7 +345,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 		Q_ASSERT(registers.size() == 2);
 		mApplication = registers[0];
 		mDesiredMeasuringSystem =
-			mSettings->isMultiPhase() || !mSettings->l2ServiceType().isEmpty() ?
+			mSettings->isMultiPhase() || mSettings->piggyEnabled() ?
 			MeasurementSystemP3 : MeasurementSystemP1;
 		mMeasuringSystem = registers[1];
 		mState = mApplication == ApplicationH &&
@@ -392,7 +392,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 		Q_ASSERT(mAcSensor->protocolType() == AcSensor::Em340Protocol);
 		// Caution: EM3xx meters do not support MeasurementSystemP1
 		// Changing the measurement system also resets the kWh counters.
-		mDesiredMeasuringSystem = mSettings->isMultiPhase() || mSettings->l2ServiceType().isEmpty() ?
+		mDesiredMeasuringSystem = mSettings->isMultiPhase() || !mSettings->piggyEnabled() ?
 			MeasurementSystemP3 : MeasurementSystemP2;
 		mState = mDesiredMeasuringSystem == registers[0] ? Acquisition : SetMeasuringSystem;
 		break;
@@ -584,7 +584,7 @@ void AcSensorUpdater::startNextAction()
 		mPvDataProcessor = new DataProcessor(mAcPvSensor, mSettings, this);
 		connect(mSettings, SIGNAL(isMultiPhaseChanged()),
 				this, SLOT(onIsMultiPhaseChanged()));
-		connect(mSettings, SIGNAL(l2ServiceTypeChanged()),
+		connect(mSettings, SIGNAL(l2ClassAndVrmInstanceChanged()),
 				this, SLOT(onL2ServiceTypeChanged()));
 		mAcSensor->setConnectionState(Detected);
 		break;
@@ -594,7 +594,7 @@ void AcSensorUpdater::startNextAction()
 			if (mSettings->isMultiPhase()) {
 				mCommands = Em24Commands;
 				mCommandCount = Em24CommandCount;
-			} else if (!mSettings->l2ServiceType().isEmpty()) {
+			} else if (mSettings->piggyEnabled()) {
 				mCommands = Em24CommandsP1PV;
 				mCommandCount = Em24CommandsP1PVCount;
 			} else {
@@ -610,7 +610,7 @@ void AcSensorUpdater::startNextAction()
 			if (mSettings->isMultiPhase()) {
 				mCommands = Em340Commands;
 				mCommandCount = Em340CommandCount;
-			} else if (!mSettings->l2ServiceType().isEmpty()) {
+			} else if (mSettings->piggyEnabled()) {
 				mCommands = Em340CommandsP1PV;
 				mCommandCount = Em340CommandsP1PVCount;
 			} else {
@@ -725,7 +725,7 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 		if (ra.action == None)
 			break;
 		DataProcessor *dest = mDataProcessor;
-		if (!mSettings->l2ServiceType().isEmpty()) {
+		if (mSettings->piggyEnabled()) {
 			if (ra.phase == PhaseL2)
 				dest = mPvDataProcessor;
 			ra.phase = MultiPhase;

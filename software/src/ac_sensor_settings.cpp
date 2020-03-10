@@ -7,14 +7,19 @@ AcSensorSettings::AcSensorSettings(int deviceType, const QString &serial,
 	mDeviceType(deviceType),
 	mSerial(serial),
 	mIsMultiPhase(false),
+	mPiggyEnabled(false),
 	mPosition(Input1),
-	mDeviceInstance(-1),
 	mL1Energy(0),
 	mL2Energy(0),
 	mL3Energy(0),
-	mL2Position(Input1),
-	mL2DeviceInstance(-1)
+	mL2Position(Input1)
 {
+}
+
+bool AcSensorSettings::supportMultiphase() const
+{
+	return (mDeviceType >= 71 && mDeviceType <= 73) ||
+		(mDeviceType >= 340 && mDeviceType <= 345);
 }
 
 void AcSensorSettings::setCustomName(const QString &n)
@@ -27,18 +32,18 @@ void AcSensorSettings::setCustomName(const QString &n)
 
 QString AcSensorSettings::productName() const
 {
-	return getProductName(mServiceType, mPosition);
+	return getProductName(serviceType(), mPosition);
+}
+
+QString AcSensorSettings::serviceType() const
+{
+	return mClassAndVrmInstance.split(":").first();
 }
 
 void AcSensorSettings::setServiceType(const QString &t)
 {
-	if (mServiceType == t)
-		return;
-	mServiceType = t;
-	if (t != "grid")
-		setL2ServiceType(QString());
-	emit serviceTypeChanged();
-	emit productNameChanged();
+	setClassAndVrmInstance(
+		QString("%1:%2").arg(t).arg(deviceInstance()));
 }
 
 void AcSensorSettings::setIsMultiPhase(bool b)
@@ -47,8 +52,18 @@ void AcSensorSettings::setIsMultiPhase(bool b)
 		return;
 	mIsMultiPhase = b;
 	if (b)
-		setL2ServiceType(QString());
+		setPiggyEnabled(false);
 	emit isMultiPhaseChanged();
+}
+
+void AcSensorSettings::setPiggyEnabled(bool b)
+{
+	if (mPiggyEnabled == b)
+		return;
+	mPiggyEnabled = b;
+	if (b)
+		setIsMultiPhase(false);
+	emit piggyEnabledChanged();
 }
 
 const QString AcSensorSettings::l2CustomName() const
@@ -66,22 +81,29 @@ void AcSensorSettings::setL2CustomName(const QString &v)
 
 const QString AcSensorSettings::l2ProductName() const
 {
-	return getProductName(mL2ServiceType, mL2Position);
+	return getProductName(l2ServiceType(), mL2Position);
 }
 
 const QString AcSensorSettings::l2ServiceType() const
 {
-	return mL2ServiceType;
+	return mL2ClassAndVrmInstance.split(":").first();
 }
 
-void AcSensorSettings::setL2ServiceType(const QString &v)
+void AcSensorSettings::setClassAndVrmInstance(const QString &s)
 {
-	if (mL2ServiceType == v)
+	if (mClassAndVrmInstance == s)
 		return;
-	mL2ServiceType = v;
-	if (!v.isEmpty())
-		setIsMultiPhase(false);
-	emit l2ServiceTypeChanged();
+	mClassAndVrmInstance = s;
+	emit productNameChanged();
+	emit classAndVrmInstanceChanged();
+}
+
+void AcSensorSettings::setL2ClassAndVrmInstance(const QString &s)
+{
+	if (mL2ClassAndVrmInstance == s)
+		return;
+	mL2ClassAndVrmInstance = s;
+	emit l2ClassAndVrmInstanceChanged();
 	emit l2ProductNameChanged();
 }
 
@@ -115,28 +137,20 @@ void AcSensorSettings::setPosition(Position p)
 
 int AcSensorSettings::deviceInstance() const
 {
-	return mDeviceInstance;
-}
-
-void AcSensorSettings::setDeviceInstance(int d)
-{
-	if (mDeviceInstance == d)
-		return;
-	mDeviceInstance = d;
-	emit deviceInstanceChanged();
+	bool ok;
+	int di = mClassAndVrmInstance.split(":").last().toInt(&ok);
+	if (ok)
+		return di;
+	return -1;
 }
 
 int AcSensorSettings::l2DeviceInstance() const
 {
-	return mL2DeviceInstance;
-}
-
-void AcSensorSettings::setL2DeviceInstance(int d)
-{
-	if (mL2DeviceInstance == d)
-		return;
-	mL2DeviceInstance = d;
-	emit l2DeviceInstanceChanged();
+	bool ok;
+	int di = mL2ClassAndVrmInstance.split(":").last().toInt(&ok);
+	if (ok)
+		return di;
+	return -1;
 }
 
 double AcSensorSettings::l1ReverseEnergy() const
