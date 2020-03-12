@@ -120,13 +120,9 @@ QString AcSensorBridge::getServiceName(AcSensor *acSensor, AcSensorSettings *set
 	QString portId = acSensor->portName().
 			replace("/dev/", "").
 			replace("/", "_");
-	int deviceInstance = isSecondary ?
-		settings->l2DeviceInstance() :
-		settings->deviceInstance();
-	QString serviceName = QString("pub/com.victronenergy.%1.cgwacs_%2_di%3_mb%4").
+	QString serviceName = QString("pub/com.victronenergy.%1.cgwacs_%2_mb%3").
 			arg(serviceType).
 			arg(portId).
-			arg(deviceInstance).
 			arg(acSensor->slaveAddress());
 	if (isSecondary)
 		serviceName += "_l2";
