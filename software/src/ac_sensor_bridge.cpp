@@ -1,5 +1,6 @@
 #include <cmath>
 #include <QCoreApplication>
+#include <QStringList>
 #include <QsLog.h>
 #include <velib/vecan/products.h>
 #include "ac_sensor.h"

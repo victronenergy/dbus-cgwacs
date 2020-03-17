@@ -1,3 +1,4 @@
+#include <QStringList>
 #include <QsLog.h>
 #include "ac_sensor_settings.h"
 
