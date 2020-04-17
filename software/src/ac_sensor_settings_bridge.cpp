@@ -20,8 +20,8 @@ static bool positionToDBus(DBusBridge*, QVariant &v)
 AcSensorSettingsBridge::AcSensorSettingsBridge(AcSensorSettings *settings, QObject *parent) :
 	DBusBridge(Service, false, parent)
 {
-	QString primaryId = settings->serial();
-	QString secondaryId = QString("%1_S").arg(settings->serial());
+	QString primaryId = QString("cgwacs_%1").arg(settings->serial());
+	QString secondaryId = QString("cgwacs_%1_S").arg(settings->serial());
 	QString primaryPath = QString("/Settings/Devices/%1").arg(primaryId);
 	QString secondaryPath = QString("/Settings/Devices/%1").arg(secondaryId);
 
