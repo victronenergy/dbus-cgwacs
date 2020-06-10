@@ -48,7 +48,7 @@ AcSensorSettingsBridge::AcSensorSettingsBridge(AcSensorSettings *settings, QObje
 	consume(settings, "l2CustomName", QVariant(""),
 			secondaryPath + "/CustomName", false);
 	consume(settings, "l2Position", QVariant(0),
-			secondaryPath + "/Position", false);
+			secondaryPath + "/Position", false, positionFromDBus, positionToDBus);
 	consume(settings, "piggyEnabled", QVariant(0),
 			secondaryPath + "/Enabled", false);
 
