@@ -14,6 +14,12 @@ static bool roleFromDBus(DBusBridge*, QVariant &v)
 	return (QStringList() << "grid" << "pvinverter" << "genset").contains(s);
 }
 
+static bool positionFromDBus(DBusBridge*, QVariant &v)
+{
+	int n = v.toInt();
+	return (n >= 0) && (n < 3);
+}
+
 AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 							   bool isSecondary, QObject *parent) :
 	DBusBridge(getServiceName(acSensor, settings, isSecondary), true, parent)
@@ -38,7 +44,8 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	producePowerInfo(acSensor->l3(), "/Ac/L3", isGridmeter);
 
 	if (isSecondary || settings->serviceType() == "pvinverter")
-		produce(settings, isSecondary ? "l2Position" : "position", "/Position");
+		produce(settings, isSecondary ? "l2Position" : "position", "/Position",
+			QString(), -1, false, positionFromDBus);
 	produce(settings, isSecondary ? "l2ProductName" : "productName", "/ProductName");
 	produce(settings, isSecondary ? "l2CustomName" : "customName", "/CustomName");
 	produce(settings, isSecondary ? "l2ServiceType" : "serviceType", "/Role",
