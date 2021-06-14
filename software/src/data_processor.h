@@ -31,6 +31,8 @@ public:
 
 	void setNegativeEnergy(Phase phase, double value);
 
+	void setApparentPower(Phase phase, double value);
+
 	void updateEnergySettings();
 
 private:

@@ -74,6 +74,11 @@ void DataProcessor::setNegativeEnergy(Phase phase, double value)
 	setReverseEnergy(phase, value);
 }
 
+void DataProcessor::setApparentPower(Phase phase, double value)
+{
+	mAcSensor->getPhase(phase)->setApparentPower(value);
+}
+
 void DataProcessor::updateEnergySettings()
 {
 	if (!mStoreReverseEnergy)

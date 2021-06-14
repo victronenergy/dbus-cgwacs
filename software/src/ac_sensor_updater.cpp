@@ -37,7 +37,8 @@ enum ParameterType {
 	Voltage,
 	Current,
 	PositiveEnergy,
-	NegativeEnergy
+	NegativeEnergy,
+	ApparentPower
 };
 
 struct RegisterCommand {
@@ -60,7 +61,9 @@ static const CompositeCommand Em24Commands[] = {
 	{ 0x000C, 8, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 } } },
 	{ 0x003E, 10, { { 0, PositiveEnergy, MultiPhase } } },
 	{ 0x0046, 12, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 } } },
-	{ 0x005C, 14, { { 0, NegativeEnergy, MultiPhase } } }
+	{ 0x005C, 13, { { 0, NegativeEnergy, MultiPhase } } },
+	{ 0x0018, 14, { { 0, ApparentPower, PhaseL1 }, { 2, ApparentPower, PhaseL2 }, { 4, ApparentPower, PhaseL3 } } },
+	{ 0x002A, 15, { { 0, ApparentPower, MultiPhase }, { 2, Dummy, MultiPhase } } }
 };
 
 static const int Em24CommandCount = sizeof(Em24Commands) / sizeof(Em24Commands[0]);
@@ -76,7 +79,8 @@ static const CompositeCommand Em24CommandsP1[] = {
 	{ 0x0024, 2, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x000C, 8, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x003E, 10, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x005C, 14, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
+	{ 0x005C, 14, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x002A, 15, { { 0, ApparentPower, MultiPhase }, { 2, Dummy, MultiPhase } } }
 };
 
 static const int Em24CommandP1Count = sizeof(Em24CommandsP1) / sizeof(Em24CommandsP1[0]);
@@ -91,7 +95,8 @@ static const CompositeCommand Em24CommandsP1PV[] = {
 	// we assume that in case of a shared system L1 is a grid meter and L2 a
 	// PV inverter (which always has ReverseEnergy=0 because power and current
 	// are always positive).
-	{ 0x005C, 10, { { 0, NegativeEnergy, PhaseL1 }, { 1, Dummy, MultiPhase } } }
+	{ 0x005C, 10, { { 0, NegativeEnergy, PhaseL1 }, { 1, Dummy, MultiPhase } } },
+	{ 0x0018, 12, { { 0, ApparentPower, PhaseL1 }, { 2, ApparentPower, PhaseL2 } } }
 };
 
 static const int Em24CommandsP1PVCount = sizeof(Em24CommandsP1PV) / sizeof(Em24CommandsP1PV[0]);
@@ -100,7 +105,8 @@ static const CompositeCommand Em112Commands[] = {
 	{ 0x0004, 0, { { 0, Power, MultiPhase } } },
 	{ 0x0000, 4, { { 0, Voltage, MultiPhase }, { 2, Current, MultiPhase } } },
 	{ 0x0010, 8, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x0020, 12, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
+	{ 0x0020, 12, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x0006, 15, { { 0, ApparentPower, MultiPhase }, { 2, Dummy, MultiPhase } } }
 };
 
 static const int Em112CommandCount = sizeof(Em112Commands) / sizeof(Em112Commands[0]);
@@ -114,7 +120,7 @@ static const CompositeCommand Em340Commands[] = {
 	{ 0x0034, 5, { { 0, PositiveEnergy, MultiPhase } } },
 	{ 0x0040, 6, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 } } },
 	{ 0x004E, 7, { { 0, NegativeEnergy, MultiPhase } } },
-	{ 0x0060, 8, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 }, { 4, NegativeEnergy, PhaseL3 } } },
+	{ 0x0060, 8, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 }, { 4, NegativeEnergy, PhaseL3 } } }
 };
 
 static const int Em340CommandCount = sizeof(Em340Commands) / sizeof(Em340Commands[0]);
@@ -782,6 +788,11 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 						dest->setNegativeEnergy(PhaseL1, v);
 				}
 				break;
+			case ApparentPower:
+				v = getDouble(registers, ra.regOffset, 0.1);
+				dest->setApparentPower(ra.phase, v);
+				if (setPhaseL1)
+					dest->setApparentPower(PhaseL1, v);
 			default:
 				break;
 			}

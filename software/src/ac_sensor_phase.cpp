@@ -51,6 +51,14 @@ void AcSensorPhase::setEnergyReverse(double e)
 	emit energyReverseChanged();
 }
 
+void AcSensorPhase::setApparentPower(double v)
+{
+	if (valuesEqual(mApparentPower, v))
+		return;
+	mApparentPower = v;
+	emit apparentPowerChanged();
+}
+
 void AcSensorPhase::resetValues()
 {
 	setCurrent(qQNaN());
@@ -58,6 +66,7 @@ void AcSensorPhase::resetValues()
 	setVoltage(qQNaN());
 	setEnergyForward(qQNaN());
 	setEnergyReverse(qQNaN());
+	setApparentPower(qQNaN());
 }
 
 bool AcSensorPhase::valuesEqual(double v1, double v2)

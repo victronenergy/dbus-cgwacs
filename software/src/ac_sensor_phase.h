@@ -15,6 +15,7 @@ class AcSensorPhase : public QObject
 	Q_PROPERTY(double power READ power WRITE setPower NOTIFY powerChanged)
 	Q_PROPERTY(double energyForward READ energyForward WRITE setEnergyForward NOTIFY energyForwardChanged)
 	Q_PROPERTY(double energyReverse READ energyReverse WRITE setEnergyReverse NOTIFY energyReverseChanged)
+	Q_PROPERTY(double apparentPower READ apparentPower WRITE setApparentPower NOTIFY apparentPowerChanged)
 public:
 	explicit AcSensorPhase(QObject *parent = 0);
 
@@ -53,6 +54,13 @@ public:
 
 	void setEnergyReverse(double e);
 
+	double apparentPower() const
+	{
+		return mApparentPower;
+	}
+
+	void setApparentPower(double v);
+
 	/*!
 	 * @brief Reset all measured values to NaN
 	 */
@@ -69,6 +77,8 @@ signals:
 
 	void energyReverseChanged();
 
+	void apparentPowerChanged();
+
 private:
 	static bool valuesEqual(double v1, double v2);
 
@@ -77,6 +87,7 @@ private:
 	double mPower;
 	double mEnergyForward;
 	double mEnergyReverse;
+	double mApparentPower;
 };
 
 #endif // POWER_INFO_H
