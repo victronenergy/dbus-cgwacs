@@ -29,7 +29,7 @@ class AcSensorSettings : public QObject
 
 	Q_PROPERTY(QString l2CustomName READ l2CustomName WRITE setL2CustomName NOTIFY l2CustomNameChanged)
 	Q_PROPERTY(QString l2ProductName READ l2ProductName NOTIFY l2ProductNameChanged)
-	Q_PROPERTY(QString l2ServiceType READ l2ServiceType)
+	Q_PROPERTY(QString l2ServiceType READ l2ServiceType WRITE setL2ServiceType)
 	Q_PROPERTY(Position l2Position READ l2Position WRITE setL2Position NOTIFY l2PositionChanged)
 	Q_PROPERTY(int l2DeviceInstance READ l2DeviceInstance NOTIFY l2DeviceInstanceChanged)
 public:
@@ -106,6 +106,8 @@ public:
 	const QString l2ProductName() const;
 
 	const QString l2ServiceType() const;
+
+	void setL2ServiceType(const QString &t);
 
 	Position l2Position() const;
 

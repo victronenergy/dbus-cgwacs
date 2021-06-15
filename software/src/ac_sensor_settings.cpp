@@ -90,6 +90,12 @@ const QString AcSensorSettings::l2ServiceType() const
 	return mL2ClassAndVrmInstance.split(":").first();
 }
 
+void AcSensorSettings::setL2ServiceType(const QString &t)
+{
+	setL2ClassAndVrmInstance(
+		QString("%1:%2").arg(t).arg(l2DeviceInstance()));
+}
+
 void AcSensorSettings::setClassAndVrmInstance(const QString &s)
 {
 	if (mClassAndVrmInstance == s)
