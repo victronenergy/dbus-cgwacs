@@ -11,7 +11,7 @@
 static bool roleFromDBus(DBusBridge*, QVariant &v)
 {
 	QString s = v.toString();
-	return (QStringList() << "grid" << "pvinverter" << "genset").contains(s);
+	return (QStringList() << "grid" << "pvinverter" << "genset" << "acmeter").contains(s);
 }
 
 static bool positionFromDBus(DBusBridge*, QVariant &v)
@@ -86,7 +86,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 		settings->deviceInstance();
 	produce("/DeviceInstance", deviceInstance);
 	produce("/Serial", isSecondary ? QString("%1_S").arg(acSensor->serial()) : acSensor->serial());
-	produce("/AllowedRoles", isSecondary ? (QStringList() << "pvinverter") : (QStringList() << "grid" << "pvinverter" << "genset"));
+	produce("/AllowedRoles", isSecondary ? (QStringList() << "pvinverter") : (QStringList() << "grid" << "pvinverter" << "genset" << "acmeter"));
 
 	registerService();
 }
