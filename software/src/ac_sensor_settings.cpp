@@ -258,7 +258,7 @@ QString AcSensorSettings::getProductName(const QString &serviceType, Position po
 			productName.append(" on ").append(p);
 		return productName;
 	}
-	if (serviceType == "acmeter")
-		return "AC meter";
+	if (serviceType == "acload")
+		return "AC load";
 	return "AC sensor";
 }
