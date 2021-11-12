@@ -77,3 +77,7 @@ HEADERS += \
 
 DISTFILES += \
     ../README.md
+
+*g++* {
+    QMAKE_CXX += -Wno-class-memaccess -Wno-deprecated-copy
+}
