@@ -1,6 +1,7 @@
 #include <QsLog.h>
 #include "ac_sensor.h"
 #include "ac_sensor_phase.h"
+#include "ac_sensor_bridge.h"
 
 AcSensor::AcSensor(const QString &portName, int slaveAddress, QObject *parent) :
 	QObject(parent),
@@ -124,4 +125,11 @@ void AcSensor::resetValues()
 	mL1->resetValues();
 	mL2->resetValues();
 	mL3->resetValues();
+}
+
+void AcSensor::flushValues()
+{
+	AcSensorBridge *bridge = findChild<AcSensorBridge *>();
+	if (bridge != 0)
+		bridge->publishPendingChanges();
 }

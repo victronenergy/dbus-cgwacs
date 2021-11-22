@@ -115,6 +115,8 @@ public:
 
 	void initDeviceInstance(const QString &uniqueId, const QString &deviceClass, int defaultValue);
 
+	void publishPendingChanges();
+
 signals:
 	void initialized();
 

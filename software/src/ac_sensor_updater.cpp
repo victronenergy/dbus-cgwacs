@@ -794,6 +794,7 @@ void AcSensorUpdater::startNextAcquisition()
 					mAcSensor->setConnectionState(Connected);
 					mAcPvSensor->setConnectionState(Connected);
 				}
+				mAcSensor->flushValues(); // Flush values out on dbus
 				startNextAction();
 				return;
 			}

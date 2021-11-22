@@ -170,6 +170,11 @@ public:
 	 */
 	void resetValues();
 
+	/*
+	 * Send values out on dbus
+	 */
+	void flushValues();
+
 signals:
 	void connectionStateChanged();
 
