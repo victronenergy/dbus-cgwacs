@@ -20,6 +20,12 @@ static bool positionFromDBus(DBusBridge*, QVariant &v)
 	return (n >= 0) && (n < 3);
 }
 
+static bool customNameFromDBus(DBusBridge*, QVariant &v)
+{
+	Q_UNUSED(v)
+	return true;
+}
+
 AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 							   bool isSecondary, QObject *parent) :
 	DBusBridge(getServiceName(acSensor, settings, isSecondary), true, parent)
@@ -47,7 +53,8 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 		produce(settings, isSecondary ? "l2Position" : "position", "/Position",
 			QString(), -1, false, positionFromDBus);
 	produce(settings, isSecondary ? "l2ProductName" : "productName", "/ProductName");
-	produce(settings, isSecondary ? "l2CustomName" : "customName", "/CustomName");
+	produce(settings, isSecondary ? "l2CustomName" : "customName", "/CustomName",
+			QString(), -1, false, customNameFromDBus);
 	produce(settings, isSecondary ? "l2ServiceType" : "serviceType", "/Role",
 		QString(), -1, false, roleFromDBus);
 
@@ -105,9 +112,8 @@ bool AcSensorBridge::toDBus(const QString &path, QVariant &value)
 
 bool AcSensorBridge::fromDBus(const QString &path, QVariant &value)
 {
+	Q_UNUSED(path)
 	Q_UNUSED(value)
-	if (path == "/CustomName")
-		return true;
 	return false;
 }
 
