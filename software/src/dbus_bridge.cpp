@@ -395,3 +395,11 @@ void BridgeItem::produceValue(QVariant value, VeQItem::State state)
 	if (valueIsChanged)
 		emit valueChanged(this, value);
 }
+
+void DBusBridge::publishPendingChanges()
+{
+	if (mUpdateTimer != 0) {
+		onUpdateTimer();
+		mUpdateTimer->start(); // Restart the timer
+	}
+}
