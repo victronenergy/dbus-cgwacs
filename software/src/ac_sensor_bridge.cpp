@@ -80,6 +80,11 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 			VE_PROD_ID_CARLO_GAVAZZI_ET340_PIGGY_BACK :
 			VE_PROD_ID_CARLO_GAVAZZI_ET340;
 		break;
+	case AcSensor::Em540Protocol:
+		productId = isSecondary ?
+			VE_PROD_ID_CARLO_GAVAZZI_EM540_PIGGY_BACK :
+			VE_PROD_ID_CARLO_GAVAZZI_EM540;
+		break;
 	default:
 		Q_ASSERT(false);
 		break;

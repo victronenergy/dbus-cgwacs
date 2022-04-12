@@ -13,8 +13,9 @@ static const int MeasurementSystemP2 = 2; // 2 phase (2P)
 static const int MeasurementSystemP3 = 0; // 3 phase (3Pn)
 
 // measurement mode used for ET1xx/ET3xx meters. Mode B means that feed back to grid yields
-// negative power readings.
+// negative power readings. EM540 supports mode C, which should do total energy accounting.
 static const int MeasurementModeB = 1;
+static const int MeasurementModeC = 2;
 
 static const int ApplicationH = 7; // show negative power (EM24)
 static const int MaxAcquisitionIndex = 16;
@@ -140,6 +141,44 @@ static const CompositeCommand Em340CommandsP1PV[] = {
 
 static const int Em340CommandsP1PVCount = sizeof(Em340CommandsP1PV) / sizeof(Em340CommandsP1PV[0]);
 
+static const CompositeCommand Em540Commands[] = {
+	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
+	{ 0x0012, 0, { { 0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
+	{ 0x0024, 1, { { 0, Voltage, MultiPhase }, { 2, Dummy, MultiPhase } } },
+	{ 0x0000, 2, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 }, { 4, Voltage, PhaseL3 }, {6, Dummy, MultiPhase } } },
+	{ 0x000C, 4, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 }, {6, Dummy, MultiPhase } } },
+	{ 0x0034, 6, { { 0, PositiveEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
+	{ 0x0040, 8, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
+	{ 0x004E, 10, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
+};
+
+static const int Em540CommandCount = sizeof(Em540Commands) / sizeof(Em540Commands[0]);
+
+static const CompositeCommand Em540P1Commands[] = {
+	{ 0x0012, 0, { { 0, Power, MultiPhase } } },
+	{ 0x0000, 1, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x000C, 3, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x0040, 5, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x004E, 7, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+};
+
+static const int Em540P1CommandCount = sizeof(Em540P1Commands) / sizeof(Em540P1Commands[0]);
+
+static const CompositeCommand Em540CommandsP1PV[] = {
+	{ 0x0012, 0, { { 0, Power, PhaseL1 } } },
+	{ 0x0014, 2, { { 0, Power, PhaseL2 }, { 1, Dummy, MultiPhase } } },
+	{ 0x0000, 4, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 } } },
+	{ 0x000C, 6, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 } } },
+	{ 0x0040, 8, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 } } },
+	// As with the EM24, there is no individual negative counters for exported
+	// energy. We assume that in a shared system, L1 is a grid meter and L2
+	// is a PV-inverter, so on L2 there is never any imported power, therefore
+	// all negative energy can be assumed to be on L1.
+	{ 0x004E, 10, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 } } }
+};
+
+static const int Em540CommandsP1PVCount = sizeof(Em540CommandsP1PV) / sizeof(Em540CommandsP1PV[0]);
+
 int getMaxOffset(const CompositeCommand &cmd) {
 	int maxOffset = 0;
 	for (int i=0; i<MaxRegCount; ++i) {
@@ -225,6 +264,7 @@ void AcSensorUpdater::startMeasurements()
 		mState = CheckSetup;
 		break;
 	case AcSensor::Et112Protocol:
+	case AcSensor::Em540Protocol:
 		// Fall through
 	case AcSensor::Em340Protocol:
 		mState = CheckMeasurementMode;
@@ -287,6 +327,10 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 			mSetCurrentSign = false;
 			mState = Serial;
 			break;
+		case AcSensor::Em540Protocol:
+			mSetCurrentSign = true;
+			mState = Serial;
+			break;
 		case AcSensor::Unknown:
 			QLOG_WARN() << "Unknown device ID, disconnecting";
 			disconnectSensor();
@@ -328,7 +372,8 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 
 		// For meters that support it, read the phase sequence
 		if ((mAcSensor->protocolType() == AcSensor::Em24Protocol) ||
-				(mAcSensor->protocolType() == AcSensor::Em340Protocol)) {
+				(mAcSensor->protocolType() == AcSensor::Em340Protocol) ||
+				(mAcSensor->protocolType() == AcSensor::Em540Protocol)) {
 			mState = PhaseSequence;
 		} else {
 			mState = WaitForStart;
@@ -378,18 +423,28 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 		}
 		break;
 	case CheckMeasurementMode:
-		Q_ASSERT(registers.size() == 1);
-		if (registers[0] == MeasurementModeB) {
-			mState = mAcSensor->protocolType() == AcSensor::Em340Protocol ?
-				CheckMeasurementSystem :
-				Acquisition;
-		} else {
-			mState = SetMeasurementMode;
+		{
+			Q_ASSERT(registers.size() == 1);
+			int desiredMode = mAcSensor->protocolType() == AcSensor::Em340Protocol ?
+				MeasurementModeB : MeasurementModeC;
+			if (registers[0] == desiredMode) {
+				switch (mAcSensor->protocolType()) {
+				case AcSensor::Em340Protocol:
+				case AcSensor::Em540Protocol:
+					mState = CheckMeasurementSystem;
+					break;
+				default:
+					mState = Acquisition;
+				}
+			} else {
+				mState = SetMeasurementMode;
+			}
 		}
 		break;
 	case CheckMeasurementSystem:
 		Q_ASSERT(registers.size() == 1);
-		Q_ASSERT(mAcSensor->protocolType() == AcSensor::Em340Protocol);
+		Q_ASSERT((mAcSensor->protocolType() == AcSensor::Em340Protocol) ||
+			(mAcSensor->protocolType() == AcSensor::Em540Protocol));
 		// Caution: EM3xx meters do not support MeasurementSystemP1
 		// Changing the measurement system also resets the kWh counters.
 		mDesiredMeasuringSystem = mSettings->isMultiPhase() || !mSettings->piggyEnabled() ?
@@ -436,9 +491,16 @@ void AcSensorUpdater::onWriteCompleted(int function, quint8 addr,
 		mState = Acquisition;
 		break;
 	case SetMeasurementMode:
-		mState = mAcSensor->protocolType() == AcSensor::Em340Protocol ?
-			CheckMeasurementSystem :
-			Acquisition;
+		{
+			switch (mAcSensor->protocolType()) {
+			case AcSensor::Em340Protocol:
+			case AcSensor::Em540Protocol:
+				mState = CheckMeasurementSystem;
+				break;
+			default:
+				mState = Acquisition;
+			}
+		}
 		break;
 	case SetAddress:
 		QLOG_WARN() << "Slave Address Changed";
@@ -524,18 +586,31 @@ void AcSensorUpdater::startNextAction()
 		if (mAcSensor->protocolType() == AcSensor::Em24Protocol) {
 			readRegisters(RegEm24Serial, 7);
 		} else {
-			// Also works for EM3xx
+			// Also works for EM3xx and EM5xx
 			readRegisters(RegEm112Serial, 7);
 		}
 		break;
 	case FirmwareVersion:
-		readRegisters(RegFirmwareVersion, 1);
+		switch (mAcSensor->protocolType()) {
+		case AcSensor::Em24Protocol:
+		case AcSensor::Et112Protocol:
+			readRegisters(RegAltFirmwareVersion, 1); // EM24 and ET112 has version code at 303h
+			break;
+		default:
+			readRegisters(RegFirmwareVersion, 1); // EM340 and EM540 has firmware version at 302h
+		}
 		break;
 	case PhaseSequence:
-		readRegisters(
-			mAcSensor->protocolType() == AcSensor::Em24Protocol ?
-				RegEm24PhaseSequence :
-				RegEm340PhaseSequence, 1);
+		switch(mAcSensor->protocolType()) {
+		case AcSensor::Em24Protocol:
+			readRegisters(RegEm24PhaseSequence, 1);
+			break;
+		case AcSensor::Em540Protocol:
+			readRegisters(RegEm540PhaseSequence, 1);
+			break;
+		default:
+			readRegisters(RegEm340PhaseSequence, 1);
+		}
 		break;
 	case CheckSetup:
 		readRegisters(RegApplication, 2);
@@ -560,20 +635,27 @@ void AcSensorUpdater::startNextAction()
 			mDesiredMeasuringSystem);
 		break;
 	case CheckMeasurementMode:
-		readRegisters(RegEm112MeasurementMode, 1);
+		readRegisters(RegEm112MeasurementMode, 1); // Same for EM3xx, EM1xx, EM540
 		break;
 	case CheckMeasurementSystem:
 		readRegisters(
 			mAcSensor->protocolType() == AcSensor::Em24Protocol ?
 				RegMeasurementSystem :
-				RegEm340MeasurementSystem,
+				RegEm340MeasurementSystem, // Also works for EM540
 			1);
 		break;
 	case SetMeasurementMode:
-		QLOG_INFO() << "Set EM1xx/EM3xx measurement mode to B";
-		// This will cause the EM1xx/EM3xx range to report negative power values when
-		// sending power to the grid.
-		writeRegister(RegEm112MeasurementMode, MeasurementModeB);
+		switch (mAcSensor->protocolType()) {
+		case AcSensor::Em540Protocol:
+			QLOG_INFO() << "Set EM540 measurement mode to C";
+			writeRegister(RegEm112MeasurementMode, MeasurementModeC);
+			break;
+		default:
+			// This will cause the EM1xx/EM3xx range to report negative power values when
+			// sending power to the grid.
+			QLOG_INFO() << "Set EM1xx/EM3xx measurement mode to B";
+			writeRegister(RegEm112MeasurementMode, MeasurementModeB);
+		}
 		break;
 	case WaitForStart:
 		Q_ASSERT(mSettings == 0);
@@ -616,6 +698,18 @@ void AcSensorUpdater::startNextAction()
 			} else {
 				mCommands = Em340P1Commands;
 				mCommandCount = Em340P1CommandCount;
+			}
+			break;
+		case AcSensor::Em540Protocol:
+			if (mSettings->isMultiPhase()) {
+				mCommands = Em540Commands;
+				mCommandCount = Em540CommandCount;
+			} else if (mSettings->piggyEnabled()) {
+				mCommands = Em540CommandsP1PV;
+				mCommandCount = Em540CommandsP1PVCount;
+			} else {
+				mCommands = Em540P1Commands;
+				mCommandCount = Em540P1CommandCount;
 			}
 			break;
 		case AcSensor::Unknown:
@@ -773,7 +867,8 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 				// ET112 seems to return negative values for kWh(-), unlike the
 				// other meters.
 				v = qAbs(getDouble(registers, ra.regOffset, 0.1));
-				if (mAcSensor->protocolType() == AcSensor::Em24Protocol &&
+				if ((mAcSensor->protocolType() == AcSensor::Em24Protocol ||
+					mAcSensor->protocolType() == AcSensor::Em540Protocol) &&
 					mSettings->isMultiPhase()) {
 					dest->setNegativeEnergy(v);
 				} else {

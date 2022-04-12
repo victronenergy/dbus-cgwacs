@@ -66,6 +66,7 @@ public:
 		Em24Protocol,
 		Et112Protocol,
 		Em340Protocol,
+		Em540Protocol,
 		Unknown
 	};
 
