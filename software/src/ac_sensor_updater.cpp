@@ -486,7 +486,7 @@ void AcSensorUpdater::onWriteCompleted(int function, quint8 addr,
 		break;
 	case SetMeasuringSystem:
 		Q_ASSERT(function == ModbusRtu::WriteSingleRegister);
-		Q_ASSERT(address == RegMeasurementSystem);
+		Q_ASSERT(address == RegMeasurementSystem || address == RegEm340MeasurementSystem);
 		Q_ASSERT(value == mDesiredMeasuringSystem);
 		mState = Acquisition;
 		break;
