@@ -2,7 +2,20 @@ dbus-cgwacs
 ===========
 
 Reads energy measuremens from Carlo Gavazzi Wired AC Sensors (hence cgwacs),
-and puts in on the D-Bus. Supported models: EM24, ET112, and ET340.
+and puts in on the D-Bus. Supported models: EM24, ET112, ET340, EM530 and EM540.
+
+Note that for the EM530 and EM540, only Sub-family `X` and `PFC` is supported.
+
+| Family     | Sub-family | Part number        | Supported |
+|------------|------------|--------------------|-----------|
+| EM530-IS   | X          | EM530DINAV53XS1X   | Yes       |
+|            | PFA        | EM530DINAV53XS1PFA | No        |
+|            | PFB        | EM530DINAV53XS1PFB | No        |
+|            | PFC        | EM530DINAV53XS1PFC | Yes       |
+| EM540-IS   | X          | EM540DINAV23XS1X   | Yes       |
+|            | PFA        | EM540DINAV23XS1PFA | No        |
+|            | PFB        | EM540DINAV23XS1PFB | No        |
+|            | PFC        | EM540DINAV23XS1PFC | Yes       |
 
 Architecture
 ============
