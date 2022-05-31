@@ -175,6 +175,12 @@ public:
 	 */
 	void flushValues();
 
+	/*
+	 * How often the modbus registers are updated, a static value based on what
+	 * we know about the meter.
+	 */
+	int refreshTime();
+
 signals:
 	void connectionStateChanged();
 

@@ -105,6 +105,11 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	produce("/Serial", isSecondary ? QString("%1_S").arg(acSensor->serial()) : acSensor->serial());
 	produce("/AllowedRoles", isSecondary ? (QStringList() << "pvinverter" << "acload") : (QStringList() << "grid" << "pvinverter" << "genset" << "acload"));
 
+	// Publish some information about the known refresh time of these devices.
+	// This is used by hub4control to know how fast it can make its control
+	// loop.
+	produce("/RefreshTime", acSensor->refreshTime());
+
 	registerService();
 }
 

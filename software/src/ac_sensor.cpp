@@ -133,3 +133,17 @@ void AcSensor::flushValues()
 	if (bridge != 0)
 		bridge->publishPendingChanges();
 }
+
+int AcSensor::refreshTime() {
+	switch (protocolType()) {
+		case Em24Protocol:
+			return 600;
+		case Et112Protocol:
+			return 750;
+		case Em540Protocol:
+			return 100;
+		case Em340Protocol:
+		default:
+			return 2000;
+	}
+}
