@@ -20,7 +20,7 @@ AcSensorSettings::AcSensorSettings(int deviceType, const QString &serial,
 bool AcSensorSettings::supportMultiphase() const
 {
 	return (mDeviceType >= 71 && mDeviceType <= 73) || // EM24
-		(mDeviceType >= 340 && mDeviceType <= 345) ||  // ET340
+		(mDeviceType >= 330 && mDeviceType <= 348) ||  // ET340
 		(mDeviceType >= 1744 && mDeviceType <= 1763);  // EM540
 }
 
