@@ -106,7 +106,7 @@ static const CompositeCommand Em112Commands[] = {
 
 static const int Em112CommandCount = sizeof(Em112Commands) / sizeof(Em112Commands[0]);
 
-static const CompositeCommand Em340Commands[] = {
+static const CompositeCommand Et340Commands[] = {
 	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
 	{ 0x0012, 0, { { 0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
 	{ 0x0024, 1, { { 0, Voltage, MultiPhase }, { 2, Dummy, MultiPhase } } },
@@ -118,9 +118,9 @@ static const CompositeCommand Em340Commands[] = {
 	{ 0x0060, 12, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 }, { 4, NegativeEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
 };
 
-static const int Em340CommandCount = sizeof(Em340Commands) / sizeof(Em340Commands[0]);
+static const int Et340CommandCount = sizeof(Et340Commands) / sizeof(Et340Commands[0]);
 
-static const CompositeCommand Em340P1Commands[] = {
+static const CompositeCommand Et340P1Commands[] = {
 	{ 0x0012, 0, { { 0, Power, MultiPhase } } },
 	{ 0x0000, 1, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x000C, 3, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
@@ -128,9 +128,9 @@ static const CompositeCommand Em340P1Commands[] = {
 	{ 0x0060, 7, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
 };
 
-static const int Em340P1CommandCount = sizeof(Em340P1Commands) / sizeof(Em340P1Commands[0]);
+static const int Et340P1CommandCount = sizeof(Et340P1Commands) / sizeof(Et340P1Commands[0]);
 
-static const CompositeCommand Em340CommandsP1PV[] = {
+static const CompositeCommand Et340CommandsP1PV[] = {
 	{ 0x0012, 0, { { 0, Power, PhaseL1 } } },
 	{ 0x0014, 2, { { 0, Power, PhaseL2 }, { 1, Dummy, MultiPhase } } },
 	{ 0x0000, 4, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 } } },
@@ -139,7 +139,7 @@ static const CompositeCommand Em340CommandsP1PV[] = {
 	{ 0x0060, 10, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 } } }
 };
 
-static const int Em340CommandsP1PVCount = sizeof(Em340CommandsP1PV) / sizeof(Em340CommandsP1PV[0]);
+static const int Et340CommandsP1PVCount = sizeof(Et340CommandsP1PV) / sizeof(Et340CommandsP1PV[0]);
 
 static const CompositeCommand Em540Commands[] = {
 	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
@@ -266,7 +266,7 @@ void AcSensorUpdater::startMeasurements()
 	case AcSensor::Et112Protocol:
 	case AcSensor::Em540Protocol:
 		// Fall through
-	case AcSensor::Em340Protocol:
+	case AcSensor::Et340Protocol:
 		mState = CheckMeasurementMode;
 		break;
 	case AcSensor::Unknown:
@@ -323,7 +323,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 			mSetCurrentSign = false;
 			mState = Serial;
 			break;
-		case AcSensor::Em340Protocol:
+		case AcSensor::Et340Protocol:
 			mSetCurrentSign = false;
 			mState = Serial;
 			break;
@@ -372,7 +372,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 
 		// For meters that support it, read the phase sequence
 		if ((mAcSensor->protocolType() == AcSensor::Em24Protocol) ||
-				(mAcSensor->protocolType() == AcSensor::Em340Protocol) ||
+				(mAcSensor->protocolType() == AcSensor::Et340Protocol) ||
 				(mAcSensor->protocolType() == AcSensor::Em540Protocol)) {
 			mState = PhaseSequence;
 		} else {
@@ -425,11 +425,11 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 	case CheckMeasurementMode:
 		{
 			Q_ASSERT(registers.size() == 1);
-			int desiredMode = mAcSensor->protocolType() == AcSensor::Em340Protocol ?
+			int desiredMode = mAcSensor->protocolType() == AcSensor::Et340Protocol ?
 				MeasurementModeB : MeasurementModeC;
 			if (registers[0] == desiredMode) {
 				switch (mAcSensor->protocolType()) {
-				case AcSensor::Em340Protocol:
+				case AcSensor::Et340Protocol:
 				case AcSensor::Em540Protocol:
 					mState = CheckMeasurementSystem;
 					break;
@@ -443,7 +443,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 		break;
 	case CheckMeasurementSystem:
 		Q_ASSERT(registers.size() == 1);
-		Q_ASSERT((mAcSensor->protocolType() == AcSensor::Em340Protocol) ||
+		Q_ASSERT((mAcSensor->protocolType() == AcSensor::Et340Protocol) ||
 			(mAcSensor->protocolType() == AcSensor::Em540Protocol));
 		// Caution: EM3xx meters do not support MeasurementSystemP1
 		// Changing the measurement system also resets the kWh counters.
@@ -486,14 +486,14 @@ void AcSensorUpdater::onWriteCompleted(int function, quint8 addr,
 		break;
 	case SetMeasuringSystem:
 		Q_ASSERT(function == ModbusRtu::WriteSingleRegister);
-		Q_ASSERT(address == RegMeasurementSystem || address == RegEm340MeasurementSystem);
+		Q_ASSERT(address == RegMeasurementSystem || address == RegEm300MeasurementSystem);
 		Q_ASSERT(value == mDesiredMeasuringSystem);
 		mState = Acquisition;
 		break;
 	case SetMeasurementMode:
 		{
 			switch (mAcSensor->protocolType()) {
-			case AcSensor::Em340Protocol:
+			case AcSensor::Et340Protocol:
 			case AcSensor::Em540Protocol:
 				mState = CheckMeasurementSystem;
 				break;
@@ -567,7 +567,7 @@ void AcSensorUpdater::startNextAction()
 		case AcSensor::Em24Protocol:
 			mState = CheckSetup;
 			break;
-		case AcSensor::Em340Protocol:
+		case AcSensor::Et340Protocol:
 			mState = CheckMeasurementMode;
 			break;
 		default:
@@ -609,7 +609,7 @@ void AcSensorUpdater::startNextAction()
 			readRegisters(RegEm540PhaseSequence, 1);
 			break;
 		default:
-			readRegisters(RegEm340PhaseSequence, 1);
+			readRegisters(RegEm300PhaseSequence, 1);
 		}
 		break;
 	case CheckSetup:
@@ -631,7 +631,7 @@ void AcSensorUpdater::startNextAction()
 		writeRegister(
 			mAcSensor->protocolType() == AcSensor::Em24Protocol ?
 				RegMeasurementSystem :
-				RegEm340MeasurementSystem,
+				RegEm300MeasurementSystem,
 			mDesiredMeasuringSystem);
 		break;
 	case CheckMeasurementMode:
@@ -641,7 +641,7 @@ void AcSensorUpdater::startNextAction()
 		readRegisters(
 			mAcSensor->protocolType() == AcSensor::Em24Protocol ?
 				RegMeasurementSystem :
-				RegEm340MeasurementSystem, // Also works for EM540
+				RegEm300MeasurementSystem, // Also works for EM540
 			1);
 		break;
 	case SetMeasurementMode:
@@ -688,16 +688,16 @@ void AcSensorUpdater::startNextAction()
 			mCommands = Em112Commands;
 			mCommandCount = Em112CommandCount;
 			break;
-		case AcSensor::Em340Protocol:
+		case AcSensor::Et340Protocol:
 			if (mSettings->isMultiPhase()) {
-				mCommands = Em340Commands;
-				mCommandCount = Em340CommandCount;
+				mCommands = Et340Commands;
+				mCommandCount = Et340CommandCount;
 			} else if (mSettings->piggyEnabled()) {
-				mCommands = Em340CommandsP1PV;
-				mCommandCount = Em340CommandsP1PVCount;
+				mCommands = Et340CommandsP1PV;
+				mCommandCount = Et340CommandsP1PVCount;
 			} else {
-				mCommands = Em340P1Commands;
-				mCommandCount = Em340P1CommandCount;
+				mCommands = Et340P1Commands;
+				mCommandCount = Et340P1CommandCount;
 			}
 			break;
 		case AcSensor::Em540Protocol:

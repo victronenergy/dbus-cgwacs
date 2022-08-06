@@ -124,9 +124,9 @@ private:
 
 	enum Registers {
 		RegDeviceId = 0x000B,
-		RegEm340PhaseSequence = 0x0032,
+		RegEm300PhaseSequence = 0x0032,
 		RegEm24PhaseSequence = 0x0036,
-		RegEm340MeasurementSystem = 0x1002,
+		RegEm300MeasurementSystem = 0x1002,
 		RegEm540PhaseSequence = 0x010E,
 		RegApplication = 0x1101,
 		RegMeasurementSystem = 0x1102,
