@@ -141,6 +141,44 @@ static const CompositeCommand Et340CommandsP1PV[] = {
 
 static const int Et340CommandsP1PVCount = sizeof(Et340CommandsP1PV) / sizeof(Et340CommandsP1PV[0]);
 
+static const CompositeCommand Em300Commands[] = {
+	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
+	{ 0x0012, 0, { { 0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
+	{ 0x0024, 2, { { 0, Voltage, MultiPhase }, { 2, Dummy, MultiPhase } } },
+	{ 0x0000, 4, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 }, { 4, Voltage, PhaseL3 }, {6, Dummy, MultiPhase } } },
+	{ 0x000C, 6, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 }, {6, Dummy, MultiPhase } } },
+	{ 0x0034, 8, { { 0, PositiveEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
+	{ 0x0040, 10, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
+	{ 0x004E, 12, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
+};
+
+static const int Em300CommandCount = sizeof(Em300Commands) / sizeof(Em300Commands[0]);
+
+static const CompositeCommand Em300P1Commands[] = {
+	{ 0x0012, 0, { { 0, Power, MultiPhase } } },
+	{ 0x0000, 1, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x000C, 3, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x0040, 5, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x004E, 7, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+};
+
+static const int Em300P1CommandCount = sizeof(Em300P1Commands) / sizeof(Em300P1Commands[0]);
+
+static const CompositeCommand Em300CommandsP1PV[] = {
+	{ 0x0012, 0, { { 0, Power, PhaseL1 } } },
+	{ 0x0014, 2, { { 0, Power, PhaseL2 }, { 1, Dummy, MultiPhase } } },
+	{ 0x0000, 4, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 } } },
+	{ 0x000C, 6, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 } } },
+	{ 0x0040, 8, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 } } },
+	// As with the EM24, there is no individual negative counters for exported
+	// energy. We assume that in a shared system, L1 is a grid meter and L2
+	// is a PV-inverter, so on L2 there is never any imported power, therefore
+	// all negative energy can be assumed to be on L1.
+	{ 0x004E, 10, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 } } }
+};
+
+static const int Em300CommandsP1PVCount = sizeof(Em300CommandsP1PV) / sizeof(Em300CommandsP1PV[0]);
+
 static const CompositeCommand Em540Commands[] = {
 	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
 	{ 0x0012, 0, { { 0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
@@ -265,6 +303,7 @@ void AcSensorUpdater::startMeasurements()
 		break;
 	case AcSensor::Et112Protocol:
 	case AcSensor::Em540Protocol:
+	case AcSensor::Em300Protocol:
 		// Fall through
 	case AcSensor::Et340Protocol:
 		mState = CheckMeasurementMode;
@@ -320,10 +359,8 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 			mState = VersionCode;
 			break;
 		case AcSensor::Et112Protocol:
-			mSetCurrentSign = false;
-			mState = Serial;
-			break;
 		case AcSensor::Et340Protocol:
+		case AcSensor::Em300Protocol:
 			mSetCurrentSign = false;
 			mState = Serial;
 			break;
@@ -371,12 +408,16 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 		mAcPvSensor->setFirmwareVersion(registers[0]);
 
 		// For meters that support it, read the phase sequence
-		if ((mAcSensor->protocolType() == AcSensor::Em24Protocol) ||
-				(mAcSensor->protocolType() == AcSensor::Et340Protocol) ||
-				(mAcSensor->protocolType() == AcSensor::Em540Protocol)) {
-			mState = PhaseSequence;
-		} else {
-			mState = WaitForStart;
+		switch (mAcSensor->protocolType())
+		{
+			case AcSensor::Em24Protocol:
+			case AcSensor::Et340Protocol:
+			case AcSensor::Em300Protocol:
+			case AcSensor::Em540Protocol:
+				mState = PhaseSequence;
+				break;
+			default:
+				mState = WaitForStart;
 		}
 		break;
 	case PhaseSequence:
@@ -425,11 +466,14 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 	case CheckMeasurementMode:
 		{
 			Q_ASSERT(registers.size() == 1);
-			int desiredMode = mAcSensor->protocolType() == AcSensor::Et340Protocol ?
-				MeasurementModeB : MeasurementModeC;
+			// All meters (ET112, ET340, EM300) needs to be in mode B. Em540
+			// has mode C which we want.
+			int desiredMode = mAcSensor->protocolType() == AcSensor::Em540Protocol ?
+				MeasurementModeC : MeasurementModeB;
 			if (registers[0] == desiredMode) {
 				switch (mAcSensor->protocolType()) {
 				case AcSensor::Et340Protocol:
+				case AcSensor::Em300Protocol:
 				case AcSensor::Em540Protocol:
 					mState = CheckMeasurementSystem;
 					break;
@@ -444,6 +488,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 	case CheckMeasurementSystem:
 		Q_ASSERT(registers.size() == 1);
 		Q_ASSERT((mAcSensor->protocolType() == AcSensor::Et340Protocol) ||
+			(mAcSensor->protocolType() == AcSensor::Em300Protocol) ||
 			(mAcSensor->protocolType() == AcSensor::Em540Protocol));
 		// Caution: EM3xx meters do not support MeasurementSystemP1
 		// Changing the measurement system also resets the kWh counters.
@@ -494,6 +539,7 @@ void AcSensorUpdater::onWriteCompleted(int function, quint8 addr,
 		{
 			switch (mAcSensor->protocolType()) {
 			case AcSensor::Et340Protocol:
+			case AcSensor::Em300Protocol:
 			case AcSensor::Em540Protocol:
 				mState = CheckMeasurementSystem;
 				break;
@@ -568,6 +614,7 @@ void AcSensorUpdater::startNextAction()
 			mState = CheckSetup;
 			break;
 		case AcSensor::Et340Protocol:
+		case AcSensor::Em300Protocol:
 			mState = CheckMeasurementMode;
 			break;
 		default:
@@ -687,6 +734,18 @@ void AcSensorUpdater::startNextAction()
 		case AcSensor::Et112Protocol:
 			mCommands = Em112Commands;
 			mCommandCount = Em112CommandCount;
+			break;
+		case AcSensor::Em300Protocol:
+			if (mSettings->isMultiPhase()) {
+				mCommands = Em300Commands;
+				mCommandCount = Em300CommandCount;
+			} else if (mSettings->piggyEnabled()) {
+				mCommands = Em300CommandsP1PV;
+				mCommandCount = Em300CommandsP1PVCount;
+			} else {
+				mCommands = Em300P1Commands;
+				mCommandCount = Em300P1CommandCount;
+			}
 			break;
 		case AcSensor::Et340Protocol:
 			if (mSettings->isMultiPhase()) {
