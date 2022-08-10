@@ -2,10 +2,10 @@
 #include <QsLog.h>
 #include "ac_sensor_settings.h"
 
-AcSensorSettings::AcSensorSettings(int deviceType, const QString &serial,
+AcSensorSettings::AcSensorSettings(bool supportMultiphase, const QString &serial,
 								   QObject *parent) :
 	QObject(parent),
-	mDeviceType(deviceType),
+	mSupportMultiphase(supportMultiphase),
 	mSerial(serial),
 	mIsMultiPhase(false),
 	mPiggyEnabled(false),
@@ -19,9 +19,7 @@ AcSensorSettings::AcSensorSettings(int deviceType, const QString &serial,
 
 bool AcSensorSettings::supportMultiphase() const
 {
-	return (mDeviceType >= 71 && mDeviceType <= 73) || // EM24
-		(mDeviceType >= 340 && mDeviceType <= 345) ||  // ET340
-		(mDeviceType >= 1744 && mDeviceType <= 1763);  // EM540
+	return mSupportMultiphase;
 }
 
 void AcSensorSettings::setCustomName(const QString &n)

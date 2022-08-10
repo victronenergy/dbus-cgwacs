@@ -659,7 +659,7 @@ void AcSensorUpdater::startNextAction()
 		break;
 	case WaitForStart:
 		Q_ASSERT(mSettings == 0);
-		mSettings = new AcSensorSettings(mAcSensor->deviceType(),
+		mSettings = new AcSensorSettings(mAcSensor->supportMultiphase(),
 											mAcSensor->serial(),
 											mAcSensor);
 		mDataProcessor = new DataProcessor(mAcSensor, mSettings, this);

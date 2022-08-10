@@ -11,7 +11,6 @@ Q_DECLARE_METATYPE(Position)
 class AcSensorSettings : public QObject
 {
 	Q_OBJECT
-	Q_PROPERTY(int deviceType READ deviceType)
 	Q_PROPERTY(bool supportMultiphase READ supportMultiphase)
 	Q_PROPERTY(QString serial READ serial)
 	Q_PROPERTY(QString customName READ customName WRITE setCustomName NOTIFY customNameChanged)
@@ -33,12 +32,7 @@ class AcSensorSettings : public QObject
 	Q_PROPERTY(Position l2Position READ l2Position WRITE setL2Position NOTIFY l2PositionChanged)
 	Q_PROPERTY(int l2DeviceInstance READ l2DeviceInstance NOTIFY l2DeviceInstanceChanged)
 public:
-	AcSensorSettings(int deviceType, const QString &serial, QObject *parent = 0);
-
-	int deviceType() const
-	{
-		return mDeviceType;
-	}
+	AcSensorSettings(bool supportMultiphase, const QString &serial, QObject *parent = 0);
 
 	bool supportMultiphase() const;
 
@@ -171,7 +165,7 @@ signals:
 private:
 	static QString getProductName(const QString &serviceType, Position position);
 
-	int mDeviceType;
+	bool mSupportMultiphase;
 	QString mSerial;
 	QString mCustomName;
 	QString mClassAndVrmInstance;

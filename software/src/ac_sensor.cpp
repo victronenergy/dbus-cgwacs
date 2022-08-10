@@ -57,6 +57,11 @@ AcSensor::ProtocolTypes AcSensor::protocolType() const
 	return Unknown;
 }
 
+bool AcSensor::supportMultiphase() const
+{
+	return protocolType() != Et112Protocol;
+}
+
 void AcSensor::setErrorCode(int code)
 {
 	if (mErrorCode == code)

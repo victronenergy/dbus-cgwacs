@@ -77,6 +77,11 @@ public:
 	ProtocolTypes protocolType() const;
 
 	/*!
+	 * Returns whether this meter supports multiphase operation.
+	 */
+	bool supportMultiphase() const;
+
+	/*!
 	 * Returned the serial number of the energy meter.
 	 */
 	QString serial() const
