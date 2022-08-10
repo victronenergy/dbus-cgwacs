@@ -425,8 +425,8 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 	case CheckMeasurementMode:
 		{
 			Q_ASSERT(registers.size() == 1);
-			int desiredMode = mAcSensor->protocolType() == AcSensor::Em340Protocol ?
-				MeasurementModeB : MeasurementModeC;
+			int desiredMode = mAcSensor->protocolType() == AcSensor::Em540Protocol ?
+				MeasurementModeC : MeasurementModeB;
 			if (registers[0] == desiredMode) {
 				switch (mAcSensor->protocolType()) {
 				case AcSensor::Em340Protocol:
