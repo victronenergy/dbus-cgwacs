@@ -50,6 +50,8 @@ AcSensor::ProtocolTypes AcSensor::protocolType() const
 		return Em24Protocol;
 	if (mDeviceType >= 102 && mDeviceType <= 121)
 		return Et112Protocol;
+	if (mDeviceType == 338 || mDeviceType == 348)
+		return Em300S27Protocol;
 	if (mDeviceType >= 330 && mDeviceType <= 345)
 		return Em340Protocol;
 	if (mDeviceType >= 1744 && mDeviceType <= 1763)

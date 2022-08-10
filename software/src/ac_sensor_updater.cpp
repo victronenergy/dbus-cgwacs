@@ -179,6 +179,18 @@ static const CompositeCommand Em540CommandsP1PV[] = {
 
 static const int Em540CommandsP1PVCount = sizeof(Em540CommandsP1PV) / sizeof(Em540CommandsP1PV[0]);
 
+// Even though this meter is supposedly the same as an EM24, it is still
+// too much of an EM300, and single-phase needs a special command-set.
+static const CompositeCommand Em300S27P1Commands[] = {
+	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
+	{ 0x0000, 2, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x000C, 8, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x003E, 10, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x005C, 14, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
+};
+
+static const int Em300S27P1CommandCount = sizeof(Em24CommandsP1) / sizeof(Em24CommandsP1[0]);
+
 int getMaxOffset(const CompositeCommand &cmd) {
 	int maxOffset = 0;
 	for (int i=0; i<MaxRegCount; ++i) {
@@ -265,6 +277,7 @@ void AcSensorUpdater::startMeasurements()
 		break;
 	case AcSensor::Et112Protocol:
 	case AcSensor::Em540Protocol:
+	case AcSensor::Em300S27Protocol:
 		// Fall through
 	case AcSensor::Em340Protocol:
 		mState = CheckMeasurementMode;
@@ -320,10 +333,8 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 			mState = VersionCode;
 			break;
 		case AcSensor::Et112Protocol:
-			mSetCurrentSign = false;
-			mState = Serial;
-			break;
 		case AcSensor::Em340Protocol:
+		case AcSensor::Em300S27Protocol:
 			mSetCurrentSign = false;
 			mState = Serial;
 			break;
@@ -373,6 +384,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 		// For meters that support it, read the phase sequence
 		if ((mAcSensor->protocolType() == AcSensor::Em24Protocol) ||
 				(mAcSensor->protocolType() == AcSensor::Em340Protocol) ||
+				(mAcSensor->protocolType() == AcSensor::Em300S27Protocol) ||
 				(mAcSensor->protocolType() == AcSensor::Em540Protocol)) {
 			mState = PhaseSequence;
 		} else {
@@ -431,6 +443,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 				switch (mAcSensor->protocolType()) {
 				case AcSensor::Em340Protocol:
 				case AcSensor::Em540Protocol:
+				case AcSensor::Em300S27Protocol:
 					mState = CheckMeasurementSystem;
 					break;
 				default:
@@ -444,6 +457,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 	case CheckMeasurementSystem:
 		Q_ASSERT(registers.size() == 1);
 		Q_ASSERT((mAcSensor->protocolType() == AcSensor::Em340Protocol) ||
+			(mAcSensor->protocolType() == AcSensor::Em300S27Protocol) ||
 			(mAcSensor->protocolType() == AcSensor::Em540Protocol));
 		// Caution: EM3xx meters do not support MeasurementSystemP1
 		// Changing the measurement system also resets the kWh counters.
@@ -495,6 +509,7 @@ void AcSensorUpdater::onWriteCompleted(int function, quint8 addr,
 			switch (mAcSensor->protocolType()) {
 			case AcSensor::Em340Protocol:
 			case AcSensor::Em540Protocol:
+			case AcSensor::Em300S27Protocol:
 				mState = CheckMeasurementSystem;
 				break;
 			default:
@@ -568,6 +583,7 @@ void AcSensorUpdater::startNextAction()
 			mState = CheckSetup;
 			break;
 		case AcSensor::Em340Protocol:
+		case AcSensor::Em300S27Protocol:
 			mState = CheckMeasurementMode;
 			break;
 		default:
@@ -710,6 +726,19 @@ void AcSensorUpdater::startNextAction()
 			} else {
 				mCommands = Em540P1Commands;
 				mCommandCount = Em540P1CommandCount;
+			}
+			break;
+		case AcSensor::Em300S27Protocol:
+			// Same registers as the EM24... mostly.
+			if (mSettings->isMultiPhase()) {
+				mCommands = Em24Commands;
+				mCommandCount = Em24CommandCount;
+			} else if (mSettings->piggyEnabled()) {
+				mCommands = Em24CommandsP1PV;
+				mCommandCount = Em24CommandsP1PVCount;
+			} else {
+				mCommands = Em300S27P1Commands;
+				mCommandCount = Em300S27P1CommandCount;
 			}
 			break;
 		case AcSensor::Unknown:
@@ -867,8 +896,11 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 				// ET112 seems to return negative values for kWh(-), unlike the
 				// other meters.
 				v = qAbs(getDouble(registers, ra.regOffset, 0.1));
+
+				// These meters dont' have per-phase reverse counters
 				if ((mAcSensor->protocolType() == AcSensor::Em24Protocol ||
-					mAcSensor->protocolType() == AcSensor::Em540Protocol) &&
+					mAcSensor->protocolType() == AcSensor::Em540Protocol ||
+					mAcSensor->protocolType() == AcSensor::Em300S27Protocol) &&
 					mSettings->isMultiPhase()) {
 					dest->setNegativeEnergy(v);
 				} else {
