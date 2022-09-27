@@ -119,7 +119,8 @@ private:
 		WaitOnConnectionLost,
 
 		SetAddress,
-		PhaseSequence
+		PhaseSequence,
+		PhaseReverseEnergy
 	};
 
 	enum Registers {
