@@ -100,7 +100,7 @@ static const CompositeCommand Em112Commands[] = {
 	{ 0x0020, 12, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
 };
 
-static const CompositeCommand Em340Commands[] = {
+static const CompositeCommand Et340Commands[] = {
 	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
 	{ 0x0012, 0, { { 0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
 	{ 0x0024, 1, { { 0, Voltage, MultiPhase }, { 2, Dummy, MultiPhase } } },
@@ -112,7 +112,7 @@ static const CompositeCommand Em340Commands[] = {
 	{ 0x0060, 12, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 }, { 4, NegativeEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
 };
 
-static const CompositeCommand Em340P1Commands[] = {
+static const CompositeCommand Et340P1Commands[] = {
 	{ 0x0012, 0, { { 0, Power, MultiPhase } } },
 	{ 0x0000, 1, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x000C, 3, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
@@ -120,7 +120,7 @@ static const CompositeCommand Em340P1Commands[] = {
 	{ 0x0060, 7, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
 };
 
-static const CompositeCommand Em340CommandsP1PV[] = {
+static const CompositeCommand Et340CommandsP1PV[] = {
 	{ 0x0012, 0, { { 0, Power, PhaseL1 } } },
 	{ 0x0014, 2, { { 0, Power, PhaseL2 }, { 1, Dummy, MultiPhase } } },
 	{ 0x0000, 4, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 } } },
@@ -286,7 +286,7 @@ void AcSensorUpdater::startMeasurements()
 	case AcSensor::Em300S27Protocol:
 	case AcSensor::Em300Protocol:
 		// Fall through
-	case AcSensor::Em340Protocol:
+	case AcSensor::Et340Protocol:
 		mState = CheckMeasurementMode;
 		break;
 	case AcSensor::Unknown:
@@ -349,7 +349,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 			mState = VersionCode;
 			break;
 		case AcSensor::Em300Protocol:
-		case AcSensor::Em340Protocol:
+		case AcSensor::Et340Protocol:
 			mSetCurrentSign = false;
 			mState = PhaseReverseEnergy; // Check phase reverse energy support
 			break;
@@ -403,7 +403,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 
 		// For meters that support it, read the phase sequence
 		if ((mAcSensor->protocolType() == AcSensor::Em24Protocol) ||
-				(mAcSensor->protocolType() == AcSensor::Em340Protocol) ||
+				(mAcSensor->protocolType() == AcSensor::Et340Protocol) ||
 				(mAcSensor->protocolType() == AcSensor::Em300Protocol) ||
 				(mAcSensor->protocolType() == AcSensor::Em300S27Protocol) ||
 				(mAcSensor->protocolType() == AcSensor::Em540Protocol)) {
@@ -465,7 +465,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 				MeasurementModeC : MeasurementModeB;
 			if (registers[0] == desiredMode) {
 				switch (mAcSensor->protocolType()) {
-				case AcSensor::Em340Protocol:
+				case AcSensor::Et340Protocol:
 				case AcSensor::Em300Protocol:
 				case AcSensor::Em540Protocol:
 				case AcSensor::Em300S27Protocol:
@@ -481,7 +481,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 		break;
 	case CheckMeasurementSystem:
 		Q_ASSERT(registers.size() == 1);
-		Q_ASSERT((mAcSensor->protocolType() == AcSensor::Em340Protocol) ||
+		Q_ASSERT((mAcSensor->protocolType() == AcSensor::Et340Protocol) ||
 			(mAcSensor->protocolType() == AcSensor::Em300Protocol) ||
 			(mAcSensor->protocolType() == AcSensor::Em300S27Protocol) ||
 			(mAcSensor->protocolType() == AcSensor::Em540Protocol));
@@ -526,14 +526,14 @@ void AcSensorUpdater::onWriteCompleted(int function, quint8 addr,
 		break;
 	case SetMeasuringSystem:
 		Q_ASSERT(function == ModbusRtu::WriteSingleRegister);
-		Q_ASSERT(address == RegMeasurementSystem || address == RegEm340MeasurementSystem);
+		Q_ASSERT(address == RegMeasurementSystem || address == RegEm300MeasurementSystem);
 		Q_ASSERT(value == mDesiredMeasuringSystem);
 		mState = Acquisition;
 		break;
 	case SetMeasurementMode:
 		{
 			switch (mAcSensor->protocolType()) {
-			case AcSensor::Em340Protocol:
+			case AcSensor::Et340Protocol:
 			case AcSensor::Em300Protocol:
 			case AcSensor::Em540Protocol:
 			case AcSensor::Em300S27Protocol:
@@ -609,7 +609,7 @@ void AcSensorUpdater::startNextAction()
 		case AcSensor::Em24Protocol:
 			mState = CheckSetup;
 			break;
-		case AcSensor::Em340Protocol:
+		case AcSensor::Et340Protocol:
 		case AcSensor::Em300Protocol:
 		case AcSensor::Em300S27Protocol:
 			mState = CheckMeasurementMode;
@@ -653,7 +653,7 @@ void AcSensorUpdater::startNextAction()
 			readRegisters(RegEm540PhaseSequence, 1);
 			break;
 		default:
-			readRegisters(RegEm340PhaseSequence, 1);
+			readRegisters(RegEm300PhaseSequence, 1);
 		}
 		break;
 	case PhaseReverseEnergy: // This state is only reached for EM-300 meters
@@ -678,7 +678,7 @@ void AcSensorUpdater::startNextAction()
 		writeRegister(
 			mAcSensor->protocolType() == AcSensor::Em24Protocol ?
 				RegMeasurementSystem :
-				RegEm340MeasurementSystem,
+				RegEm300MeasurementSystem,
 			mDesiredMeasuringSystem);
 		break;
 	case CheckMeasurementMode:
@@ -688,7 +688,7 @@ void AcSensorUpdater::startNextAction()
 		readRegisters(
 			mAcSensor->protocolType() == AcSensor::Em24Protocol ?
 				RegMeasurementSystem :
-				RegEm340MeasurementSystem, // Also works for EM540
+				RegEm300MeasurementSystem, // Also works for EM540
 			1);
 		break;
 	case SetMeasurementMode:
@@ -735,16 +735,16 @@ void AcSensorUpdater::startNextAction()
 			mCommands = Em112Commands;
 			mCommandCount = CMDCOUNT(Em112Commands);
 			break;
-		case AcSensor::Em340Protocol:
+		case AcSensor::Et340Protocol:
 			if (mSettings->isMultiPhase()) {
-				mCommands = Em340Commands;
-				mCommandCount = CMDCOUNT(Em340Commands);
+				mCommands = Et340Commands;
+				mCommandCount = CMDCOUNT(Et340Commands);
 			} else if (mSettings->piggyEnabled()) {
-				mCommands = Em340CommandsP1PV;
-				mCommandCount = CMDCOUNT(Em340CommandsP1PV);
+				mCommands = Et340CommandsP1PV;
+				mCommandCount = CMDCOUNT(Et340CommandsP1PV);
 			} else {
-				mCommands = Em340P1Commands;
-				mCommandCount = CMDCOUNT(Em340P1Commands);
+				mCommands = Et340P1Commands;
+				mCommandCount = CMDCOUNT(Et340P1Commands);
 			}
 			break;
 		case AcSensor::Em300Protocol:

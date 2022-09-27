@@ -75,7 +75,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	case AcSensor::Et112Protocol:
 		productId = VE_PROD_ID_CARLO_GAVAZZI_ET112;
 		break;
-	case AcSensor::Em340Protocol:
+	case AcSensor::Et340Protocol:
 		productId = isSecondary ?
 			VE_PROD_ID_CARLO_GAVAZZI_ET340_PIGGY_BACK :
 			VE_PROD_ID_CARLO_GAVAZZI_ET340;
