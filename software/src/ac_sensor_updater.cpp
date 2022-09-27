@@ -53,6 +53,8 @@ struct CompositeCommand {
 	RegisterCommand actions[MaxRegCount];
 };
 
+#define CMDCOUNT(x) sizeof(x) / sizeof(x[0])
+
 static const CompositeCommand Em24Commands[] = {
 	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
 	{ 0x0012, 0, { { 0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
@@ -63,8 +65,6 @@ static const CompositeCommand Em24Commands[] = {
 	{ 0x0046, 12, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 } } },
 	{ 0x005C, 14, { { 0, NegativeEnergy, MultiPhase } } }
 };
-
-static const int Em24CommandCount = sizeof(Em24Commands) / sizeof(Em24Commands[0]);
 
 /// We use dummy commands here to vary the number of requested registers. This
 /// way we avoid problems if a response to a modbus request arrives too late.
@@ -80,8 +80,6 @@ static const CompositeCommand Em24CommandsP1[] = {
 	{ 0x005C, 14, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
 };
 
-static const int Em24CommandP1Count = sizeof(Em24CommandsP1) / sizeof(Em24CommandsP1[0]);
-
 static const CompositeCommand Em24CommandsP1PV[] = {
 	{ 0x0012, 0, { { 0, Power, PhaseL1 } } },
 	{ 0x0014, 2, { { 0, Power, PhaseL2 }, { 1, Dummy, MultiPhase } } },
@@ -95,16 +93,12 @@ static const CompositeCommand Em24CommandsP1PV[] = {
 	{ 0x005C, 10, { { 0, NegativeEnergy, PhaseL1 }, { 1, Dummy, MultiPhase } } }
 };
 
-static const int Em24CommandsP1PVCount = sizeof(Em24CommandsP1PV) / sizeof(Em24CommandsP1PV[0]);
-
 static const CompositeCommand Em112Commands[] = {
 	{ 0x0004, 0, { { 0, Power, MultiPhase } } },
 	{ 0x0000, 4, { { 0, Voltage, MultiPhase }, { 2, Current, MultiPhase } } },
 	{ 0x0010, 8, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x0020, 12, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
 };
-
-static const int Em112CommandCount = sizeof(Em112Commands) / sizeof(Em112Commands[0]);
 
 static const CompositeCommand Em340Commands[] = {
 	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
@@ -118,8 +112,6 @@ static const CompositeCommand Em340Commands[] = {
 	{ 0x0060, 12, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 }, { 4, NegativeEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
 };
 
-static const int Em340CommandCount = sizeof(Em340Commands) / sizeof(Em340Commands[0]);
-
 static const CompositeCommand Em340P1Commands[] = {
 	{ 0x0012, 0, { { 0, Power, MultiPhase } } },
 	{ 0x0000, 1, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
@@ -127,8 +119,6 @@ static const CompositeCommand Em340P1Commands[] = {
 	{ 0x0040, 5, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x0060, 7, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
 };
-
-static const int Em340P1CommandCount = sizeof(Em340P1Commands) / sizeof(Em340P1Commands[0]);
 
 static const CompositeCommand Em340CommandsP1PV[] = {
 	{ 0x0012, 0, { { 0, Power, PhaseL1 } } },
@@ -138,8 +128,6 @@ static const CompositeCommand Em340CommandsP1PV[] = {
 	{ 0x0040, 8, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 } } },
 	{ 0x0060, 10, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 } } }
 };
-
-static const int Em340CommandsP1PVCount = sizeof(Em340CommandsP1PV) / sizeof(Em340CommandsP1PV[0]);
 
 static const CompositeCommand Em300Commands[] = {
 	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
@@ -152,16 +140,12 @@ static const CompositeCommand Em300Commands[] = {
 	{ 0x004E, 12, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
 };
 
-static const int Em300CommandCount = sizeof(Em300Commands) / sizeof(Em300Commands[0]);
-
 static const CompositeCommand Em300P1Commands[] = {
 	{ 0x0012, 0,  { { 0, Power, MultiPhase } } },
 	{ 0x0000, 4,  { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x000C, 8,  { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x0040, 12, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
 };
-
-static const int Em300P1CommandCount = sizeof(Em300P1Commands) / sizeof(Em300P1Commands[0]);
 
 static const CompositeCommand Em300CommandsP1PV[] = {
 	{ 0x0012, 0,  { { 0, Power, PhaseL1 } } },
@@ -170,8 +154,6 @@ static const CompositeCommand Em300CommandsP1PV[] = {
 	{ 0x000C, 12, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 } } },
 	{ 0x0040, 15, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 } } },
 };
-
-static const int Em300CommandsP1PVCount = sizeof(Em300CommandsP1PV) / sizeof(Em300CommandsP1PV[0]);
 
 static const CompositeCommand Em540Commands[] = {
 	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
@@ -184,8 +166,6 @@ static const CompositeCommand Em540Commands[] = {
 	{ 0x004E, 10, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
 };
 
-static const int Em540CommandCount = sizeof(Em540Commands) / sizeof(Em540Commands[0]);
-
 static const CompositeCommand Em540P1Commands[] = {
 	{ 0x0012, 0, { { 0, Power, MultiPhase } } },
 	{ 0x0000, 1, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
@@ -193,8 +173,6 @@ static const CompositeCommand Em540P1Commands[] = {
 	{ 0x0040, 5, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x004E, 7, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
 };
-
-static const int Em540P1CommandCount = sizeof(Em540P1Commands) / sizeof(Em540P1Commands[0]);
 
 static const CompositeCommand Em540CommandsP1PV[] = {
 	{ 0x0012, 0, { { 0, Power, PhaseL1 } } },
@@ -209,8 +187,6 @@ static const CompositeCommand Em540CommandsP1PV[] = {
 	{ 0x004E, 10, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 } } }
 };
 
-static const int Em540CommandsP1PVCount = sizeof(Em540CommandsP1PV) / sizeof(Em540CommandsP1PV[0]);
-
 // Even though this meter is supposedly the same as an EM24, it is still
 // too much of an EM300, and single-phase needs a special command-set.
 static const CompositeCommand Em300S27P1Commands[] = {
@@ -220,8 +196,6 @@ static const CompositeCommand Em300S27P1Commands[] = {
 	{ 0x003E, 10, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x005C, 14, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
 };
-
-static const int Em300S27P1CommandCount = sizeof(Em24CommandsP1) / sizeof(Em24CommandsP1[0]);
 
 int getMaxOffset(const CompositeCommand &cmd) {
 	int maxOffset = 0;
@@ -748,66 +722,66 @@ void AcSensorUpdater::startNextAction()
 		case AcSensor::Em24Protocol:
 			if (mSettings->isMultiPhase()) {
 				mCommands = Em24Commands;
-				mCommandCount = Em24CommandCount;
+				mCommandCount = CMDCOUNT(Em24Commands);
 			} else if (mSettings->piggyEnabled()) {
 				mCommands = Em24CommandsP1PV;
-				mCommandCount = Em24CommandsP1PVCount;
+				mCommandCount = CMDCOUNT(Em24CommandsP1PV);
 			} else {
 				mCommands = Em24CommandsP1;
-				mCommandCount = Em24CommandP1Count;
+				mCommandCount = CMDCOUNT(Em24CommandsP1);
 			}
 			break;
 		case AcSensor::Et112Protocol:
 			mCommands = Em112Commands;
-			mCommandCount = Em112CommandCount;
+			mCommandCount = CMDCOUNT(Em112Commands);
 			break;
 		case AcSensor::Em340Protocol:
 			if (mSettings->isMultiPhase()) {
 				mCommands = Em340Commands;
-				mCommandCount = Em340CommandCount;
+				mCommandCount = CMDCOUNT(Em340Commands);
 			} else if (mSettings->piggyEnabled()) {
 				mCommands = Em340CommandsP1PV;
-				mCommandCount = Em340CommandsP1PVCount;
+				mCommandCount = CMDCOUNT(Em340CommandsP1PV);
 			} else {
 				mCommands = Em340P1Commands;
-				mCommandCount = Em340P1CommandCount;
+				mCommandCount = CMDCOUNT(Em340P1Commands);
 			}
 			break;
 		case AcSensor::Em300Protocol:
 			if (mSettings->isMultiPhase()) {
 				mCommands = Em300Commands;
-				mCommandCount = Em300CommandCount;
+				mCommandCount = CMDCOUNT(Em300Commands);
 			} else if (mSettings->piggyEnabled()) {
 				mCommands = Em300CommandsP1PV;
-				mCommandCount = Em300CommandsP1PVCount;
+				mCommandCount = CMDCOUNT(Em300CommandsP1PV);
 			} else {
 				mCommands = Em300P1Commands;
-				mCommandCount = Em300P1CommandCount;
+				mCommandCount = CMDCOUNT(Em300P1Commands);
 			}
 			break;
 		case AcSensor::Em540Protocol:
 			if (mSettings->isMultiPhase()) {
 				mCommands = Em540Commands;
-				mCommandCount = Em540CommandCount;
+				mCommandCount = CMDCOUNT(Em540Commands);
 			} else if (mSettings->piggyEnabled()) {
 				mCommands = Em540CommandsP1PV;
-				mCommandCount = Em540CommandsP1PVCount;
+				mCommandCount = CMDCOUNT(Em540CommandsP1PV);
 			} else {
 				mCommands = Em540P1Commands;
-				mCommandCount = Em540P1CommandCount;
+				mCommandCount = CMDCOUNT(Em540P1Commands);
 			}
 			break;
 		case AcSensor::Em300S27Protocol:
 			// Same registers as the EM24... mostly.
 			if (mSettings->isMultiPhase()) {
 				mCommands = Em24Commands;
-				mCommandCount = Em24CommandCount;
+				mCommandCount = CMDCOUNT(Em24Commands);
 			} else if (mSettings->piggyEnabled()) {
 				mCommands = Em24CommandsP1PV;
-				mCommandCount = Em24CommandsP1PVCount;
+				mCommandCount = CMDCOUNT(Em24CommandsP1PV);
 			} else {
 				mCommands = Em300S27P1Commands;
-				mCommandCount = Em300S27P1CommandCount;
+				mCommandCount = CMDCOUNT(Em24CommandsP1);
 			}
 			break;
 		case AcSensor::Unknown:
