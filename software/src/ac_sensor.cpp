@@ -34,6 +34,20 @@ void AcSensor::setDeviceType(int t)
 	if (mDeviceType == t)
 		return;
 	mDeviceType = t;
+
+	if (mDeviceType >= 71 && mDeviceType <= 73)
+		setProtocolType(Em24Protocol);
+	else if (mDeviceType >= 102 && mDeviceType <= 121)
+		setProtocolType(Et112Protocol);
+	else if (mDeviceType == 338 || mDeviceType == 348)
+		setProtocolType(Em300S27Protocol);
+	else if (mDeviceType >= 330 && mDeviceType <= 345)
+		setProtocolType(Em340Protocol);
+	else if (mDeviceType >= 1744 && mDeviceType <= 1763)
+		setProtocolType(Em540Protocol);
+	else
+		setProtocolType(Unknown);
+
 	emit deviceTypeChanged();
 }
 
@@ -47,17 +61,12 @@ void AcSensor::setDeviceSubType(int t)
 
 AcSensor::ProtocolTypes AcSensor::protocolType() const
 {
-	if (mDeviceType >= 71 && mDeviceType <= 73)
-		return Em24Protocol;
-	if (mDeviceType >= 102 && mDeviceType <= 121)
-		return Et112Protocol;
-	if (mDeviceType == 338 || mDeviceType == 348)
-		return Em300S27Protocol;
-	if (mDeviceType >= 330 && mDeviceType <= 345)
-		return Em340Protocol;
-	if (mDeviceType >= 1744 && mDeviceType <= 1763)
-		return Em540Protocol;
-	return Unknown;
+	return mProtocolType;
+}
+
+void AcSensor::setProtocolType(AcSensor::ProtocolTypes p)
+{
+	mProtocolType = p;
 }
 
 bool AcSensor::supportMultiphase() const

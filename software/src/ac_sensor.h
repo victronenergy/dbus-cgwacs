@@ -77,6 +77,8 @@ public:
 	 */
 	ProtocolTypes protocolType() const;
 
+	void setProtocolType(ProtocolTypes p);
+
 	/*!
 	 * Returns whether this meter supports multiphase operation.
 	 */
@@ -200,6 +202,7 @@ private:
 	ConnectionState mConnectionState;
 	int mDeviceType;
 	int mDeviceSubType;
+	ProtocolTypes mProtocolType;
 	int mErrorCode;
 	int mFirmwareVersion;
 	QString mPortName;
