@@ -68,6 +68,7 @@ public:
 		Em340Protocol,
 		Em540Protocol,
 		Em300S27Protocol,
+		Em300Protocol, // Similar to Em340Protocol, less registers
 		Unknown
 	};
 

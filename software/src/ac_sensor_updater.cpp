@@ -141,6 +141,38 @@ static const CompositeCommand Em340CommandsP1PV[] = {
 
 static const int Em340CommandsP1PVCount = sizeof(Em340CommandsP1PV) / sizeof(Em340CommandsP1PV[0]);
 
+static const CompositeCommand Em300Commands[] = {
+	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
+	{ 0x0012, 0, { { 0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
+	{ 0x0024, 1, { { 0, Voltage, MultiPhase }, { 2, Dummy, MultiPhase } } },
+	{ 0x0000, 2, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 }, { 4, Voltage, PhaseL3 }, {6, Dummy, MultiPhase } } },
+	{ 0x000C, 4, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 }, {6, Dummy, MultiPhase } } },
+	{ 0x0034, 6, { { 0, PositiveEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
+	{ 0x0040, 8, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
+	{ 0x004E, 12, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
+};
+
+static const int Em300CommandCount = sizeof(Em300Commands) / sizeof(Em300Commands[0]);
+
+static const CompositeCommand Em300P1Commands[] = {
+	{ 0x0012, 0,  { { 0, Power, MultiPhase } } },
+	{ 0x0000, 4,  { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x000C, 8,  { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x0040, 12, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+};
+
+static const int Em300P1CommandCount = sizeof(Em300P1Commands) / sizeof(Em300P1Commands[0]);
+
+static const CompositeCommand Em300CommandsP1PV[] = {
+	{ 0x0012, 0,  { { 0, Power, PhaseL1 } } },
+	{ 0x0014, 4,  { { 0, Power, PhaseL2 }, { 1, Dummy, MultiPhase } } },
+	{ 0x0000, 8,  { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 } } },
+	{ 0x000C, 12, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 } } },
+	{ 0x0040, 15, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 } } },
+};
+
+static const int Em300CommandsP1PVCount = sizeof(Em300CommandsP1PV) / sizeof(Em300CommandsP1PV[0]);
+
 static const CompositeCommand Em540Commands[] = {
 	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
 	{ 0x0012, 0, { { 0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
@@ -278,6 +310,7 @@ void AcSensorUpdater::startMeasurements()
 	case AcSensor::Et112Protocol:
 	case AcSensor::Em540Protocol:
 	case AcSensor::Em300S27Protocol:
+	case AcSensor::Em300Protocol:
 		// Fall through
 	case AcSensor::Em340Protocol:
 		mState = CheckMeasurementMode;
@@ -293,6 +326,15 @@ void AcSensorUpdater::onErrorReceived(int errorType, quint8 addr, int exception)
 {
 	if (addr != mAcSensor->slaveAddress())
 		return;
+
+	/* An error on fetching the per-phase registers for an EM-300 is "normal"
+	   for some meters. Switch protocol and continue with next stage. */
+	if (mState == PhaseReverseEnergy) {
+		QLOG_INFO() << "Meter has no per-phase reverse registers. Assuming older EM-300 meter.";
+		mAcSensor->setProtocolType(AcSensor::Em300Protocol);
+		mState = Serial;
+	}
+
 	QLOG_DEBUG() << "ModBus Error:" << errorType << exception
 				 << "State:" << mState << "Slave Address" << addr
 				 << "Acq State:" << mAcquisitionIndex
@@ -332,8 +374,12 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 			mSetCurrentSign = true;
 			mState = VersionCode;
 			break;
-		case AcSensor::Et112Protocol:
+		case AcSensor::Em300Protocol:
 		case AcSensor::Em340Protocol:
+			mSetCurrentSign = false;
+			mState = PhaseReverseEnergy; // Check phase reverse energy support
+			break;
+		case AcSensor::Et112Protocol:
 		case AcSensor::Em300S27Protocol:
 			mSetCurrentSign = false;
 			mState = Serial;
@@ -384,6 +430,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 		// For meters that support it, read the phase sequence
 		if ((mAcSensor->protocolType() == AcSensor::Em24Protocol) ||
 				(mAcSensor->protocolType() == AcSensor::Em340Protocol) ||
+				(mAcSensor->protocolType() == AcSensor::Em300Protocol) ||
 				(mAcSensor->protocolType() == AcSensor::Em300S27Protocol) ||
 				(mAcSensor->protocolType() == AcSensor::Em540Protocol)) {
 			mState = PhaseSequence;
@@ -397,6 +444,9 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 			mAcSensor->setPhaseSequence(seq);
 			mState = WaitForStart;
 		}
+		break;
+	case PhaseReverseEnergy:
+		mState = Serial;
 		break;
 	case CheckSetup:
 		Q_ASSERT(registers.size() == 2);
@@ -442,6 +492,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 			if (registers[0] == desiredMode) {
 				switch (mAcSensor->protocolType()) {
 				case AcSensor::Em340Protocol:
+				case AcSensor::Em300Protocol:
 				case AcSensor::Em540Protocol:
 				case AcSensor::Em300S27Protocol:
 					mState = CheckMeasurementSystem;
@@ -457,6 +508,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 	case CheckMeasurementSystem:
 		Q_ASSERT(registers.size() == 1);
 		Q_ASSERT((mAcSensor->protocolType() == AcSensor::Em340Protocol) ||
+			(mAcSensor->protocolType() == AcSensor::Em300Protocol) ||
 			(mAcSensor->protocolType() == AcSensor::Em300S27Protocol) ||
 			(mAcSensor->protocolType() == AcSensor::Em540Protocol));
 		// Caution: EM3xx meters do not support MeasurementSystemP1
@@ -508,6 +560,7 @@ void AcSensorUpdater::onWriteCompleted(int function, quint8 addr,
 		{
 			switch (mAcSensor->protocolType()) {
 			case AcSensor::Em340Protocol:
+			case AcSensor::Em300Protocol:
 			case AcSensor::Em540Protocol:
 			case AcSensor::Em300S27Protocol:
 				mState = CheckMeasurementSystem;
@@ -583,6 +636,7 @@ void AcSensorUpdater::startNextAction()
 			mState = CheckSetup;
 			break;
 		case AcSensor::Em340Protocol:
+		case AcSensor::Em300Protocol:
 		case AcSensor::Em300S27Protocol:
 			mState = CheckMeasurementMode;
 			break;
@@ -627,6 +681,9 @@ void AcSensorUpdater::startNextAction()
 		default:
 			readRegisters(RegEm340PhaseSequence, 1);
 		}
+		break;
+	case PhaseReverseEnergy: // This state is only reached for EM-300 meters
+		readRegisters(0x0060, 2); // Location of L1 reverse energy counter
 		break;
 	case CheckSetup:
 		readRegisters(RegApplication, 2);
@@ -714,6 +771,18 @@ void AcSensorUpdater::startNextAction()
 			} else {
 				mCommands = Em340P1Commands;
 				mCommandCount = Em340P1CommandCount;
+			}
+			break;
+		case AcSensor::Em300Protocol:
+			if (mSettings->isMultiPhase()) {
+				mCommands = Em300Commands;
+				mCommandCount = Em300CommandCount;
+			} else if (mSettings->piggyEnabled()) {
+				mCommands = Em300CommandsP1PV;
+				mCommandCount = Em300CommandsP1PVCount;
+			} else {
+				mCommands = Em300P1Commands;
+				mCommandCount = Em300P1CommandCount;
 			}
 			break;
 		case AcSensor::Em540Protocol:
@@ -901,7 +970,8 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 				// These meters dont' have per-phase reverse counters
 				if ((mAcSensor->protocolType() == AcSensor::Em24Protocol ||
 					mAcSensor->protocolType() == AcSensor::Em540Protocol ||
-					mAcSensor->protocolType() == AcSensor::Em300S27Protocol) &&
+					mAcSensor->protocolType() == AcSensor::Em300S27Protocol ||
+					mAcSensor->protocolType() == AcSensor::Em300Protocol) &&
 					mSettings->isMultiPhase()) {
 					dest->setNegativeEnergy(v);
 				} else {
