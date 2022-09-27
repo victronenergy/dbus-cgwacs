@@ -65,10 +65,10 @@ public:
 	enum ProtocolTypes {
 		Em24Protocol,
 		Et112Protocol,
-		Em340Protocol,
+		Et340Protocol,
 		Em540Protocol,
 		Em300S27Protocol,
-		Em300Protocol, // Similar to Em340Protocol, less registers
+		Em300Protocol, // Similar to Et340Protocol, less registers
 		Unknown
 	};
 

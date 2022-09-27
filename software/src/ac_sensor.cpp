@@ -42,7 +42,7 @@ void AcSensor::setDeviceType(int t)
 	else if (mDeviceType == 338 || mDeviceType == 348)
 		setProtocolType(Em300S27Protocol);
 	else if (mDeviceType >= 330 && mDeviceType <= 345)
-		setProtocolType(Em340Protocol);
+		setProtocolType(Et340Protocol);
 	else if (mDeviceType >= 1744 && mDeviceType <= 1763)
 		setProtocolType(Em540Protocol);
 	else
@@ -151,7 +151,7 @@ int AcSensor::refreshTime() {
 			return 750;
 		case Em540Protocol:
 			return 100;
-		case Em340Protocol:
+		case Et340Protocol:
 		default:
 			return 2000;
 	}
