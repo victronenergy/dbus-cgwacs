@@ -33,7 +33,7 @@ DEFINES += VERSION=\\\"$${VERSION}\\\"
 TEMPLATE = app
 
 include(ext/qslog/QsLog.pri)
-include(ext/velib/src/qt/ve_qitems.pri)
+include(ext/veutil/src/qt/veqitem.pri)
 
 INCLUDEPATH += \
     ext/qslog \

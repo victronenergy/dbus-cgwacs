@@ -9,3 +9,6 @@
 [submodule "software/ext/velib"]
 	path = software/ext/velib
 	url = git@github.com:victronenergy/velib.git
+[submodule "software/ext/veutil"]
+	path = software/ext/veutil
+	url = https://github.com/victronenergy/veutil

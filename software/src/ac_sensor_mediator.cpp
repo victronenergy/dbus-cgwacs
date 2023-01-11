@@ -1,6 +1,6 @@
 #include <QsLog.h>
 #include <QStringList>
-#include <velib/qt/ve_qitem.hpp>
+#include <veutil/qt/ve_qitem.hpp>
 #include "ac_sensor.h"
 #include "ac_sensor_bridge.h"
 #include "ac_sensor_mediator.h"

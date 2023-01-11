@@ -1,5 +1,4 @@
 #include <QsLog.h>
-#include <velib/qt/v_busitems.h>
 #include "ac_sensor_settings.h"
 #include "ac_sensor_settings_bridge.h"
 

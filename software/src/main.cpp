@@ -5,9 +5,9 @@
 #include <QEventLoop>
 #include <QTimer>
 #include <unistd.h>
-#include <velib/qt/ve_qitem.hpp>
-#include <velib/qt/ve_qitems_dbus.hpp>
-#include <velib/qt/ve_qitem_dbus_publisher.hpp>
+#include <veutil/qt/ve_qitem.hpp>
+#include <veutil/qt/ve_qitems_dbus.hpp>
+#include <veutil/qt/ve_qitem_exported_dbus_services.hpp>
 #include "dbus_bridge.h"
 #include "ac_sensor.h"
 #include "ac_sensor_mediator.h"
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
 	producer.open(dbusAddress);
 
 	BridgeItemProducer dbusExportProducer(VeQItems::getRoot(), "pub");
-	VeQItemDbusPublisher publisher(dbusExportProducer.services());
+	VeQItemExportedDbusServices publisher(dbusExportProducer.services());
 	publisher.open(dbusAddress);
 
 	qRegisterMetaType<ConnectionState>();

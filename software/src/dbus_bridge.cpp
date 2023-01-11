@@ -2,8 +2,8 @@
 #include <QDBusMessage>
 #include <QsLog.h>
 #include <QTimer>
-#include <velib/qt/ve_qitem.hpp>
-#include <velib/qt/ve_qitems_dbus.hpp>
+#include <veutil/qt/ve_qitem.hpp>
+#include <veutil/qt/ve_qitems_dbus.hpp>
 #include "dbus_bridge.h"
 
 DBusBridge::DBusBridge(const QString &serviceName, bool isProducer, QObject *parent):
@@ -74,8 +74,8 @@ void DBusBridge::consume(QObject *src, const char *property, const QString &path
 	Q_ASSERT(!mIsProducer);
 	VeQItem *vbi = mServiceRoot->itemGetOrCreate(path);
 	BusItemBridge &b = connectItem(vbi, src, property, path, QString(), 0, false, false, _fromDBus, _toDBus);
-	connect(vbi, SIGNAL(valueChanged(VeQItem *, QVariant)),
-			this, SLOT(onVBusItemChanged(VeQItem *)));
+	connect(vbi, SIGNAL(valueChanged(QVariant)),
+			this, SLOT(onVBusItemChanged()));
 	QVariant v = vbi->getValue(); // force value retrieval
 	if (v.isValid())
 		setValue(b, v);
@@ -245,8 +245,9 @@ void DBusBridge::onPropertyChanged()
 	}
 }
 
-void DBusBridge::onVBusItemChanged(VeQItem *item)
+void DBusBridge::onVBusItemChanged()
 {
+	VeQItem *item = static_cast<VeQItem *>(sender());
 	BusItemBridge *bridge = findBridge(item);
 	if (bridge == 0)
 		return;
@@ -391,9 +392,9 @@ void BridgeItem::produceValue(QVariant value, VeQItem::State state)
 	mValue = value;
 
 	if (stateIsChanged)
-		emit stateChanged(this, state);
+		emit stateChanged(state);
 	if (valueIsChanged)
-		emit valueChanged(this, value);
+		emit valueChanged(value);
 }
 
 void DBusBridge::publishPendingChanges()

@@ -6,7 +6,7 @@
 #include <QObject>
 #include <QPointer>
 #include <QString>
-#include <velib/qt/ve_qitem.hpp>
+#include <veutil/qt/ve_qitem.hpp>
 
 class BridgeItem;
 class QDBusConnection;
@@ -153,7 +153,7 @@ protected:
 private slots:
 	void onPropertyChanged();
 
-	void onVBusItemChanged(VeQItem *item);
+	void onVBusItemChanged();
 
 	void onUpdateTimer();
 
