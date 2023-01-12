@@ -829,7 +829,12 @@ void AcSensorUpdater::startNextAcquisition()
 					mAcSensor->setConnectionState(Connected);
 					mAcPvSensor->setConnectionState(Connected);
 				}
-				mAcSensor->flushValues(); // Flush values out on dbus
+				// For meters where it is supported, that is we tested it and
+				// it works well, flush the values out to dbus at the end of
+				// the modbus reading cycle.
+				if (mAcSensor->supportFastloop()) {
+					mAcSensor->flushValues();
+				}
 				startNextAction();
 				return;
 			}

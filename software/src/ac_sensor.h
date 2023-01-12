@@ -74,6 +74,12 @@ public:
 	bool supportMultiphase() const;
 
 	/*!
+	 * Returns whether meter supports a fast read loop. Some meters are noisier
+	 * and are better operated at slower intervals.
+	 */
+	bool supportFastloop() const;
+
+	/*!
 	 * Returned the serial number of the energy meter.
 	 */
 	QString serial() const

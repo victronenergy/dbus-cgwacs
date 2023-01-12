@@ -65,6 +65,13 @@ bool AcSensor::supportMultiphase() const
 	return protocolType() != Et112Protocol;
 }
 
+bool AcSensor::supportFastloop() const
+{
+	// The EM24 appears to jump around if you fast-read it. This logic can be
+	// improved if more meters need to be added to this list.
+	return protocolType() != Em24Protocol;
+}
+
 void AcSensor::setErrorCode(int code)
 {
 	if (mErrorCode == code)

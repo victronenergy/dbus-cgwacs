@@ -37,8 +37,8 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 
 	bool isGridmeter =
 		(isSecondary ? settings->l2ServiceType() : settings->serviceType()) == "grid";
-	// Changes in QT properties will not be propagated to the D-Bus at once, but in 1000ms/2500ms
-	// intervals.
+	// Changes on dbus will happen at least this often, but may be flushed
+	// sooner (for fast ESS loop).
 	setUpdateInterval(isGridmeter ? 1000 : 2500);
 
 	produce(acSensor, "connectionState", "/Connected");
