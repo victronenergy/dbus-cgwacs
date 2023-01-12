@@ -7,7 +7,6 @@ AcSensor::AcSensor(const QString &portName, int slaveAddress, QObject *parent) :
 	QObject(parent),
 	mConnectionState(Disconnected),
 	mDeviceType(0),
-	mDeviceSubType(0),
 	mErrorCode(0),
 	mFirmwareVersion(0),
 	mPortName(portName),
@@ -49,14 +48,6 @@ void AcSensor::setDeviceType(int t)
 		setProtocolType(Unknown);
 
 	emit deviceTypeChanged();
-}
-
-void AcSensor::setDeviceSubType(int t)
-{
-	if (mDeviceSubType == t)
-		return;
-	mDeviceSubType = t;
-	emit deviceSubTypeChanged();
 }
 
 AcSensor::ProtocolTypes AcSensor::protocolType() const

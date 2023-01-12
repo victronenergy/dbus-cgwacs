@@ -346,7 +346,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 		switch (mAcSensor->protocolType()) {
 		case AcSensor::Em24Protocol:
 			mSetCurrentSign = true;
-			mState = VersionCode;
+			mState = Serial;
 			break;
 		case AcSensor::Em300Protocol:
 		case AcSensor::Et340Protocol:
@@ -367,11 +367,6 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 			disconnectSensor();
 			return;
 		}
-		break;
-	case VersionCode:
-		mAcSensor->setDeviceSubType(registers[0]);
-		mAcPvSensor->setDeviceSubType(registers[0]);
-		mState = Serial;
 		break;
 	case Serial:
 	{
@@ -622,9 +617,6 @@ void AcSensorUpdater::startNextAction()
 	case DeviceId:
 		mAcSensor->setConnectionState(Searched);
 		readRegisters(RegDeviceId, 1);
-		break;
-	case VersionCode:
-		readRegisters(RegEm24VersionCode, 1);
 		break;
 	case Serial:
 		if (mAcSensor->protocolType() == AcSensor::Em24Protocol) {

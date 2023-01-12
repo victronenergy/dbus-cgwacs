@@ -25,7 +25,6 @@ class AcSensor : public QObject
 	Q_OBJECT
 	Q_PROPERTY(ConnectionState connectionState READ connectionState WRITE setConnectionState NOTIFY connectionStateChanged)
 	Q_PROPERTY(int deviceType READ deviceType WRITE setDeviceType NOTIFY deviceTypeChanged)
-	Q_PROPERTY(int deviceSubType READ deviceSubType WRITE setDeviceSubType NOTIFY deviceSubTypeChanged)
 	Q_PROPERTY(QString serial READ serial WRITE setSerial NOTIFY serialChanged)
 	Q_PROPERTY(QString role READ role WRITE setRole NOTIFY roleChanged)
 	Q_PROPERTY(int firmwareVersion READ firmwareVersion WRITE setFirmwareVersion NOTIFY firmwareVersionChanged)
@@ -50,17 +49,6 @@ public:
 	}
 
 	void setDeviceType(int t);
-
-	/*!
-	 * Returns the device sub type as reported by the energy meter. This value
-	 * is non-zero for EM24 energy meters only.
-	 */
-	int deviceSubType() const
-	{
-		return mDeviceSubType;
-	}
-
-	void setDeviceSubType(int t);
 
 	enum ProtocolTypes {
 		Em24Protocol,
@@ -189,8 +177,6 @@ signals:
 
 	void deviceTypeChanged();
 
-	void deviceSubTypeChanged();
-
 	void serialChanged();
 
 	void roleChanged();
@@ -202,7 +188,6 @@ signals:
 private:
 	ConnectionState mConnectionState;
 	int mDeviceType;
-	int mDeviceSubType;
 	ProtocolTypes mProtocolType;
 	int mErrorCode;
 	int mFirmwareVersion;

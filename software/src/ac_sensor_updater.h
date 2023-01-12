@@ -102,7 +102,6 @@ private:
 
 	enum State {
 		DeviceId,
-		VersionCode,
 		Serial,
 		FirmwareVersion,
 		WaitForStart,
@@ -133,7 +132,6 @@ private:
 		RegMeasurementSystem = 0x1102,
 		RegEm112MeasurementMode = 0x1103,
 		RegEm24Serial = 0x1300,
-		RegEm24VersionCode = 0x0302,
 		RegFirmwareVersion = 0x0302,
 		RegAltFirmwareVersion = 0x0303,
 		RegEm24FrontSelector = 0x0304,
