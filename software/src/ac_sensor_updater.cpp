@@ -409,7 +409,11 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 		break;
 	case PhaseSequence:
 		{
-			int seq = (registers[0] == 0 ? PhaseSequenceOk : PhaseSequenceNotOk);
+			// For EM24 and EM300, 0 is OK, -1 is not OK.
+			// For EM540, 1 is OK, and -1 is not OK.
+			// So we assume everything except -1 (0xFFFF in two's complement)
+			// is OK.
+			int seq = (registers[0] == 0xFFFF ? PhaseSequenceNotOk : PhaseSequenceOk);
 			mAcSensor->setPhaseSequence(seq);
 			mState = WaitForStart;
 		}
