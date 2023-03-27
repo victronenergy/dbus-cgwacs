@@ -67,9 +67,11 @@ bool AcSensor::supportMultiphase() const
 
 bool AcSensor::supportFastloop() const
 {
-	// The EM24 appears to jump around if you fast-read it. This logic can be
-	// improved if more meters need to be added to this list.
-	return protocolType() != Em24Protocol;
+	// Only the EM540 really supports the faster updates, and the EM24 
+	// seems particularly jumpy below 20W. Since it adds very little speed
+	// and sometimes causes problems, including more D-bus traffic, only
+	// fast-update for the EM540.
+	return protocolType() == Em540Protocol;
 }
 
 void AcSensor::setErrorCode(int code)
