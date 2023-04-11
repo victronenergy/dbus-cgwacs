@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
 	QString portName;
 	QString dbusAddress = "system";
 	int timeout = 250;
+	int baud = 9600;
 	QStringList args = app.arguments();
 	args.pop_front();
 
@@ -89,6 +90,8 @@ int main(int argc, char *argv[])
 			QLOG_INFO() << "\t dbus address or 'session' or 'system'";
 			QLOG_INFO() << "\t-d level, --debug level";
 			QLOG_INFO() << "\t Set log level";
+			QLOG_INFO() << "\t--baud rate";
+			QLOG_INFO() << "\t Baud rate to use, default 9600";
 			QLOG_INFO() << "\t--timeout milliseconds";
 			QLOG_INFO() << "\t Timeout in milliseconds for RS485 responses";
 			QLOG_INFO() << "\t <Port Name>";
@@ -119,6 +122,9 @@ int main(int argc, char *argv[])
 		} else if (arg == "-z" || arg == "--zigbee") {
 			timeout = qMax(2000, timeout);
 			isZigbee = true;
+		} else if (arg == "--baud") {
+			if (!args.isEmpty())
+				baud = qBound(9600, args.takeFirst().toInt(), 115200);
 		} else if (!arg.startsWith('-')) {
 			portName = arg;
 		}
@@ -146,7 +152,7 @@ int main(int argc, char *argv[])
 	}
 
 	VeQItem *settingsRoot = VeQItems::getRoot()->itemGetOrCreate("sub/com.victronenergy.settings", false);
-	AcSensorMediator m(portName, timeout, isZigbee, settingsRoot);
+	AcSensorMediator m(portName, baud, timeout, isZigbee, settingsRoot);
 
 	app.connect(&m, SIGNAL(connectionLost()), &app, SLOT(quit()));
 	app.connect(&m, SIGNAL(serialEvent(const char *)), &app, SLOT(quit()));

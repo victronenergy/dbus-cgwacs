@@ -11,10 +11,11 @@
 
 static const QString DeviceIdsPath = "Settings/CGwacs/DeviceIds";
 
-AcSensorMediator::AcSensorMediator(const QString &portName, int timeout, bool isZigbee, VeQItem *settingsRoot,
+AcSensorMediator::AcSensorMediator(const QString &portName, int baud,
+								   int timeout, bool isZigbee, VeQItem *settingsRoot,
 								   QObject *parent) :
 	QObject(parent),
-	mModbus(new ModbusRtu(portName, 9600, timeout, this)),
+	mModbus(new ModbusRtu(portName, baud, timeout, this)),
 	mDeviceIdsItem(settingsRoot->itemGetOrCreate(DeviceIdsPath))
 {
 	DBusBridge settingsBridge(settingsRoot, false);
