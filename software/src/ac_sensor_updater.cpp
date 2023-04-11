@@ -789,7 +789,7 @@ void AcSensorUpdater::startNextAction()
 	{
 		int sleep = mStopwatch.elapsed();
 		sleep = 250 - sleep;
-		if (sleep > 50) {
+		if (!mAcSensor->supportFastloop() && sleep > 50) {
 			mAcquisitionTimer->setInterval(sleep);
 			mAcquisitionTimer->start();
 		} else {
