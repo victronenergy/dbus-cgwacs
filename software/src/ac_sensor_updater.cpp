@@ -18,7 +18,6 @@ static const int MeasurementModeB = 1;
 static const int MeasurementModeC = 2;
 
 static const int ApplicationH = 7; // show negative power (EM24)
-static const int MaxAcquisitionIndex = 16;
 static const int MaxRegCount = 5;
 static const int MaxTimeoutCount = 5;
 static const int MaxErrorCount = 20;
@@ -58,12 +57,12 @@ struct CompositeCommand {
 static const CompositeCommand Em24Commands[] = {
 	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
 	{ 0x0012, 0, { { 0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
-	{ 0x0024, 2, { { 0, Voltage, MultiPhase } } },
-	{ 0x0000, 4, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 }, { 4, Voltage, PhaseL3 } } },
-	{ 0x000C, 8, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 } } },
-	{ 0x003E, 10, { { 0, PositiveEnergy, MultiPhase } } },
-	{ 0x0046, 12, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 } } },
-	{ 0x005C, 14, { { 0, NegativeEnergy, MultiPhase } } }
+	{ 0x0024, 1, { { 0, Voltage, MultiPhase } } },
+	{ 0x0000, 2, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 }, { 4, Voltage, PhaseL3 } } },
+	{ 0x000C, 3, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 } } },
+	{ 0x003E, 4, { { 0, PositiveEnergy, MultiPhase } } },
+	{ 0x0046, 5, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 } } },
+	{ 0x005C, 6, { { 0, NegativeEnergy, MultiPhase } } }
 };
 
 /// We use dummy commands here to vary the number of requested registers. This
@@ -74,30 +73,30 @@ static const CompositeCommand Em24Commands[] = {
 /// late packets.
 static const CompositeCommand Em24CommandsP1[] = {
 	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
-	{ 0x0024, 2, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x000C, 8, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x003E, 10, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x005C, 14, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
+	{ 0x0024, 1, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x000C, 2, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x003E, 3, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x005C, 4, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
 };
 
 static const CompositeCommand Em24CommandsP1PV[] = {
 	{ 0x0012, 0, { { 0, Power, PhaseL1 } } },
-	{ 0x0014, 2, { { 0, Power, PhaseL2 }, { 1, Dummy, MultiPhase } } },
-	{ 0x0000, 4, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 } } },
-	{ 0x000C, 6, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 } } },
-	{ 0x0046, 8, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 } } },
+	{ 0x0014, 1, { { 0, Power, PhaseL2 }, { 1, Dummy, MultiPhase } } },
+	{ 0x0000, 2, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 } } },
+	{ 0x000C, 3, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 } } },
+	{ 0x0046, 4, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 } } },
 	// Note that NegativeEnergy will give us the energy of all phases. Right now
 	// we assume that in case of a shared system L1 is a grid meter and L2 a
 	// PV inverter (which always has ReverseEnergy=0 because power and current
 	// are always positive).
-	{ 0x005C, 10, { { 0, NegativeEnergy, PhaseL1 }, { 1, Dummy, MultiPhase } } }
+	{ 0x005C, 5, { { 0, NegativeEnergy, PhaseL1 }, { 1, Dummy, MultiPhase } } }
 };
 
 static const CompositeCommand Em112Commands[] = {
 	{ 0x0004, 0, { { 0, Power, MultiPhase } } },
-	{ 0x0000, 4, { { 0, Voltage, MultiPhase }, { 2, Current, MultiPhase } } },
-	{ 0x0010, 8, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x0020, 12, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
+	{ 0x0000, 1, { { 0, Voltage, MultiPhase }, { 2, Current, MultiPhase } } },
+	{ 0x0010, 2, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x0020, 3, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
 };
 
 static const CompositeCommand Et340Commands[] = {
@@ -105,28 +104,28 @@ static const CompositeCommand Et340Commands[] = {
 	{ 0x0012, 0, { { 0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
 	{ 0x0024, 1, { { 0, Voltage, MultiPhase }, { 2, Dummy, MultiPhase } } },
 	{ 0x0000, 2, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 }, { 4, Voltage, PhaseL3 }, {6, Dummy, MultiPhase } } },
-	{ 0x000C, 4, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 }, {6, Dummy, MultiPhase } } },
-	{ 0x0034, 6, { { 0, PositiveEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
-	{ 0x0040, 8, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
-	{ 0x004E, 10, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
-	{ 0x0060, 12, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 }, { 4, NegativeEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
+	{ 0x000C, 3, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 }, {6, Dummy, MultiPhase } } },
+	{ 0x0034, 4, { { 0, PositiveEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
+	{ 0x0040, 5, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
+	{ 0x004E, 6, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
+	{ 0x0060, 7, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 }, { 4, NegativeEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
 };
 
 static const CompositeCommand Et340P1Commands[] = {
 	{ 0x0012, 0, { { 0, Power, MultiPhase } } },
 	{ 0x0000, 1, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x000C, 3, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x0040, 5, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x0060, 7, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x000C, 2, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x0040, 3, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x0060, 4, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
 };
 
 static const CompositeCommand Et340CommandsP1PV[] = {
 	{ 0x0012, 0, { { 0, Power, PhaseL1 } } },
-	{ 0x0014, 2, { { 0, Power, PhaseL2 }, { 1, Dummy, MultiPhase } } },
-	{ 0x0000, 4, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 } } },
-	{ 0x000C, 6, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 } } },
-	{ 0x0040, 8, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 } } },
-	{ 0x0060, 10, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 } } }
+	{ 0x0014, 1, { { 0, Power, PhaseL2 }, { 1, Dummy, MultiPhase } } },
+	{ 0x0000, 2, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 } } },
+	{ 0x000C, 3, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 } } },
+	{ 0x0040, 4, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 } } },
+	{ 0x0060, 5, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 } } }
 };
 
 static const CompositeCommand Em300Commands[] = {
@@ -134,25 +133,25 @@ static const CompositeCommand Em300Commands[] = {
 	{ 0x0012, 0, { { 0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
 	{ 0x0024, 1, { { 0, Voltage, MultiPhase }, { 2, Dummy, MultiPhase } } },
 	{ 0x0000, 2, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 }, { 4, Voltage, PhaseL3 }, {6, Dummy, MultiPhase } } },
-	{ 0x000C, 4, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 }, {6, Dummy, MultiPhase } } },
-	{ 0x0034, 6, { { 0, PositiveEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
-	{ 0x0040, 8, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
-	{ 0x004E, 12, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
+	{ 0x000C, 3, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 }, {6, Dummy, MultiPhase } } },
+	{ 0x0034, 4, { { 0, PositiveEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
+	{ 0x0040, 5, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
+	{ 0x004E, 6, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
 };
 
 static const CompositeCommand Em300P1Commands[] = {
 	{ 0x0012, 0,  { { 0, Power, MultiPhase } } },
-	{ 0x0000, 4,  { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x000C, 8,  { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x0040, 12, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x0000, 1,  { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x000C, 2,  { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x0040, 3, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
 };
 
 static const CompositeCommand Em300CommandsP1PV[] = {
 	{ 0x0012, 0,  { { 0, Power, PhaseL1 } } },
-	{ 0x0014, 4,  { { 0, Power, PhaseL2 }, { 1, Dummy, MultiPhase } } },
-	{ 0x0000, 8,  { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 } } },
-	{ 0x000C, 12, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 } } },
-	{ 0x0040, 15, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 } } },
+	{ 0x0014, 1,  { { 0, Power, PhaseL2 }, { 1, Dummy, MultiPhase } } },
+	{ 0x0000, 2,  { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 } } },
+	{ 0x000C, 3, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 } } },
+	{ 0x0040, 4, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 } } },
 };
 
 static const CompositeCommand Em540Commands[] = {
@@ -160,41 +159,41 @@ static const CompositeCommand Em540Commands[] = {
 	{ 0x0012, 0, { { 0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
 	{ 0x0024, 1, { { 0, Voltage, MultiPhase }, { 2, Dummy, MultiPhase } } },
 	{ 0x0000, 2, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 }, { 4, Voltage, PhaseL3 }, {6, Dummy, MultiPhase } } },
-	{ 0x000C, 4, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 }, {6, Dummy, MultiPhase } } },
-	{ 0x0034, 6, { { 0, PositiveEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
-	{ 0x0040, 8, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
-	{ 0x004E, 10, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
+	{ 0x000C, 3, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 }, {6, Dummy, MultiPhase } } },
+	{ 0x0034, 4, { { 0, PositiveEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
+	{ 0x0040, 5, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
+	{ 0x004E, 6, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
 };
 
 static const CompositeCommand Em540P1Commands[] = {
 	{ 0x0012, 0, { { 0, Power, MultiPhase } } },
 	{ 0x0000, 1, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x000C, 3, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x0040, 5, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x004E, 7, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x000C, 2, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x0040, 3, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x004E, 4, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
 };
 
 static const CompositeCommand Em540CommandsP1PV[] = {
 	{ 0x0012, 0, { { 0, Power, PhaseL1 } } },
-	{ 0x0014, 2, { { 0, Power, PhaseL2 }, { 1, Dummy, MultiPhase } } },
-	{ 0x0000, 4, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 } } },
-	{ 0x000C, 6, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 } } },
-	{ 0x0040, 8, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 } } },
+	{ 0x0014, 1, { { 0, Power, PhaseL2 }, { 1, Dummy, MultiPhase } } },
+	{ 0x0000, 2, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 } } },
+	{ 0x000C, 3, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 } } },
+	{ 0x0040, 4, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 } } },
 	// As with the EM24, there is no individual negative counters for exported
 	// energy. We assume that in a shared system, L1 is a grid meter and L2
 	// is a PV-inverter, so on L2 there is never any imported power, therefore
 	// all negative energy can be assumed to be on L1.
-	{ 0x004E, 10, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 } } }
+	{ 0x004E, 5, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 } } }
 };
 
 // Even though this meter is supposedly the same as an EM24, it is still
 // too much of an EM300, and single-phase needs a special command-set.
 static const CompositeCommand Em300S27P1Commands[] = {
 	{ 0x0028, 0, { { 0, Power, MultiPhase } } },
-	{ 0x0000, 2, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x000C, 8, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x003E, 10, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x005C, 14, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
+	{ 0x0000, 1, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x000C, 2, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x003E, 3, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x005C, 4, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
 };
 
 int getMaxOffset(const CompositeCommand &cmd) {
@@ -828,7 +827,7 @@ void AcSensorUpdater::startNextAcquisition()
 				mState = Wait;
 				mCommandIndex = 0;
 				++mAcquisitionIndex;
-				if (mAcquisitionIndex == MaxAcquisitionIndex) {
+				if (mAcquisitionIndex >= getMaxInterval()) {
 					mAcquisitionIndex = 0;
 					mAcSensor->setConnectionState(Connected);
 					mAcPvSensor->setConnectionState(Connected);
@@ -969,4 +968,10 @@ double AcSensorUpdater::getDouble(const QList<quint16> &registers,
 	value = (int32_t)(registers[offset] | registers[offset + 1] << 16);
 	if (value == 0x7FFFFFFF) return qQNaN();
 	return value * factor;
+}
+
+// Get the last interval
+int AcSensorUpdater::getMaxInterval()
+{
+	return mCommands[mCommandCount-1].interval;
 }

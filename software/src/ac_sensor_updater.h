@@ -100,6 +100,8 @@ private:
 
 	double getDouble(const QList<quint16> &registers, int offset, double factor);
 
+	int getMaxInterval();
+
 	enum State {
 		DeviceId,
 		Serial,
