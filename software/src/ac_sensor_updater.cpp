@@ -827,7 +827,7 @@ void AcSensorUpdater::startNextAcquisition()
 				mState = Wait;
 				mCommandIndex = 0;
 				++mAcquisitionIndex;
-				if (mAcquisitionIndex >= getMaxInterval()) {
+				if (mAcquisitionIndex > getMaxInterval()) {
 					mAcquisitionIndex = 0;
 					mAcSensor->setConnectionState(Connected);
 					mAcPvSensor->setConnectionState(Connected);
