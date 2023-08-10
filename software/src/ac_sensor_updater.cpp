@@ -486,10 +486,17 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 			(mAcSensor->protocolType() == AcSensor::Em300Protocol) ||
 			(mAcSensor->protocolType() == AcSensor::Em300S27Protocol) ||
 			(mAcSensor->protocolType() == AcSensor::Em540Protocol));
-		// Caution: EM3xx meters do not support MeasurementSystemP1
-		// Changing the measurement system also resets the kWh counters.
-		mDesiredMeasuringSystem = mSettings->isMultiPhase() || !mSettings->piggyEnabled() ?
-			MeasurementSystemP3 : MeasurementSystemP2;
+		switch (mAcSensor->protocolType()) {
+		case AcSensor::Em540Protocol:
+			// EM540 meter doesn't like 2P mode.
+			mDesiredMeasuringSystem = MeasurementSystemP3;
+			break;
+		default:
+			// Caution: EM3xx meters do not support MeasurementSystemP1
+			// Changing the measurement system also resets the kWh counters.
+			mDesiredMeasuringSystem = mSettings->isMultiPhase() || !mSettings->piggyEnabled() ?
+				MeasurementSystemP3 : MeasurementSystemP2;
+		}
 		mState = mDesiredMeasuringSystem == registers[0] ? Acquisition : SetMeasuringSystem;
 		break;
 	case Acquisition:
