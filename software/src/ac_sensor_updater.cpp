@@ -186,7 +186,7 @@ static const CompositeCommand Em540CommandsP1PV[] = {
 	// energy. We assume that in a shared system, L1 is a grid meter and L2
 	// is a PV-inverter, so on L2 there is never any imported power, therefore
 	// all negative energy can be assumed to be on L1.
-	{ 0x004E, 5, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 } } }
+	{ 0x004E, 5, { { 0, NegativeEnergy, PhaseL1 }, { 2, Dummy, MultiPhase } } }
 };
 
 // Even though this meter is supposedly the same as an EM24, it is still
