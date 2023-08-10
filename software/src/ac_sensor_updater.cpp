@@ -144,6 +144,7 @@ static const CompositeCommand Em300P1Commands[] = {
 	{ 0x0000, 1,  { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x000C, 2,  { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x0040, 3, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x004E, 4, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
 };
 
 static const CompositeCommand Em300CommandsP1PV[] = {
@@ -152,6 +153,8 @@ static const CompositeCommand Em300CommandsP1PV[] = {
 	{ 0x0000, 2,  { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 } } },
 	{ 0x000C, 3, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 } } },
 	{ 0x0040, 4, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 } } },
+	// No per-phase counters, total is assumed to be for L1.
+	{ 0x004E, 5, { { 0, NegativeEnergy, PhaseL1 }, { 2, Dummy, MultiPhase } } },
 };
 
 static const CompositeCommand Em540Commands[] = {
