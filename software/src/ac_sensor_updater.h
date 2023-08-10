@@ -85,6 +85,8 @@ private slots:
 
 	void onL2ServiceTypeChanged();
 
+	void onPiggyEnabledChanged();
+
 private:
 	void startNextAction();
 

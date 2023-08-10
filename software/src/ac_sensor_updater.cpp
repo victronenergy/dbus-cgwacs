@@ -462,8 +462,8 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 	case CheckMeasurementMode:
 		{
 			Q_ASSERT(registers.size() == 1);
-			int desiredMode = mAcSensor->protocolType() == AcSensor::Em540Protocol ?
-				MeasurementModeC : MeasurementModeB;
+			int desiredMode = mAcSensor->protocolType() == AcSensor::Em540Protocol
+				&& !mSettings->piggyEnabled() ? MeasurementModeC : MeasurementModeB;
 			if (registers[0] == desiredMode) {
 				switch (mAcSensor->protocolType()) {
 				case AcSensor::Et340Protocol:
@@ -600,6 +600,11 @@ void AcSensorUpdater::onL2ServiceTypeChanged()
 	mSetupRequested = true;
 }
 
+void AcSensorUpdater::onPiggyEnabledChanged()
+{
+	mSetupRequested = true;
+}
+
 void AcSensorUpdater::startNextAction()
 {
 	if (mSetupRequested) {
@@ -613,6 +618,7 @@ void AcSensorUpdater::startNextAction()
 		case AcSensor::Et340Protocol:
 		case AcSensor::Em300Protocol:
 		case AcSensor::Em300S27Protocol:
+		case AcSensor::Em540Protocol:
 			mState = CheckMeasurementMode;
 			break;
 		default:
@@ -692,8 +698,13 @@ void AcSensorUpdater::startNextAction()
 	case SetMeasurementMode:
 		switch (mAcSensor->protocolType()) {
 		case AcSensor::Em540Protocol:
-			QLOG_INFO() << "Set EM540 measurement mode to C";
-			writeRegister(RegEm112MeasurementMode, MeasurementModeC);
+			if (mSettings->piggyEnabled()) {
+				QLOG_INFO() << "Set EM540 measurement mode to B";
+				writeRegister(RegEm112MeasurementMode, MeasurementModeB);
+			} else {
+				QLOG_INFO() << "Set EM540 measurement mode to C";
+				writeRegister(RegEm112MeasurementMode, MeasurementModeC);
+			}
 			break;
 		default:
 			// This will cause the EM1xx/EM3xx range to report negative power values when
@@ -713,6 +724,8 @@ void AcSensorUpdater::startNextAction()
 				this, SLOT(onIsMultiPhaseChanged()));
 		connect(mSettings, SIGNAL(l2ClassAndVrmInstanceChanged()),
 				this, SLOT(onL2ServiceTypeChanged()));
+		connect(mSettings, SIGNAL(piggyEnabledChanged()),
+				this, SLOT(onPiggyEnabledChanged()));
 		mAcSensor->setConnectionState(Detected);
 		break;
 	case Acquisition:
