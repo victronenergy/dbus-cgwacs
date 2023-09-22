@@ -7,6 +7,7 @@
 
 Q_DECLARE_METATYPE(Phase)
 Q_DECLARE_METATYPE(Position)
+Q_DECLARE_METATYPE(AccountingMode)
 
 class AcSensorSettings : public QObject
 {
@@ -21,6 +22,7 @@ class AcSensorSettings : public QObject
 	Q_PROPERTY(bool isMultiPhase READ isMultiPhase WRITE setIsMultiPhase NOTIFY isMultiPhaseChanged)
 	Q_PROPERTY(bool piggyEnabled READ piggyEnabled WRITE setPiggyEnabled NOTIFY piggyEnabledChanged)
 	Q_PROPERTY(Position position READ position WRITE setPosition NOTIFY positionChanged)
+	Q_PROPERTY(AccountingMode accountingMode READ accountingMode WRITE setaccountingMode NOTIFY accountingModeChanged)
 	Q_PROPERTY(int deviceInstance READ deviceInstance)
 	Q_PROPERTY(double l1ReverseEnergy READ l1ReverseEnergy WRITE setL1ReverseEnergy NOTIFY l1ReverseEnergyChanged)
 	Q_PROPERTY(double l2ReverseEnergy READ l2ReverseEnergy WRITE setL2ReverseEnergy NOTIFY l2ReverseEnergyChanged)
@@ -111,6 +113,10 @@ public:
 
 	void setPosition(Position p);
 
+	AccountingMode accountingMode();
+
+	void setAccountingMode(AccountingMode a);
+
 	int deviceInstance() const;
 
 	int l2DeviceInstance() const;
@@ -148,6 +154,8 @@ signals:
 
 	void positionChanged();
 
+	void accountingModeChanged();
+
 	void l1ReverseEnergyChanged();
 
 	void l2ReverseEnergyChanged();
@@ -173,6 +181,7 @@ private:
 	bool mIsMultiPhase;
 	bool mPiggyEnabled;
 	Position mPosition;
+	AccountingMode mAccountingMode;
 	double mL1Energy;
 	double mL2Energy;
 	double mL3Energy;
