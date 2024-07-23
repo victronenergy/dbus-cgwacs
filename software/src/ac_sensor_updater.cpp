@@ -375,8 +375,8 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 		Q_ASSERT(registers.size() == 7);
 		QString serial;
 		foreach (quint16 r, registers) {
-			serial.append(r >> 8);
-			serial.append(r & 0xFF);
+			serial.append(QChar(r >> 8));
+			serial.append(QChar(r & 0xFF));
 		}
 		// Some grid meters (ET112, ET340) add zero values in the MSB's of the
 		// registers. Others (EM24) add zero padding at the end.
