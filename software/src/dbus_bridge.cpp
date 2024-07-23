@@ -157,7 +157,7 @@ bool DBusBridge::addSetting(const QString &path,
 	/// not implemented as part of the VeQItem framework, so it is better to do it here, than to
 	/// shift the burden to the users of this class.
 	int pos = path.startsWith('/') ? 1 : 0;
-	if (path.midRef(pos, 8) != "Settings") {
+	if (path.mid(pos, 8) != "Settings") {
 		QLOG_ERROR() << "Settings path should start with Settings: " << path;
 		return false;
 	}
