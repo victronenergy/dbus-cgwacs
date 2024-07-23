@@ -67,7 +67,7 @@ bool AcSensor::supportMultiphase() const
 
 bool AcSensor::supportFastloop() const
 {
-	// Only the EM540 really supports the faster updates, and the EM24 
+	// Only the EM540 really supports the faster updates, and the EM24
 	// seems particularly jumpy below 20W. Since it adds very little speed
 	// and sometimes causes problems, including more D-bus traffic, only
 	// fast-update for the EM540.
