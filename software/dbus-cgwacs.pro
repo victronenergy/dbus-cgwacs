@@ -8,6 +8,8 @@ QMAKE_CXXFLAGS += -Wno-psabi
 # solved in newer QT versions.
 QMAKE_CXXFLAGS += -Wno-unused-local-typedefs
 
+equals(QT_MAJOR_VERSION, 6): QMAKE_CXXFLAGS += -std=c++17
+
 # Add more folders to ship with the application here
 unix {
     bindir = $$(bindir)
