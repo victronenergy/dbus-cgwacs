@@ -9,6 +9,12 @@
 #include "ac_sensor_updater.h"
 #include "dbus_bridge.h"
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+#define SkipEmptyParts Qt::SkipEmptyParts
+#else
+#define SkipEmptyParts QString::SkipEmptyParts
+#endif
+
 static const QString DeviceIdsPath = "Settings/CGwacs/DeviceIds";
 
 AcSensorMediator::AcSensorMediator(const QString &portName, int baud,
@@ -137,7 +143,7 @@ void AcSensorMediator::registerDevice(const QString &serial)
 {
 	if (mDeviceIds.isEmpty()) {
 		QString ids = mDeviceIdsItem->getValue().toString();
-		mDeviceIds = ids.split(',', QString::SkipEmptyParts);
+		mDeviceIds = ids.split(',', SkipEmptyParts);
 	}
 	if (mDeviceIds.contains(serial))
 		return;
