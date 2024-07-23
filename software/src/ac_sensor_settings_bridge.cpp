@@ -6,7 +6,7 @@ static const QString Service = "sub/com.victronenergy.settings";
 
 static bool positionFromDBus(DBusBridge*, QVariant &v)
 {
-	v = qVariantFromValue(static_cast<Position>(v.toInt()));
+	v = QVariant::fromValue(static_cast<Position>(v.toInt()));
 	return true;
 }
 
