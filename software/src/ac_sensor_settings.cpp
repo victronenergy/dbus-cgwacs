@@ -10,6 +10,7 @@ AcSensorSettings::AcSensorSettings(bool supportMultiphase, const QString &serial
 	mIsMultiPhase(false),
 	mPiggyEnabled(false),
 	mPosition(Input1),
+	mAccountingMode(Individual),
 	mL1Energy(0),
 	mL2Energy(0),
 	mL3Energy(0),
@@ -125,6 +126,18 @@ void AcSensorSettings::setL2Position(Position v)
 	mL2Position = v;
 	emit l2PositionChanged();
 	emit l2ProductNameChanged();
+}
+
+AccountingMode AcSensorSetting::accountingMode()
+{
+	return mAccountingMode;
+}
+
+void AcSensorSettings::setAccountingMode(AccountingMode m) {
+	if (mAccountingMode == m)
+		return;
+	mAccountingMode = m;
+	emit accountingModeChanged();
 }
 
 Position AcSensorSettings::position()

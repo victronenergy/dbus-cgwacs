@@ -18,6 +18,11 @@ enum Position {
 	Input2 = 2
 };
 
+enum AccountingMode {
+	Individual = 0,
+	Sum = 1,
+};
+
 inline quint8 msb(quint16 d)
 {
 	return d >> 8;

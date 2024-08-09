@@ -964,6 +964,15 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 				// other meters.
 				v = qAbs(getDouble(registers, ra.regOffset, 0.1));
 
+				// Ignore per-phase counters if mode is sum, this will then correct ET340s weird sum counts
+				// void DataProcessor::setNegativeEnergy(double sum) does the phase correction
+				if (mSettings->accountingMode() === Sum) {
+					if ( ra.phase == MultiPhase) {
+						dest->setNegativeEnergy(v);
+					}
+					break;
+				}
+
 				// These meters dont' have per-phase reverse counters
 				if ((mAcSensor->protocolType() == AcSensor::Em24Protocol ||
 					mAcSensor->protocolType() == AcSensor::Em540Protocol ||
@@ -974,6 +983,7 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 				} else {
 					dest->setNegativeEnergy(ra.phase, v);
 					if (setPhaseL1)
+						// Device has has no per phase count, so L1 is set for data completion
 						dest->setNegativeEnergy(PhaseL1, v);
 				}
 				break;

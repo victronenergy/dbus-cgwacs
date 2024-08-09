@@ -15,6 +15,17 @@ static bool positionToDBus(DBusBridge*, QVariant &v)
 	v = QVariant(static_cast<int>(v.value<Position>()));
 	return true;
 }
+static bool accountingModeFromDBus(DBusBridge*, QVariant &v)
+{
+	v = qVariantFromValue(static_cast<AccountingMode>(v.toInt()));
+	return true;
+}
+
+static bool accountingModeToDBus(DBusBridge*, QVariant &v)
+{
+	v = QVariant(static_cast<int>(v.value<AccountingMode>()));
+	return true;
+}
 
 AcSensorSettingsBridge::AcSensorSettingsBridge(AcSensorSettings *settings, QObject *parent) :
 	DBusBridge(Service, false, parent)
@@ -33,6 +44,8 @@ AcSensorSettingsBridge::AcSensorSettingsBridge(AcSensorSettings *settings, QObje
 			primaryPath + "/IsMultiphase", false);
 	consume(settings, "position", QVariant(0),
 			primaryPath + "/Position", false, positionFromDBus, positionToDBus);
+	consume(settings, "accountingMode", QVariant(0),
+			primaryPath + "/AccountingMode", false, accountingModeFromDBus, accountingModeToDBus);
 	consume(settings, "l1ReverseEnergy", 0.0, 0.0, 1e6,
 			primaryPath + "/L1ReverseEnergy", true);
 	consume(settings, "l2ReverseEnergy", 0.0, 0.0, 1e6,
