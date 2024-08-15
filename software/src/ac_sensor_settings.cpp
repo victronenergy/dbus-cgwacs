@@ -259,5 +259,9 @@ QString AcSensorSettings::getProductName(const QString &serviceType, Position po
 	}
 	if (serviceType == "acload")
 		return "AC load";
+	if (serviceType == "evcharger")
+		return "EVSE";
+	if (serviceType == "heatpump")
+		return "Heat pump";
 	return "AC sensor";
 }

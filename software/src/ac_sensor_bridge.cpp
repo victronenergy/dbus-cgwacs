@@ -11,7 +11,7 @@
 static bool roleFromDBus(DBusBridge*, QVariant &v)
 {
 	QString s = v.toString();
-	return (QStringList() << "grid" << "pvinverter" << "genset" << "acload").contains(s);
+	return (QStringList() << "grid" << "pvinverter" << "genset" << "acload" << "evcharger" << "heatpump").contains(s);
 }
 
 static bool positionFromDBus(DBusBridge*, QVariant &v)
@@ -108,7 +108,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 		settings->deviceInstance();
 	produce("/DeviceInstance", deviceInstance);
 	produce("/Serial", isSecondary ? QString("%1_S").arg(acSensor->serial()) : acSensor->serial());
-	produce("/AllowedRoles", isSecondary ? (QStringList() << "pvinverter" << "acload") : (QStringList() << "grid" << "pvinverter" << "genset" << "acload"));
+	produce("/AllowedRoles", isSecondary ? (QStringList() << "pvinverter" << "acload" << "evcharger" << "heatpump") : (QStringList() << "grid" << "pvinverter" << "genset" << "acload" << "evcharger" << "heatpump"));
 
 	// Publish some information about the known refresh time of these devices.
 	// This is used by hub4control to know how fast it can make its control
