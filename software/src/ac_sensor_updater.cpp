@@ -174,7 +174,7 @@ static const CompositeCommand Em540Commands[] = {
 	{ 0x0034, 4, { { 0, PositiveEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
 	{ 0x0040, 5, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
 	{ 0x004E, 6, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
-	{ 0x0033, 7, { { 0, Frequency, MultiPhase }, {1, Dummy, MultiPhase } } }
+	{ 0x053C, 7, { { 0, Frequency, MultiPhase }, {2, Dummy, MultiPhase } } }
 };
 
 static const CompositeCommand Em540P1Commands[] = {
@@ -183,7 +183,7 @@ static const CompositeCommand Em540P1Commands[] = {
 	{ 0x000C, 2, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x0040, 3, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x004E, 4, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x0033, 6, { { 0, Frequency, MultiPhase }, {1, Dummy, MultiPhase } } }
+	{ 0x053C, 6, { { 0, Frequency, MultiPhase }, {2, Dummy, MultiPhase } } }
 };
 
 static const CompositeCommand Em540CommandsP1PV[] = {
@@ -989,8 +989,12 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 				}
 				break;
 			case Frequency:
-				dest->setFrequency(
-					registers[0] == 0xFFFF ? qQNaN() : registers[0] * 0.1);
+				// EM540 has higher resolution
+				if (mAcSensor->protocolType() == AcSensor::Em540Protocol)
+					v = getDouble(registers, ra.regOffset, 0.001);
+				else
+					v = registers[0] == 0xFFFF ? qQNaN() : registers[0] * 0.1;
+				dest->setFrequency(v);
 				break;
 			default:
 				break;
