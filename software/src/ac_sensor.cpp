@@ -12,6 +12,7 @@ AcSensor::AcSensor(const QString &portName, int slaveAddress, QObject *parent) :
 	mPortName(portName),
 	mSlaveAddress(slaveAddress),
 	mPhaseSequence(-1),
+	mFrequency(qQNaN()),
 	mTotal(new AcSensorPhase(this)),
 	mL1(new AcSensorPhase(this)),
 	mL2(new AcSensorPhase(this)),
@@ -101,6 +102,12 @@ void AcSensor::setRole(const QString &s)
 void AcSensor::setPhaseSequence(int v)
 {
 	mPhaseSequence = v;
+}
+
+void AcSensor::setFrequency(double v)
+{
+	mFrequency = v;
+	emit frequencyChanged();
 }
 
 void AcSensor::setFirmwareVersion(int v)

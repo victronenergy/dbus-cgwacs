@@ -37,7 +37,8 @@ enum ParameterType {
 	Voltage,
 	Current,
 	PositiveEnergy,
-	NegativeEnergy
+	NegativeEnergy,
+	Frequency
 };
 
 struct RegisterCommand {
@@ -62,7 +63,8 @@ static const CompositeCommand Em24Commands[] = {
 	{ 0x000C, 3, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 } } },
 	{ 0x003E, 4, { { 0, PositiveEnergy, MultiPhase } } },
 	{ 0x0046, 5, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 } } },
-	{ 0x005C, 6, { { 0, NegativeEnergy, MultiPhase } } }
+	{ 0x005C, 6, { { 0, NegativeEnergy, MultiPhase } } },
+	{ 0x0037, 7, { { 0, Frequency, MultiPhase }, {1, Dummy, MultiPhase } } }
 };
 
 /// We use dummy commands here to vary the number of requested registers. This
@@ -76,7 +78,8 @@ static const CompositeCommand Em24CommandsP1[] = {
 	{ 0x0024, 1, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x000C, 2, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x003E, 3, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x005C, 4, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
+	{ 0x005C, 4, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x0037, 5, { { 0, Frequency, MultiPhase }, {1, Dummy, MultiPhase } } }
 };
 
 static const CompositeCommand Em24CommandsP1PV[] = {
@@ -96,7 +99,8 @@ static const CompositeCommand Em112Commands[] = {
 	{ 0x0004, 0, { { 0, Power, MultiPhase } } },
 	{ 0x0000, 1, { { 0, Voltage, MultiPhase }, { 2, Current, MultiPhase } } },
 	{ 0x0010, 2, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x0020, 3, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
+	{ 0x0020, 3, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x000F, 4, { { 0, Frequency, MultiPhase }, {1, Dummy, MultiPhase } } }
 };
 
 static const CompositeCommand Et340Commands[] = {
@@ -109,6 +113,7 @@ static const CompositeCommand Et340Commands[] = {
 	{ 0x0040, 5, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
 	{ 0x004E, 6, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
 	{ 0x0060, 7, { { 0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 }, { 4, NegativeEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
+	{ 0x0033, 8, { { 0, Frequency, MultiPhase }, {1, Dummy, MultiPhase } } }
 };
 
 static const CompositeCommand Et340P1Commands[] = {
@@ -117,6 +122,7 @@ static const CompositeCommand Et340P1Commands[] = {
 	{ 0x000C, 2, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x0040, 3, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x0060, 4, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x0033, 5, { { 0, Frequency, MultiPhase }, {1, Dummy, MultiPhase } } }
 };
 
 static const CompositeCommand Et340CommandsP1PV[] = {
@@ -137,6 +143,7 @@ static const CompositeCommand Em300Commands[] = {
 	{ 0x0034, 4, { { 0, PositiveEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
 	{ 0x0040, 5, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
 	{ 0x004E, 6, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
+	{ 0x0033, 7, { { 0, Frequency, MultiPhase }, {1, Dummy, MultiPhase } } }
 };
 
 static const CompositeCommand Em300P1Commands[] = {
@@ -145,6 +152,7 @@ static const CompositeCommand Em300P1Commands[] = {
 	{ 0x000C, 2,  { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x0040, 3, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x004E, 4, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
+	{ 0x0033, 5, { { 0, Frequency, MultiPhase }, {1, Dummy, MultiPhase } } }
 };
 
 static const CompositeCommand Em300CommandsP1PV[] = {
@@ -166,6 +174,7 @@ static const CompositeCommand Em540Commands[] = {
 	{ 0x0034, 4, { { 0, PositiveEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
 	{ 0x0040, 5, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
 	{ 0x004E, 6, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
+	{ 0x0033, 7, { { 0, Frequency, MultiPhase }, {1, Dummy, MultiPhase } } }
 };
 
 static const CompositeCommand Em540P1Commands[] = {
@@ -174,6 +183,7 @@ static const CompositeCommand Em540P1Commands[] = {
 	{ 0x000C, 2, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x0040, 3, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x004E, 4, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x0033, 6, { { 0, Frequency, MultiPhase }, {1, Dummy, MultiPhase } } }
 };
 
 static const CompositeCommand Em540CommandsP1PV[] = {
@@ -196,7 +206,8 @@ static const CompositeCommand Em300S27P1Commands[] = {
 	{ 0x0000, 1, { { 0, Voltage, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x000C, 2, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x003E, 3, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x005C, 4, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } }
+	{ 0x005C, 4, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
+	{ 0x0037, 5, { { 0, Frequency, MultiPhase }, {1, Dummy, MultiPhase } } }
 };
 
 int getMaxOffset(const CompositeCommand &cmd) {
@@ -976,6 +987,10 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 					if (setPhaseL1)
 						dest->setNegativeEnergy(PhaseL1, v);
 				}
+				break;
+			case Frequency:
+				dest->setFrequency(
+					registers[0] == 0xFFFF ? qQNaN() : registers[0] * 0.1);
 				break;
 			default:
 				break;

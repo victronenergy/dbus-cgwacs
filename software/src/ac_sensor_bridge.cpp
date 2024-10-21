@@ -43,6 +43,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 
 	produce(acSensor, "connectionState", "/Connected");
 	produce(acSensor, "errorCode", "/ErrorCode");
+	produce(acSensor, "frequency", "/Ac/Frequency", "Hz", 1);
 
 	producePowerInfo(acSensor->total(), "/Ac", isGridmeter);
 	producePowerInfo(acSensor->l1(), "/Ac/L1", isGridmeter);
