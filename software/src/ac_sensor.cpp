@@ -8,7 +8,6 @@ AcSensor::AcSensor(const QString &portName, int slaveAddress, QObject *parent) :
 	mConnectionState(Disconnected),
 	mDeviceType(0),
 	mErrorCode(0),
-	mFirmwareVersion(0),
 	mPortName(portName),
 	mSlaveAddress(slaveAddress),
 	mPhaseSequence(-1),
@@ -112,10 +111,11 @@ void AcSensor::setFrequency(double v)
 
 void AcSensor::setFirmwareVersion(int v)
 {
-	if (mFirmwareVersion == v)
-		return;
-	mFirmwareVersion = v;
-	emit firmwareVersionChanged();
+	QString vv = QString::number(v);
+	if (mFirmwareVersion != vv) {
+		mFirmwareVersion = vv;
+		emit firmwareVersionChanged();
+	}
 }
 
 AcSensorPhase *AcSensor::getPhase(Phase phase)
