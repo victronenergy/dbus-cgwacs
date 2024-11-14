@@ -50,9 +50,13 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	producePowerInfo(acSensor->l2(), "/Ac/L2", isGridmeter);
 	producePowerInfo(acSensor->l3(), "/Ac/L3", isGridmeter);
 
-	if (isSecondary || settings->serviceType() == "pvinverter")
+	// This is probably not entirely correct, it will give acload services
+	// on L2 a position, but it also doesn't hurt this way.
+	if (isSecondary || (QStringList() << "pvinverter" << "evcharger"
+			<< "heatpump").contains(settings->serviceType())) {
 		produce(settings, isSecondary ? "l2Position" : "position", "/Position",
 			QString(), -1, false, positionFromDBus);
+	}
 	produce(settings, isSecondary ? "l2ProductName" : "productName", "/ProductName");
 	produce(settings, isSecondary ? "l2CustomName" : "customName", "/CustomName",
 			QString(), -1, false, customNameFromDBus);
