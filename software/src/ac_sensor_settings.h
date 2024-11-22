@@ -107,7 +107,7 @@ public:
 
 	void setL2Position(Position p);
 
-	Position position();
+	Position position() const;
 
 	void setPosition(Position p);
 

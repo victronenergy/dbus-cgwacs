@@ -127,7 +127,7 @@ void AcSensorSettings::setL2Position(Position v)
 	emit l2ProductNameChanged();
 }
 
-Position AcSensorSettings::position()
+Position AcSensorSettings::position() const
 {
 	return mPosition;
 }
