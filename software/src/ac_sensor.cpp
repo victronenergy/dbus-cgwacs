@@ -111,7 +111,16 @@ void AcSensor::setFrequency(double v)
 
 void AcSensor::setFirmwareVersion(int v)
 {
-	QString vv = QString::number(v);
+	QString vv;
+	if (protocolType() == Em540Protocol) {
+		vv = QString("%1.%2.%3").arg(
+			QString::number(v >> 12),
+			QString::number(v >> 8 & 0xf),
+			QString::number(v & 0xff));
+	} else {
+		vv = QString::number(v);
+	}
+
 	if (mFirmwareVersion != vv) {
 		mFirmwareVersion = vv;
 		emit firmwareVersionChanged();
