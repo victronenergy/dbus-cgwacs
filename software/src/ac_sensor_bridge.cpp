@@ -120,6 +120,12 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	// loop.
 	produce("/RefreshTime", acSensor->refreshTime());
 
+	// If this is masquarading as something that is not a grid meter, add a
+	// path to indicate that it is a limited grid meter that cannot autostart
+	// (evcharger, genset) or limit (pvinverter).
+	if (!isGridmeter)
+		produce("/IsGenericEnergyMeter", 1);
+
 	registerService();
 }
 
