@@ -136,7 +136,7 @@ QString DBusBridge::toText(const QString &path, const QVariant &value, const QSt
 {
 	Q_UNUSED(path)
 	QString text;
-	if (precision >= 0 && value.type() == QVariant::Double) {
+	if (precision >= 0 && value.typeId() == QVariant::Double) {
 		text.setNum(value.toDouble(), 'f', precision);
 	} else {
 		text = value.toString();
@@ -172,7 +172,7 @@ bool DBusBridge::addSetting(const QString &path,
 		return false;
 	}
 	QChar type;
-	switch (defaultValue.type()) {
+	switch (defaultValue.typeId()) {
 	case QVariant::Int:
 		type = 'i';
 		break;
