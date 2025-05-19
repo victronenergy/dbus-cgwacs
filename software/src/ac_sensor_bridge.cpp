@@ -53,7 +53,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	// This is probably not entirely correct, it will give acload services
 	// on L2 a position, but it also doesn't hurt this way.
 	if (isSecondary || (QStringList() << "pvinverter" << "evcharger"
-			<< "heatpump").contains(settings->serviceType())) {
+			<< "heatpump" << "acload").contains(settings->serviceType())) {
 		produce(settings, isSecondary ? "l2Position" : "position", "/Position",
 			QString(), -1, false, positionFromDBus);
 	}
