@@ -79,6 +79,13 @@ void DataProcessor::setFrequency(double v)
 	mAcSensor->setFrequency(v);
 }
 
+void DataProcessor::setPowerFactor(Phase phase, double f)
+{
+	AcSensorPhase *pi = mAcSensor->getPhase(phase);
+	if (pi != 0)
+		pi->setPowerFactor(f);
+}
+
 void DataProcessor::updateEnergySettings()
 {
 	if (!mStoreReverseEnergy)

@@ -179,6 +179,7 @@ void AcSensorBridge::producePowerInfo(AcSensorPhase *pi, const QString &path, bo
 	produce(pi, "current", path + "/Current", "A", 1);
 	produce(pi, "voltage", path + "/Voltage", "V", 0);
 	produce(pi, "power", path + "/Power", "W", 0);
+	produce(pi, "powerFactor", path + "/PowerFactor", "", 3);
 	produce(pi, "energyForward", path + "/Energy/Forward", "kWh", 1);
 	if (isGridmeter)
 		produce(pi, "energyReverse", path + "/Energy/Reverse", "kWh", 1);

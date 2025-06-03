@@ -38,7 +38,8 @@ enum ParameterType {
 	Current,
 	PositiveEnergy,
 	NegativeEnergy,
-	Frequency
+	Frequency,
+	PowerFactor
 };
 
 struct RegisterCommand {
@@ -174,7 +175,8 @@ static const CompositeCommand Em540Commands[] = {
 	{ 0x0034, 4, { { 0, PositiveEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
 	{ 0x0040, 5, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
 	{ 0x004E, 6, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
-	{ 0x053C, 7, { { 0, Frequency, MultiPhase }, {2, Dummy, MultiPhase } } }
+	{ 0x053C, 7, { { 0, Frequency, MultiPhase }, {2, Dummy, MultiPhase } } },
+	{ 0x002E, 8, { { 0, PowerFactor, PhaseL1 }, { 1, PowerFactor, PhaseL2 }, { 2, PowerFactor, PhaseL3 } } }
 };
 
 static const CompositeCommand Em540P1Commands[] = {
@@ -183,7 +185,8 @@ static const CompositeCommand Em540P1Commands[] = {
 	{ 0x000C, 2, { { 0, Current, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x0040, 3, { { 0, PositiveEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
 	{ 0x004E, 4, { { 0, NegativeEnergy, MultiPhase }, { 1, Dummy, MultiPhase } } },
-	{ 0x053C, 6, { { 0, Frequency, MultiPhase }, {2, Dummy, MultiPhase } } }
+	{ 0x053C, 5, { { 0, Frequency, MultiPhase }, { 2, Dummy, MultiPhase } } },
+	{ 0x002E, 6, { { 0, PowerFactor, MultiPhase }, { 1, Dummy, MultiPhase }  } }
 };
 
 static const CompositeCommand Em540CommandsP1PV[] = {
@@ -196,7 +199,8 @@ static const CompositeCommand Em540CommandsP1PV[] = {
 	// energy. We assume that in a shared system, L1 is a grid meter and L2
 	// is a PV-inverter, so on L2 there is never any imported power, therefore
 	// all negative energy can be assumed to be on L1.
-	{ 0x004E, 5, { { 0, NegativeEnergy, PhaseL1 }, { 2, Dummy, MultiPhase } } }
+	{ 0x004E, 5, { { 0, NegativeEnergy, PhaseL1 }, { 2, Dummy, MultiPhase } } },
+	{ 0x002E, 6, { { 0, PowerFactor, PhaseL1 }, { 1, PowerFactor, PhaseL2 }  } },
 };
 
 // Even though this meter is supposedly the same as an EM24, it is still
@@ -995,6 +999,13 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 				else
 					v = registers[0] == 0xFFFF ? qQNaN() : registers[0] * 0.1;
 				dest->setFrequency(v);
+				break;
+			case PowerFactor:
+				v = (int16_t)(registers[ra.regOffset]);
+				v = (v == 0x7FFF) ? qQNaN() : v * 0.001;
+				dest->setPowerFactor(ra.phase, v);
+				if (setPhaseL1)
+					dest->setPowerFactor(PhaseL1, v);
 				break;
 			default:
 				break;

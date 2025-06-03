@@ -33,6 +33,8 @@ public:
 
 	void setFrequency(double v);
 
+	void setPowerFactor(Phase phase, double f);
+
 	void updateEnergySettings();
 
 private:
