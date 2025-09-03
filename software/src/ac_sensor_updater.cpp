@@ -176,7 +176,7 @@ static const CompositeCommand Em540Commands[] = {
 	{ 0x0040, 5, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 }, {6, Dummy, MultiPhase } } },
 	{ 0x004E, 6, { { 0, NegativeEnergy, MultiPhase }, { 2, Dummy, MultiPhase } } },
 	{ 0x053C, 7, { { 0, Frequency, MultiPhase }, {2, Dummy, MultiPhase } } },
-	{ 0x002E, 8, { { 0, PowerFactor, PhaseL1 }, { 1, PowerFactor, PhaseL2 }, { 2, PowerFactor, PhaseL3 } } }
+	{ 0x002E, 8, { { 0, PowerFactor, PhaseL1 }, { 1, PowerFactor, PhaseL2 }, { 2, PowerFactor, PhaseL3 }, {3, PowerFactor, MultiPhase } } }
 };
 
 static const CompositeCommand Em540P1Commands[] = {
