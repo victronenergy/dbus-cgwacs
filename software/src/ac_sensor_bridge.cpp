@@ -50,6 +50,12 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	producePowerInfo(acSensor->l2(), "/Ac/L2", isGridmeter);
 	producePowerInfo(acSensor->l3(), "/Ac/L3", isGridmeter);
 
+	// For EV-charger, also publish L1 current on /Current. This is the
+	// actual charge current the car is consuming from each phase.
+	// We assume the car is loading the phases the same, which is reasonable.
+	if (settings->serviceType() == "evcharger")
+		produce(acSensor->l1(), "current", "/Current", "A", 1);
+
 	// This is probably not entirely correct, it will give acload services
 	// on L2 a position, but it also doesn't hurt this way.
 	if (isSecondary || (QStringList() << "pvinverter" << "evcharger"
