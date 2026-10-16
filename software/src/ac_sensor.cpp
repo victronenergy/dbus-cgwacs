@@ -133,7 +133,7 @@ void AcSensor::setFirmwareVersion(int v)
 AcSensorPhase *AcSensor::getPhase(Phase phase)
 {
 	switch (phase) {
-	case MultiPhase:
+	case Multiphase:
 		return mTotal;
 	case PhaseL1:
 		return mL1;

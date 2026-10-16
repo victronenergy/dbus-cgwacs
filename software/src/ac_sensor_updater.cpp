@@ -69,24 +69,24 @@ struct CompositeCommand {
 // allow max 20 registers at a time.
 
 static const CompositeCommand Em24Commands[] = {
-	{ 0x0028,  2, 0, { { 0, Power, MultiPhase } } },
+	{ 0x0028,  2, 0, { { 0, Power, Multiphase } } },
 	{ 0x0012,  6, 0, { { 0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
-	{ 0x0024,  3, 1, { { 0, Voltage, MultiPhase } } },
+	{ 0x0024,  3, 1, { { 0, Voltage, Multiphase } } },
 	{ 0x0000,  6, 2, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 }, { 4, Voltage, PhaseL3 } } },
 	{ 0x000C,  6, 3, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 } } },
-	{ 0x003E, 10, 4, { { 0, PositiveEnergy, MultiPhase } } }, // padded
+	{ 0x003E, 10, 4, { { 0, PositiveEnergy, Multiphase } } }, // padded
 	{ 0x0046,  8, 5, { { 0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 } } },
-	{ 0x005C,  4, 6, { { 0, NegativeEnergy, MultiPhase } } },
-	{ 0x0037,  3, 7, { { 0, Frequency, MultiPhase } } }
+	{ 0x005C,  4, 6, { { 0, NegativeEnergy, Multiphase } } },
+	{ 0x0037,  3, 7, { { 0, Frequency, Multiphase } } }
 };
 
 static const CompositeCommand Em24CommandsP1[] = {
-	{ 0x0028, 2, 0, { { 0, Power, MultiPhase } } },
-	{ 0x0024, 5, 1, { { 0, Voltage, MultiPhase } } },
-	{ 0x000C, 4, 2, { { 0, Current, MultiPhase } } },
-	{ 0x003E, 7, 3, { { 0, PositiveEnergy, MultiPhase } } },
-	{ 0x005C, 6, 4, { { 0, NegativeEnergy, MultiPhase } } },
-	{ 0x0037, 3, 5, { { 0, Frequency, MultiPhase } } }
+	{ 0x0028, 2, 0, { { 0, Power, Multiphase } } },
+	{ 0x0024, 5, 1, { { 0, Voltage, Multiphase } } },
+	{ 0x000C, 4, 2, { { 0, Current, Multiphase } } },
+	{ 0x003E, 7, 3, { { 0, PositiveEnergy, Multiphase } } },
+	{ 0x005C, 6, 4, { { 0, NegativeEnergy, Multiphase } } },
+	{ 0x0037, 3, 5, { { 0, Frequency, Multiphase } } }
 };
 
 static const CompositeCommand Em24CommandsP1PV[] = {
@@ -103,33 +103,33 @@ static const CompositeCommand Em24CommandsP1PV[] = {
 };
 
 static const CompositeCommand Em112Commands[] = {
-	{ 0x0004, 4, 0, { { 0, Power, MultiPhase } } },
-	{ 0x0000, 6, 1, { { 0, Voltage, MultiPhase }, { 2, Current, MultiPhase } } },
-	{ 0x000F, 3, 2, { { 0, Frequency, MultiPhase },
-	                  { 1, PositiveEnergy, MultiPhase } } }, // 0x0010
-	{ 0x0020, 2, 3, { { 0, NegativeEnergy, MultiPhase } } }
+	{ 0x0004, 4, 0, { { 0, Power, Multiphase } } },
+	{ 0x0000, 6, 1, { { 0, Voltage, Multiphase }, { 2, Current, Multiphase } } },
+	{ 0x000F, 3, 2, { { 0, Frequency, Multiphase },
+	                  { 1, PositiveEnergy, Multiphase } } }, // 0x0010
+	{ 0x0020, 2, 3, { { 0, NegativeEnergy, Multiphase } } }
 };
 
 static const CompositeCommand Et340Commands[] = {
-	{ 0x0024,  6, 0, { {  0, Voltage, MultiPhase },
-	                   {  4, Power, MultiPhase } } }, // 0x0028
+	{ 0x0024,  6, 0, { {  0, Voltage, Multiphase },
+	                   {  4, Power, Multiphase } } }, // 0x0028
 	{ 0x0012, 12, 0, { {  0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
 	{ 0x0000, 18, 1, { {  0, Voltage, PhaseL1 }, {  2, Voltage, PhaseL2 }, {  4, Voltage, PhaseL3 },
 	                   { 12, Current, PhaseL1 }, { 14, Current, PhaseL2 }, { 16, Current, PhaseL3 } } }, // 0x000C
-	{ 0x0033,  3, 2, { {  0, Frequency, MultiPhase },
-	                   {  1, PositiveEnergy, MultiPhase } } }, // 0x0034
+	{ 0x0033,  3, 2, { {  0, Frequency, Multiphase },
+	                   {  1, PositiveEnergy, Multiphase } } }, // 0x0034
 	{ 0x0040, 16, 3, { {  0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 },
-	                   { 14, NegativeEnergy, MultiPhase } } },
+	                   { 14, NegativeEnergy, Multiphase } } },
 	{ 0x0060,  8, 4, { {  0, NegativeEnergy, PhaseL1 }, { 2, NegativeEnergy, PhaseL2 }, { 4, NegativeEnergy, PhaseL3 } } }
 };
 
 static const CompositeCommand Et340P1Commands[] = {
-	{ 0x0012,  2, 0, { {  0, Power, MultiPhase } } },
-	{ 0x0000, 14, 1, { {  0, Voltage, MultiPhase },
-	                   { 12, Current, MultiPhase } } }, // 0x000C
-	{ 0x0033, 15, 2, { {  0, Frequency, MultiPhase },
-	                   { 13, PositiveEnergy, MultiPhase } } }, // 0x0040
-	{ 0x0060,  4, 3, { {  0, NegativeEnergy, MultiPhase } } }
+	{ 0x0012,  2, 0, { {  0, Power, Multiphase } } },
+	{ 0x0000, 14, 1, { {  0, Voltage, Multiphase },
+	                   { 12, Current, Multiphase } } }, // 0x000C
+	{ 0x0033, 15, 2, { {  0, Frequency, Multiphase },
+	                   { 13, PositiveEnergy, Multiphase } } }, // 0x0040
+	{ 0x0060,  4, 3, { {  0, NegativeEnergy, Multiphase } } }
 };
 
 static const CompositeCommand Et340CommandsP1PV[] = {
@@ -142,24 +142,24 @@ static const CompositeCommand Et340CommandsP1PV[] = {
 };
 
 static const CompositeCommand Em300Commands[] = {
-	{ 0x0024, 6, 0,  { {  0, Voltage, MultiPhase },
-	                   {  4, Power, MultiPhase } } }, // 0x0028
+	{ 0x0024, 6, 0,  { {  0, Voltage, Multiphase },
+	                   {  4, Power, Multiphase } } }, // 0x0028
 	{ 0x0012, 6, 0,  { {  0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
 	{ 0x0000, 18, 1, { {  0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 }, { 4, Voltage, PhaseL3 },
 	                   { 12, Current, PhaseL1 }, {14, Current, PhaseL2 }, {16, Current, PhaseL3 } } }, // 0x000C
-	{ 0x0033,  3, 2, { {  0, Frequency, MultiPhase },
-	                   {  1, PositiveEnergy, MultiPhase } } }, // 0x0034
+	{ 0x0033,  3, 2, { {  0, Frequency, Multiphase },
+	                   {  1, PositiveEnergy, Multiphase } } }, // 0x0034
 	{ 0x0040, 16, 3, { {  0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 },
-	                   { 14, NegativeEnergy, MultiPhase } } } // 0x004E
+	                   { 14, NegativeEnergy, Multiphase } } } // 0x004E
 };
 
 static const CompositeCommand Em300P1Commands[] = {
-	{ 0x0012,  2, 0, { {  0, Power, MultiPhase } } },
-	{ 0x0000, 14, 1, { {  0, Voltage, MultiPhase },
-	                   { 12, Current, MultiPhase } } }, // 0x000C
-	{ 0x0033, 15, 2, { {  0, Frequency, MultiPhase },
-	                   { 13, PositiveEnergy, MultiPhase } } }, // 0x0040
-	{ 0x004E,  4, 3, { {  0, NegativeEnergy, MultiPhase } } }
+	{ 0x0012,  2, 0, { {  0, Power, Multiphase } } },
+	{ 0x0000, 14, 1, { {  0, Voltage, Multiphase },
+	                   { 12, Current, Multiphase } } }, // 0x000C
+	{ 0x0033, 15, 2, { {  0, Frequency, Multiphase },
+	                   { 13, PositiveEnergy, Multiphase } } }, // 0x0040
+	{ 0x004E,  4, 3, { {  0, NegativeEnergy, Multiphase } } }
 };
 
 static const CompositeCommand Em300CommandsP1PV[] = {
@@ -174,26 +174,26 @@ static const CompositeCommand Em300CommandsP1PV[] = {
 };
 
 static const CompositeCommand Em540Commands[] = {
-	{ 0x0024, 15, 0, { {  0, Voltage, MultiPhase },
-	                   {  4, Power, MultiPhase }, // 0x0028
-	                   { 10, PowerFactor, PhaseL1 }, { 11, PowerFactor, PhaseL2 }, { 12, PowerFactor, PhaseL3 }, { 13, PowerFactor, MultiPhase } } }, // 0x002E
+	{ 0x0024, 15, 0, { {  0, Voltage, Multiphase },
+	                   {  4, Power, Multiphase }, // 0x0028
+	                   { 10, PowerFactor, PhaseL1 }, { 11, PowerFactor, PhaseL2 }, { 12, PowerFactor, PhaseL3 }, { 13, PowerFactor, Multiphase } } }, // 0x002E
 	{ 0x0012,  6, 0, { {  0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
 	{ 0x0000, 18, 1, { {  0, Voltage, PhaseL1 }, {  2, Voltage, PhaseL2 }, {  4, Voltage, PhaseL3 },
 	                   { 12, Current, PhaseL1 }, { 14, Current, PhaseL2 }, { 16, Current, PhaseL3 } } }, // 0x000C
-	{ 0x0034,  4, 2, { {  0, PositiveEnergy, MultiPhase } } },
+	{ 0x0034,  4, 2, { {  0, PositiveEnergy, Multiphase } } },
 	{ 0x0040, 16, 3, { {  0, PositiveEnergy, PhaseL1 }, { 2, PositiveEnergy, PhaseL2 }, { 4, PositiveEnergy, PhaseL3 },
-	                   { 14, NegativeEnergy, MultiPhase } } }, // 0x004E
-	{ 0x053C,  2, 4, { {  0, Frequency, MultiPhase } } }
+	                   { 14, NegativeEnergy, Multiphase } } }, // 0x004E
+	{ 0x053C,  2, 4, { {  0, Frequency, Multiphase } } }
 };
 
 static const CompositeCommand Em540P1Commands[] = {
-	{ 0x0012,  4, 0, { { 0, Power, MultiPhase } } },
-	{ 0x0000, 14, 1, { {  0, Voltage, MultiPhase },
-	                   { 12, Current, MultiPhase } } }, // 0x000C
-	{ 0x0040, 16, 2, { {  0, PositiveEnergy, MultiPhase },
-	                   { 14, NegativeEnergy, MultiPhase } } }, // 0x004E
-	{ 0x053C,  2, 3, { {  0, Frequency, MultiPhase } } },
-	{ 0x002E,  6, 4, { {  0, PowerFactor, MultiPhase } } }
+	{ 0x0012,  4, 0, { { 0, Power, Multiphase } } },
+	{ 0x0000, 14, 1, { {  0, Voltage, Multiphase },
+	                   { 12, Current, Multiphase } } }, // 0x000C
+	{ 0x0040, 16, 2, { {  0, PositiveEnergy, Multiphase },
+	                   { 14, NegativeEnergy, Multiphase } } }, // 0x004E
+	{ 0x053C,  2, 3, { {  0, Frequency, Multiphase } } },
+	{ 0x002E,  6, 4, { {  0, PowerFactor, Multiphase } } }
 };
 
 static const CompositeCommand Em540CommandsP1PV[] = {
@@ -214,12 +214,12 @@ static const CompositeCommand Em540CommandsP1PV[] = {
 // Even though this meter is supposedly the same as an EM24, it is still
 // too much of an EM300, and single-phase needs a special command-set.
 static const CompositeCommand Em300S27P1Commands[] = {
-	{ 0x0028,  2, 0, { {  0, Power, MultiPhase } } },
-	{ 0x0000, 14, 1, { {  0, Voltage, MultiPhase },
-	                   { 12, Current, MultiPhase } } }, // 0x000C
-	{ 0x0037,  9, 2, { {  0, Frequency, MultiPhase },
-	                   {  7, PositiveEnergy, MultiPhase } } }, // 0x003E
-	{ 0x005C,  4, 3, { {  0, NegativeEnergy, MultiPhase } } }
+	{ 0x0028,  2, 0, { {  0, Power, Multiphase } } },
+	{ 0x0000, 14, 1, { {  0, Voltage, Multiphase },
+	                   { 12, Current, Multiphase } } }, // 0x000C
+	{ 0x0037,  9, 2, { {  0, Frequency, Multiphase },
+	                   {  7, PositiveEnergy, Multiphase } } }, // 0x003E
+	{ 0x005C,  4, 3, { {  0, NegativeEnergy, Multiphase } } }
 };
 
 
@@ -440,7 +440,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 		Q_ASSERT(registers.size() == 2);
 		mApplication = registers[0];
 		mDesiredMeasuringSystem =
-			mSettings->isMultiPhase() || mSettings->piggyEnabled() ?
+			mSettings->isMultiphase() || mSettings->piggyEnabled() ?
 			MeasurementSystemP3 : MeasurementSystemP1;
 		mMeasuringSystem = registers[1];
 		mState = mApplication == ApplicationH &&
@@ -507,7 +507,7 @@ void AcSensorUpdater::onReadCompleted(int function, quint8 addr, const QList<qui
 		default:
 			// Caution: EM3xx meters do not support MeasurementSystemP1
 			// Changing the measurement system also resets the kWh counters.
-			mDesiredMeasuringSystem = mSettings->isMultiPhase() || !mSettings->piggyEnabled() ?
+			mDesiredMeasuringSystem = mSettings->isMultiphase() || !mSettings->piggyEnabled() ?
 				MeasurementSystemP3 : MeasurementSystemP2;
 		}
 		mState = mDesiredMeasuringSystem == registers[0] ? Acquisition : SetMeasuringSystem;
@@ -610,7 +610,7 @@ void AcSensorUpdater::onUpdateSettings()
 		mPvDataProcessor->updateEnergySettings();
 }
 
-void AcSensorUpdater::onIsMultiPhaseChanged()
+void AcSensorUpdater::onIsMultiphaseChanged()
 {
 	mSetupRequested = true;
 }
@@ -740,8 +740,8 @@ void AcSensorUpdater::startNextAction()
 											mAcSensor);
 		mDataProcessor = new DataProcessor(mAcSensor, mSettings, this);
 		mPvDataProcessor = new DataProcessor(mAcPvSensor, mSettings, this);
-		connect(mSettings, SIGNAL(isMultiPhaseChanged()),
-				this, SLOT(onIsMultiPhaseChanged()));
+		connect(mSettings, SIGNAL(isMultiphaseChanged()),
+				this, SLOT(onIsMultiphaseChanged()));
 		connect(mSettings, SIGNAL(l2ClassAndVrmInstanceChanged()),
 				this, SLOT(onL2ServiceTypeChanged()));
 		connect(mSettings, SIGNAL(piggyEnabledChanged()),
@@ -751,7 +751,7 @@ void AcSensorUpdater::startNextAction()
 	case Acquisition:
 		switch (mAcSensor->protocolType()) {
 		case AcSensor::Em24Protocol:
-			if (mSettings->isMultiPhase()) {
+			if (mSettings->isMultiphase()) {
 				mCommands = Em24Commands;
 				mCommandCount = CMDCOUNT(Em24Commands);
 			} else if (mSettings->piggyEnabled()) {
@@ -767,7 +767,7 @@ void AcSensorUpdater::startNextAction()
 			mCommandCount = CMDCOUNT(Em112Commands);
 			break;
 		case AcSensor::Et340Protocol:
-			if (mSettings->isMultiPhase()) {
+			if (mSettings->isMultiphase()) {
 				mCommands = Et340Commands;
 				mCommandCount = CMDCOUNT(Et340Commands);
 			} else if (mSettings->piggyEnabled()) {
@@ -779,7 +779,7 @@ void AcSensorUpdater::startNextAction()
 			}
 			break;
 		case AcSensor::Em300Protocol:
-			if (mSettings->isMultiPhase()) {
+			if (mSettings->isMultiphase()) {
 				mCommands = Em300Commands;
 				mCommandCount = CMDCOUNT(Em300Commands);
 			} else if (mSettings->piggyEnabled()) {
@@ -791,7 +791,7 @@ void AcSensorUpdater::startNextAction()
 			}
 			break;
 		case AcSensor::Em540Protocol:
-			if (mSettings->isMultiPhase()) {
+			if (mSettings->isMultiphase()) {
 				mCommands = Em540Commands;
 				mCommandCount = CMDCOUNT(Em540Commands);
 			} else if (mSettings->piggyEnabled()) {
@@ -804,7 +804,7 @@ void AcSensorUpdater::startNextAction()
 			break;
 		case AcSensor::Em300S27Protocol:
 			// Same registers as the EM24... mostly.
-			if (mSettings->isMultiPhase()) {
+			if (mSettings->isMultiphase()) {
 				mCommands = Em24Commands;
 				mCommandCount = CMDCOUNT(Em24Commands);
 			} else if (mSettings->piggyEnabled()) {
@@ -929,10 +929,10 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 		if (mSettings->piggyEnabled()) {
 			if (ra.phase == PhaseL2)
 				dest = mPvDataProcessor;
-			ra.phase = MultiPhase;
+			ra.phase = Multiphase;
 		}
-		if (mSettings->isMultiPhase() || ra.phase == MultiPhase) {
-			bool setPhaseL1 = ra.phase == MultiPhase && !mSettings->isMultiPhase();
+		if (mSettings->isMultiphase() || ra.phase == Multiphase) {
+			bool setPhaseL1 = ra.phase == Multiphase && !mSettings->isMultiphase();
 			double v = 0;
 			switch (ra.action) {
 			case Power:
@@ -957,8 +957,8 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 				dest->setCurrent(ra.phase, v);
 				if (setPhaseL1)
 					dest->setCurrent(PhaseL1, v);
-				if (mSettings->isMultiPhase() && ra.phase == PhaseL3) {
-					dest->setCurrent(MultiPhase,
+				if (mSettings->isMultiphase() && ra.phase == PhaseL3) {
+					dest->setCurrent(Multiphase,
 						mAcSensor->l1()->current() +
 						mAcSensor->l2()->current() +
 						mAcSensor->l3()->current());
@@ -980,7 +980,7 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 					mAcSensor->protocolType() == AcSensor::Em540Protocol ||
 					mAcSensor->protocolType() == AcSensor::Em300S27Protocol ||
 					mAcSensor->protocolType() == AcSensor::Em300Protocol) &&
-					mSettings->isMultiPhase()) {
+					mSettings->isMultiphase()) {
 					dest->setNegativeEnergy(v);
 				} else {
 					dest->setNegativeEnergy(ra.phase, v);

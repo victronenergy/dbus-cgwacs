@@ -81,7 +81,7 @@ private slots:
 
 	void onUpdateSettings();
 
-	void onIsMultiPhaseChanged();
+	void onIsMultiphaseChanged();
 
 	void onL2ServiceTypeChanged();
 

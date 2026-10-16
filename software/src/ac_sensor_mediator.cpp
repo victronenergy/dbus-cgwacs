@@ -46,7 +46,7 @@ void AcSensorMediator::onDeviceFound()
 	AcSensorUpdater *mu = m->findChild<AcSensorUpdater *>();
 	QLOG_INFO() << "Device found:" << m->serial() << '@' << m->portName();
 	AcSensorSettings *settings = mu->settings();
-	settings->setIsMultiPhase(m->protocolType() != AcSensor::Et112Protocol);
+	settings->setIsMultiphase(m->protocolType() != AcSensor::Et112Protocol);
 	settings->setParent(m);
 	connect(settings, SIGNAL(classAndVrmInstanceChanged()),
 			this, SLOT(onServiceTypeChanged()));

@@ -18,7 +18,7 @@ class AcSensorSettings : public QObject
 	Q_PROPERTY(QString serviceType READ serviceType WRITE setServiceType)
 	Q_PROPERTY(QString classAndVrmInstance READ classAndVrmInstance WRITE setClassAndVrmInstance NOTIFY classAndVrmInstanceChanged)
 	Q_PROPERTY(QString l2ClassAndVrmInstance READ l2ClassAndVrmInstance WRITE setL2ClassAndVrmInstance NOTIFY l2ClassAndVrmInstanceChanged)
-	Q_PROPERTY(bool isMultiPhase READ isMultiPhase WRITE setIsMultiPhase NOTIFY isMultiPhaseChanged)
+	Q_PROPERTY(bool isMultiphase READ isMultiphase WRITE setIsMultiphase NOTIFY isMultiphaseChanged)
 	Q_PROPERTY(bool piggyEnabled READ piggyEnabled WRITE setPiggyEnabled NOTIFY piggyEnabledChanged)
 	Q_PROPERTY(Position position READ position WRITE setPosition NOTIFY positionChanged)
 	Q_PROPERTY(int deviceInstance READ deviceInstance)
@@ -79,9 +79,9 @@ public:
 
 	void setL2ClassAndVrmInstance(const QString &s);
 
-	bool isMultiPhase() const
+	bool isMultiphase() const
 	{
-		return mIsMultiPhase;
+		return mIsMultiphase;
 	}
 
 	bool piggyEnabled() const
@@ -91,7 +91,7 @@ public:
 
 	void setPiggyEnabled(bool b);
 
-	void setIsMultiPhase(bool b);
+	void setIsMultiphase(bool b);
 
 	const QString l2CustomName() const;
 
@@ -140,7 +140,7 @@ signals:
 
 	void l2ClassAndVrmInstanceChanged();
 
-	void isMultiPhaseChanged();
+	void isMultiphaseChanged();
 
 	void piggyEnabledChanged();
 
@@ -170,7 +170,7 @@ private:
 	QString mCustomName;
 	QString mClassAndVrmInstance;
 	QString mL2ClassAndVrmInstance;
-	bool mIsMultiPhase;
+	bool mIsMultiphase;
 	bool mPiggyEnabled;
 	Position mPosition;
 	double mL1Energy;

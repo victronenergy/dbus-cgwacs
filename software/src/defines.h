@@ -6,7 +6,7 @@
 #include <qnumeric.h>
 
 enum Phase {
-	MultiPhase = 0,
+	Multiphase = 0,
 	PhaseL1 = 1,
 	PhaseL2 = 2,
 	PhaseL3 = 3

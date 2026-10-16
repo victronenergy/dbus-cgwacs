@@ -51,16 +51,16 @@ void DataProcessor::setNegativeEnergy(double sum)
 		setInitialEnergy(PhaseL1, sum / 3);
 		setInitialEnergy(PhaseL2, sum / 3);
 		setInitialEnergy(PhaseL3, sum / 3);
-		setReverseEnergy(MultiPhase, sum);
+		setReverseEnergy(Multiphase, sum);
 		memset(mNegativePower, 0, sizeof(mNegativePower));
 		return;
 	}
-	double prevEnergy = getReverseEnergy(MultiPhase);
+	double prevEnergy = getReverseEnergy(Multiphase);
 	double delta = sum - prevEnergy;
 	if (delta <= 0)
 		return;
-	setReverseEnergy(MultiPhase, sum);
-	double f = delta / mNegativePower[MultiPhase];
+	setReverseEnergy(Multiphase, sum);
+	double f = delta / mNegativePower[Multiphase];
 	if (qIsFinite(f)) {
 		setReverseEnergy(PhaseL1, getReverseEnergy(PhaseL1) + f * mNegativePower[PhaseL1]);
 		setReverseEnergy(PhaseL2, getReverseEnergy(PhaseL2) + f * mNegativePower[PhaseL2]);
