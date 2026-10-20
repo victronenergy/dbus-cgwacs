@@ -45,7 +45,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	produce(acSensor, "errorCode", "/ErrorCode");
 	produce(acSensor, "frequency", "/Ac/Frequency", "Hz", 1);
 
-	producePowerInfo(acSensor->total(), "/Ac", isGridmeter);
+	producePowerInfo(acSensor->total(), "/Ac", isGridmeter, true);
 	producePowerInfo(acSensor->l1(), "/Ac/L1", isGridmeter);
 	producePowerInfo(acSensor->l2(), "/Ac/L2", isGridmeter);
 	producePowerInfo(acSensor->l3(), "/Ac/L3", isGridmeter);
@@ -180,10 +180,15 @@ QString AcSensorBridge::getServiceName(AcSensor *acSensor, AcSensorSettings *set
 	return serviceName;
 }
 
-void AcSensorBridge::producePowerInfo(AcSensorPhase *pi, const QString &path, bool isGridmeter)
+void AcSensorBridge::producePowerInfo(AcSensorPhase *pi, const QString &path, bool isGridmeter,
+									  bool isTotal)
 {
-	produce(pi, "current", path + "/Current", "A", 1);
-	produce(pi, "voltage", path + "/Voltage", "V", 0);
+	// A total voltage or current is meaningless for a multiphase system, so
+	// these are only published per phase.
+	if (!isTotal) {
+		produce(pi, "current", path + "/Current", "A", 1);
+		produce(pi, "voltage", path + "/Voltage", "V", 0);
+	}
 	produce(pi, "power", path + "/Power", "W", 0);
 	produce(pi, "powerFactor", path + "/PowerFactor", "", 3);
 	produce(pi, "energyForward", path + "/Energy/Forward", "kWh", 1);

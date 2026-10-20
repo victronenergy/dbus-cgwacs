@@ -29,7 +29,8 @@ protected:
 						   int precision);
 
 private:
-	void producePowerInfo(AcSensorPhase *pi, const QString &path, bool isGridmeter);
+	void producePowerInfo(AcSensorPhase *pi, const QString &path, bool isGridmeter,
+						  bool isTotal = false);
 
 	static QString getServiceName(AcSensor *acSensor, AcSensorSettings *settings,
 								  bool isSecondary);

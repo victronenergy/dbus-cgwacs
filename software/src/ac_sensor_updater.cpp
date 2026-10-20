@@ -71,7 +71,6 @@ struct CompositeCommand {
 static const CompositeCommand Em24Commands[] = {
 	{ 0x0028,  2, 0, { { 0, Power, Multiphase } } },
 	{ 0x0012,  6, 0, { { 0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
-	{ 0x0024,  3, 1, { { 0, Voltage, Multiphase } } },
 	{ 0x0000,  6, 2, { { 0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 }, { 4, Voltage, PhaseL3 } } },
 	{ 0x000C,  6, 3, { { 0, Current, PhaseL1 }, { 2, Current, PhaseL2 }, { 4, Current, PhaseL3 } } },
 	{ 0x003E, 10, 4, { { 0, PositiveEnergy, Multiphase } } }, // padded
@@ -111,8 +110,7 @@ static const CompositeCommand Em112Commands[] = {
 };
 
 static const CompositeCommand Et340Commands[] = {
-	{ 0x0024,  6, 0, { {  0, Voltage, Multiphase },
-	                   {  4, Power, Multiphase } } }, // 0x0028
+	{ 0x0028,  2, 0, { {  0, Power, Multiphase } } }, // 0x0028
 	{ 0x0012, 12, 0, { {  0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
 	{ 0x0000, 18, 1, { {  0, Voltage, PhaseL1 }, {  2, Voltage, PhaseL2 }, {  4, Voltage, PhaseL3 },
 	                   { 12, Current, PhaseL1 }, { 14, Current, PhaseL2 }, { 16, Current, PhaseL3 } } }, // 0x000C
@@ -142,8 +140,7 @@ static const CompositeCommand Et340CommandsP1PV[] = {
 };
 
 static const CompositeCommand Em300Commands[] = {
-	{ 0x0024, 6, 0,  { {  0, Voltage, Multiphase },
-	                   {  4, Power, Multiphase } } }, // 0x0028
+	{ 0x0028, 2, 0,  { {  0, Power, Multiphase } } }, // 0x0028
 	{ 0x0012, 6, 0,  { {  0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
 	{ 0x0000, 18, 1, { {  0, Voltage, PhaseL1 }, { 2, Voltage, PhaseL2 }, { 4, Voltage, PhaseL3 },
 	                   { 12, Current, PhaseL1 }, {14, Current, PhaseL2 }, {16, Current, PhaseL3 } } }, // 0x000C
@@ -174,9 +171,8 @@ static const CompositeCommand Em300CommandsP1PV[] = {
 };
 
 static const CompositeCommand Em540Commands[] = {
-	{ 0x0024, 15, 0, { {  0, Voltage, Multiphase },
-	                   {  4, Power, Multiphase }, // 0x0028
-	                   { 10, PowerFactor, PhaseL1 }, { 11, PowerFactor, PhaseL2 }, { 12, PowerFactor, PhaseL3 }, { 13, PowerFactor, Multiphase } } }, // 0x002E
+	{ 0x0028, 11, 0, { {  0, Power, Multiphase }, // 0x0028
+	                   {  6, PowerFactor, PhaseL1 }, {  7, PowerFactor, PhaseL2 }, {  8, PowerFactor, PhaseL3 }, {  9, PowerFactor, Multiphase } } }, // 0x002E
 	{ 0x0012,  6, 0, { {  0, Power, PhaseL1 }, { 2, Power, PhaseL2 }, { 4, Power, PhaseL3 } } },
 	{ 0x0000, 18, 1, { {  0, Voltage, PhaseL1 }, {  2, Voltage, PhaseL2 }, {  4, Voltage, PhaseL3 },
 	                   { 12, Current, PhaseL1 }, { 14, Current, PhaseL2 }, { 16, Current, PhaseL3 } } }, // 0x000C
@@ -957,12 +953,6 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 				dest->setCurrent(ra.phase, v);
 				if (setPhaseL1)
 					dest->setCurrent(PhaseL1, v);
-				if (mSettings->isMultiphase() && ra.phase == PhaseL3) {
-					dest->setCurrent(Multiphase,
-						mAcSensor->l1()->current() +
-						mAcSensor->l2()->current() +
-						mAcSensor->l3()->current());
-				}
 				break;
 			case PositiveEnergy:
 				v = getDouble(registers, ra.regOffset, 0.1);
