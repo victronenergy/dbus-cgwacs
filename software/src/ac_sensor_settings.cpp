@@ -8,6 +8,7 @@ AcSensorSettings::AcSensorSettings(bool supportMultiphase, const QString &serial
 	mSupportMultiphase(supportMultiphase),
 	mSerial(serial),
 	mIsMultiphase(false),
+	mPhaseCount(0),
 	mPiggyEnabled(false),
 	mPosition(Input1),
 	mL1Energy(0),
@@ -46,14 +47,44 @@ void AcSensorSettings::setServiceType(const QString &t)
 		QString("%1:%2").arg(t).arg(deviceInstance()));
 }
 
+int AcSensorSettings::phaseCount() const
+{
+	if (!mSupportMultiphase)
+		return 1;
+	if (mPhaseCount > 0)
+		return mPhaseCount;
+	return mIsMultiphase ? 3 : 1;
+}
+
 void AcSensorSettings::setIsMultiphase(bool b)
 {
 	if (mIsMultiphase == b)
 		return;
+	int old = phaseCount();
 	mIsMultiphase = b;
-	if (b)
-		setPiggyEnabled(false);
 	emit isMultiphaseChanged();
+	updatePhaseCount(old);
+}
+
+void AcSensorSettings::setPhaseCount(int n)
+{
+	n = qBound(0, n, 3);
+	if (mPhaseCount == n)
+		return;
+	int old = phaseCount();
+	mPhaseCount = n;
+	emit phaseCountSettingChanged();
+	updatePhaseCount(old);
+}
+
+void AcSensorSettings::updatePhaseCount(int oldPhaseCount)
+{
+	int n = phaseCount();
+	if (n == oldPhaseCount)
+		return;
+	if (n > 1)
+		setPiggyEnabled(false);
+	emit phaseCountChanged();
 }
 
 void AcSensorSettings::setPiggyEnabled(bool b)
@@ -61,8 +92,11 @@ void AcSensorSettings::setPiggyEnabled(bool b)
 	if (mPiggyEnabled == b)
 		return;
 	mPiggyEnabled = b;
-	if (b)
+	if (b) {
 		setIsMultiphase(false);
+		if (mPhaseCount > 1)
+			setPhaseCount(1);
+	}
 	emit piggyEnabledChanged();
 }
 

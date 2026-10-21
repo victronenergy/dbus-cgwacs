@@ -606,7 +606,7 @@ void AcSensorUpdater::onUpdateSettings()
 		mPvDataProcessor->updateEnergySettings();
 }
 
-void AcSensorUpdater::onIsMultiphaseChanged()
+void AcSensorUpdater::onPhaseCountChanged()
 {
 	mSetupRequested = true;
 }
@@ -736,8 +736,8 @@ void AcSensorUpdater::startNextAction()
 											mAcSensor);
 		mDataProcessor = new DataProcessor(mAcSensor, mSettings, this);
 		mPvDataProcessor = new DataProcessor(mAcPvSensor, mSettings, this);
-		connect(mSettings, SIGNAL(isMultiphaseChanged()),
-				this, SLOT(onIsMultiphaseChanged()));
+		connect(mSettings, SIGNAL(phaseCountChanged()),
+				this, SLOT(onPhaseCountChanged()));
 		connect(mSettings, SIGNAL(l2ClassAndVrmInstanceChanged()),
 				this, SLOT(onL2ServiceTypeChanged()));
 		connect(mSettings, SIGNAL(piggyEnabledChanged()),
@@ -927,6 +927,10 @@ void AcSensorUpdater::processAcquisitionData(const QList<quint16> &registers)
 				dest = mPvDataProcessor;
 			ra.phase = Multiphase;
 		}
+		// Phases above the phase count are not connected (eg. L3 in a split
+		// phase system), leave them invalid.
+		if (mSettings->isMultiphase() && ra.phase > mSettings->phaseCount())
+			continue;
 		if (mSettings->isMultiphase() || ra.phase == Multiphase) {
 			bool setPhaseL1 = ra.phase == Multiphase && !mSettings->isMultiphase();
 			double v = 0;

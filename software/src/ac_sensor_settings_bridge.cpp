@@ -29,8 +29,10 @@ AcSensorSettingsBridge::AcSensorSettingsBridge(AcSensorSettings *settings, QObje
 	consume(settings, "classAndVrmInstance",
 			primaryPath + "/ClassAndVrmInstance");
 	consume(settings, "isMultiphase",
-			QVariant(static_cast<int>(settings->isMultiphase())),
+			QVariant(static_cast<int>(settings->isMultiphaseSetting())),
 			primaryPath + "/IsMultiphase", false);
+	consume(settings, "phaseCount", QVariant(0),
+			primaryPath + "/PhaseCount", false);
 	consume(settings, "position", QVariant(0),
 			primaryPath + "/Position", false, positionFromDBus, positionToDBus);
 	consume(settings, "l1ReverseEnergy", 0.0, 0.0, 1e6,

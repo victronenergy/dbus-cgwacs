@@ -18,7 +18,8 @@ class AcSensorSettings : public QObject
 	Q_PROPERTY(QString serviceType READ serviceType WRITE setServiceType)
 	Q_PROPERTY(QString classAndVrmInstance READ classAndVrmInstance WRITE setClassAndVrmInstance NOTIFY classAndVrmInstanceChanged)
 	Q_PROPERTY(QString l2ClassAndVrmInstance READ l2ClassAndVrmInstance WRITE setL2ClassAndVrmInstance NOTIFY l2ClassAndVrmInstanceChanged)
-	Q_PROPERTY(bool isMultiphase READ isMultiphase WRITE setIsMultiphase NOTIFY isMultiphaseChanged)
+	Q_PROPERTY(bool isMultiphase READ isMultiphaseSetting WRITE setIsMultiphase NOTIFY isMultiphaseChanged)
+	Q_PROPERTY(int phaseCount READ phaseCountSetting WRITE setPhaseCount NOTIFY phaseCountSettingChanged)
 	Q_PROPERTY(bool piggyEnabled READ piggyEnabled WRITE setPiggyEnabled NOTIFY piggyEnabledChanged)
 	Q_PROPERTY(Position position READ position WRITE setPosition NOTIFY positionChanged)
 	Q_PROPERTY(int deviceInstance READ deviceInstance)
@@ -79,10 +80,36 @@ public:
 
 	void setL2ClassAndVrmInstance(const QString &s);
 
+	/*!
+	 * Number of phases in use: 1 for single phase, 2 for split phase
+	 * (measured like three phase, but L3 is not published), 3 for three phase.
+	 * Taken from the PhaseCount setting if set, otherwise derived from the
+	 * legacy IsMultiphase setting.
+	 */
+	int phaseCount() const;
+
 	bool isMultiphase() const
+	{
+		return phaseCount() > 1;
+	}
+
+	bool isMultiphaseSetting() const
 	{
 		return mIsMultiphase;
 	}
+
+	void setIsMultiphase(bool b);
+
+	/*!
+	 * The PhaseCount setting. 0 means not set, in which case the legacy
+	 * IsMultiphase setting is used.
+	 */
+	int phaseCountSetting() const
+	{
+		return mPhaseCount;
+	}
+
+	void setPhaseCount(int n);
 
 	bool piggyEnabled() const
 	{
@@ -90,8 +117,6 @@ public:
 	}
 
 	void setPiggyEnabled(bool b);
-
-	void setIsMultiphase(bool b);
 
 	const QString l2CustomName() const;
 
@@ -140,7 +165,11 @@ signals:
 
 	void l2ClassAndVrmInstanceChanged();
 
+	void phaseCountChanged();
+
 	void isMultiphaseChanged();
+
+	void phaseCountSettingChanged();
 
 	void piggyEnabledChanged();
 
@@ -165,12 +194,15 @@ signals:
 private:
 	static QString getProductName(const QString &serviceType, Position position);
 
+	void updatePhaseCount(int oldPhaseCount);
+
 	bool mSupportMultiphase;
 	QString mSerial;
 	QString mCustomName;
 	QString mClassAndVrmInstance;
 	QString mL2ClassAndVrmInstance;
 	bool mIsMultiphase;
+	int mPhaseCount;
 	bool mPiggyEnabled;
 	Position mPosition;
 	double mL1Energy;

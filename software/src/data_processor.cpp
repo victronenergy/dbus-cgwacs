@@ -48,9 +48,13 @@ void DataProcessor::setNegativeEnergy(double sum)
 	mStoreReverseEnergy = true;
 	double e1 = getReverseEnergy(PhaseL1);
 	if (!qIsFinite(e1)) {
-		setInitialEnergy(PhaseL1, sum / 3);
-		setInitialEnergy(PhaseL2, sum / 3);
-		setInitialEnergy(PhaseL3, sum / 3);
+		// In a split phase system L3 is not connected, leave it invalid.
+		bool hasL3 = mSettings->phaseCount() >= 3;
+		int n = hasL3 ? 3 : 2;
+		setInitialEnergy(PhaseL1, sum / n);
+		setInitialEnergy(PhaseL2, sum / n);
+		if (hasL3)
+			setInitialEnergy(PhaseL3, sum / n);
 		setReverseEnergy(Multiphase, sum);
 		memset(mNegativePower, 0, sizeof(mNegativePower));
 		return;
@@ -64,7 +68,8 @@ void DataProcessor::setNegativeEnergy(double sum)
 	if (qIsFinite(f)) {
 		setReverseEnergy(PhaseL1, getReverseEnergy(PhaseL1) + f * mNegativePower[PhaseL1]);
 		setReverseEnergy(PhaseL2, getReverseEnergy(PhaseL2) + f * mNegativePower[PhaseL2]);
-		setReverseEnergy(PhaseL3, getReverseEnergy(PhaseL3) + f * mNegativePower[PhaseL3]);
+		if (mSettings->phaseCount() >= 3)
+			setReverseEnergy(PhaseL3, getReverseEnergy(PhaseL3) + f * mNegativePower[PhaseL3]);
 	}
 	memset(mNegativePower, 0, sizeof(mNegativePower));
 }

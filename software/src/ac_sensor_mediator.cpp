@@ -54,6 +54,8 @@ void AcSensorMediator::onDeviceFound()
 			this, SLOT(onServiceTypeChanged()));
 	connect(settings, SIGNAL(piggyEnabledChanged()),
 			this, SLOT(onServiceTypeChanged()));
+	connect(settings, SIGNAL(phaseCountChanged()),
+			this, SLOT(onServiceTypeChanged()));
 
 	AcSensorSettingsBridge *b =
 			new AcSensorSettingsBridge(settings, settings);

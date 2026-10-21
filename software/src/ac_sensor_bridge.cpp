@@ -75,6 +75,7 @@ AcSensorBridge::AcSensorBridge(AcSensor *acSensor, AcSensorSettings *settings,
 	produce("/Mgmt/ProcessName", processName);
 	produce("/Mgmt/ProcessVersion", QCoreApplication::applicationVersion());
 	produce("/FirmwareVersion", acSensor->firmwareVersion());
+	produce("/NrOfPhases", isSecondary ? 1 : settings->phaseCount());
 	produce("/PhaseSequence", settings->piggyEnabled() || acSensor->phaseSequence() < 0 ? QVariant() : acSensor->phaseSequence());
 	int productId = 0;
 	switch (acSensor->protocolType()) {
